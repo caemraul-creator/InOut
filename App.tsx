@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect, useMemo } from 'react';
 import { WarehouseID, TransactionType, Product, Transaction, InventoryState } from './types';
 import { Layout } from './components/Layout';
