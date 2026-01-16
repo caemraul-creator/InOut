@@ -1,5 +1,5 @@
-import React, { useState, useEffect, useMemo } from 'react';
-import { WarehouseID, TransactionType, Product, Transaction, InventoryState } from './types';
+import React, { useState, useEffect } from 'react';
+import { WarehouseID, TransactionType, Transaction, InventoryState } from './types';
 import { Layout } from './components/Layout';
 import { Dashboard } from './components/Dashboard';
 import { InventoryList } from './components/InventoryList';
