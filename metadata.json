@@ -1,0 +1,7 @@
+{
+  "name": "InventoryMaster 2W Mobile",
+  "description": "A mobile-optimized dual-warehouse inventory management system with AI insights and simulated barcode scanning.",
+  "requestFramePermissions": [
+    "camera"
+  ]
+}
