@@ -58,7 +58,7 @@ const App: React.FC = () => {
 
       const product = prev.products.find(p => p.id === data.productId);
       const newTransaction: Transaction = {
-        id: Math.random().toString(36).substr(2, 9),
+        id: Math.random().toString(36).slice(2, 11),
         timestamp: Date.now(),
         productId: data.productId,
         productName: product?.name || 'Unknown',
