@@ -8,8 +8,8 @@
     <meta name="mobile-web-app-capable" content="yes">
     <link rel="manifest" href="/manifest.json">
     <link rel="icon" type="image/png" href="https://cdn-icons-png.flaticon.com/512/2897/2897785.png">
-    <!-- Menggunakan CDN Tailwind sebagai fallback untuk memastikan tampilan tetap terjaga -->
-    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- We rely on index.css for Tailwind. No CDN script needed here. -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
@@ -33,7 +33,7 @@
 </head>
 <body class="bg-slate-50 text-slate-900">
     <div id="root"></div>
-    <!-- Menggunakan path relatif agar diproses oleh Vite dev server -->
-    <script type="module" src="index.tsx"></script>
+    <!-- The leading slash ensures Vite picks up the file correctly -->
+    <script type="module" src="/index.tsx"></script>
 </body>
 </html>
