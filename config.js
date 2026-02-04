@@ -1,5 +1,5 @@
 // ============================================
-// CONFIG.JS - Fixed Version with Better Debugging
+// CONFIG.JS - OPTIMIZED FOR SPEED
 // ============================================
 
 const CONFIG = {
@@ -8,20 +8,38 @@ const CONFIG = {
     
     AUTO_DETECT: {
         minChars: 2,
-        debounceTime: 300,
+        debounceTime: 150, // Dipercepat dari 300ms ke 150ms
         maxResults: 5
     },
     
     SCANNER: {
         facingMode: 'environment',
         qrboxSize: 250
+    },
+    
+    // Pengaturan loading yang lebih cepat
+    LOADING: {
+        minDisplayTime: 200, // Minimal 200ms (dari 500ms)
+        fadeSpeed: 150 // Fade animation 150ms (dari 300ms)
     }
 };
 
-// API - Direct ke Google Apps Script dengan logging lebih detail
+// API - Optimized dengan timeout dan caching
 const API = {
+    cache: new Map(), // Simple cache
+    
     async get(action, params = {}) {
         try {
+            // Check cache untuk operasi read-only
+            const cacheKey = action + JSON.stringify(params);
+            if (action.includes('get') && this.cache.has(cacheKey)) {
+                const cached = this.cache.get(cacheKey);
+                if (Date.now() - cached.timestamp < 30000) { // Cache 30 detik
+                    console.log('⚡ Using cached data for:', action);
+                    return cached.data;
+                }
+            }
+            
             const url = new URL(CONFIG.API_URL);
             url.searchParams.append('action', action);
             
@@ -29,33 +47,45 @@ const API = {
                 url.searchParams.append(key, params[key]);
             });
             
-            console.log('📤 API GET Request:', action);
-            console.log('📍 URL:', url.toString());
-            console.log('📦 Params:', params);
+            console.log('📤 API GET:', action);
+            
+            // Tambahkan timeout untuk request
+            const controller = new AbortController();
+            const timeoutId = setTimeout(() => controller.abort(), 10000); // 10 detik timeout
             
             const response = await fetch(url.toString(), {
                 method: 'GET',
-                redirect: 'follow'
+                redirect: 'follow',
+                signal: controller.signal
             });
             
-            console.log('📥 Response Status:', response.status);
+            clearTimeout(timeoutId);
             
             if (!response.ok) {
-                throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                throw new Error(`HTTP ${response.status}`);
             }
             
             const data = await response.json();
-            console.log('✅ Response Data:', data);
             
             if (!data.success) {
                 throw new Error(data.error || 'API failed');
             }
             
+            // Cache hasil untuk operasi read
+            if (action.includes('get')) {
+                this.cache.set(cacheKey, {
+                    data: data.data,
+                    timestamp: Date.now()
+                });
+            }
+            
             return data.data;
             
         } catch (error) {
-            console.error('❌ API GET Error:', error);
-            console.error('Error details:', error.message);
+            if (error.name === 'AbortError') {
+                throw new Error('Request timeout - periksa koneksi internet');
+            }
+            console.error('❌ API Error:', error.message);
             throw error;
         }
     },
@@ -65,77 +95,95 @@ const API = {
             const url = new URL(CONFIG.API_URL);
             url.searchParams.append('action', action);
             
-            // Convert all data to URL parameters
             Object.keys(data).forEach(key => {
                 const value = data[key];
                 url.searchParams.append(key, String(value));
             });
             
-            console.log('📤 API POST Request:', action);
-            console.log('📍 URL:', url.toString());
-            console.log('📦 Data:', data);
+            console.log('📤 API POST:', action);
+            
+            // Timeout untuk POST juga
+            const controller = new AbortController();
+            const timeoutId = setTimeout(() => controller.abort(), 15000); // 15 detik untuk write
             
             const response = await fetch(url.toString(), {
-                method: 'GET', // Google Apps Script menggunakan GET untuk semua request
-                redirect: 'follow'
+                method: 'GET',
+                redirect: 'follow',
+                signal: controller.signal
             });
             
-            console.log('📥 Response Status:', response.status);
+            clearTimeout(timeoutId);
             
             if (!response.ok) {
-                throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                throw new Error(`HTTP ${response.status}`);
             }
             
-            // Get response text first for debugging
             const responseText = await response.text();
-            console.log('📄 Raw Response:', responseText);
-            
-            let result;
-            try {
-                result = JSON.parse(responseText);
-            } catch (parseError) {
-                console.error('❌ JSON Parse Error:', parseError);
-                console.error('Response was:', responseText);
-                throw new Error('Invalid JSON response from server');
-            }
-            
-            console.log('✅ Parsed Response:', result);
+            const result = JSON.parse(responseText);
             
             if (!result.success) {
                 throw new Error(result.error || 'API failed');
             }
             
+            // Clear cache setelah write operation
+            this.cache.clear();
+            
             return result.data || result;
             
         } catch (error) {
-            console.error('❌ API POST Error:', error);
-            console.error('Error details:', error.message);
+            if (error.name === 'AbortError') {
+                throw new Error('Request timeout - periksa koneksi internet');
+            }
+            console.error('❌ API Error:', error.message);
             throw error;
         }
+    },
+    
+    // Clear cache manual
+    clearCache() {
+        this.cache.clear();
+        console.log('🗑️ Cache cleared');
     }
 };
 
-// UI Helper
+// UI Helper - OPTIMIZED
 const UI = {
+    loadingStartTime: null,
+    
     showLoading(id = 'loader') {
         const el = document.getElementById(id);
         if (el) {
+            this.loadingStartTime = Date.now();
             el.style.display = 'flex';
-            console.log('⏳ Loading shown');
+            // Langsung opacity 1 tanpa delay
+            requestAnimationFrame(() => {
+                el.style.opacity = '1';
+            });
         }
     },
     
-    hideLoading(id = 'loader') {
+    async hideLoading(id = 'loader') {
         const el = document.getElementById(id);
         if (el) {
-            el.style.display = 'none';
-            console.log('✅ Loading hidden');
+            // Pastikan loading minimal tampil 200ms (agar tidak flicker)
+            const elapsed = Date.now() - (this.loadingStartTime || 0);
+            const minTime = CONFIG.LOADING.minDisplayTime;
+            
+            if (elapsed < minTime) {
+                await new Promise(resolve => setTimeout(resolve, minTime - elapsed));
+            }
+            
+            // Fade out cepat
+            el.style.transition = `opacity ${CONFIG.LOADING.fadeSpeed}ms ease`;
+            el.style.opacity = '0';
+            
+            setTimeout(() => {
+                el.style.display = 'none';
+            }, CONFIG.LOADING.fadeSpeed);
         }
     },
     
-    showAlert(msg, type = 'info', duration = 5000) {
-        console.log(`🔔 Alert [${type}]:`, msg);
-        
+    showAlert(msg, type = 'info', duration = 3000) { // Durasi diperpendek ke 3 detik
         let container = document.getElementById('alert-container');
         if (!container) {
             container = document.createElement('div');
@@ -148,7 +196,6 @@ const UI = {
         const alertDiv = document.createElement('div');
         alertDiv.id = alertId;
         
-        // Map alert types to colors
         const colors = {
             success: '#06D6A0',
             danger: '#EF476F',
@@ -166,7 +213,7 @@ const UI = {
             border-radius: 8px;
             margin-bottom: 0.5rem;
             box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
-            animation: slideIn 0.3s ease;
+            animation: slideIn 0.2s ease;
         `;
         
         alertDiv.innerHTML = `
@@ -184,7 +231,11 @@ const UI = {
         if (duration > 0) {
             setTimeout(() => {
                 const el = document.getElementById(alertId);
-                if (el) el.remove();
+                if (el) {
+                    el.style.transition = 'opacity 0.2s ease';
+                    el.style.opacity = '0';
+                    setTimeout(() => el.remove(), 200);
+                }
             }, duration);
         }
     }

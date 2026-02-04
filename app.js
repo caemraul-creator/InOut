@@ -82,7 +82,7 @@ function setupEventListeners() {
         if (query.length >= 2) {
             searchTimeout = setTimeout(() => {
                 searchBarang(query);
-            }, 300);
+            }, 150); // Dipercepat dari 300ms ke 150ms
         } else {
             hideItemResult();
         }
@@ -186,7 +186,7 @@ function openAddItemModal(query = '') {
         
         setTimeout(() => {
             if (namaInput) namaInput.focus();
-        }, 300);
+        }, 150); // Dipercepat dari 300ms ke 150ms
     }
 }
 

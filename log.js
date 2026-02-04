@@ -37,7 +37,7 @@ document.addEventListener('DOMContentLoaded', function() {
         clearTimeout(searchTimeout);
         searchTimeout = setTimeout(() => {
             applyFilters();
-        }, 500);
+        }, 200); // Dipercepat dari 500ms ke 200ms
     });
     
     // Enter key to search
