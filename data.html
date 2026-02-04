@@ -1,0 +1,714 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Data Stok - Warehouse Pro</title>
+    
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+    
+    <!-- Font Awesome -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        :root {
+            --primary: #FF6B35;
+            --secondary: #004E89;
+            --accent: #F7B801;
+            --dark: #1A1423;
+            --light: #F7F7FF;
+            --success: #06D6A0;
+            --danger: #EF476F;
+            --gradient-1: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            --gradient-2: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            --gradient-3: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+        }
+        
+        body {
+            font-family: 'Outfit', sans-serif;
+            background: var(--dark);
+            min-height: 100vh;
+            padding-bottom: 80px;
+        }
+        
+        /* Animated Background */
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: 
+                radial-gradient(circle at 20% 50%, rgba(102, 126, 234, 0.15) 0%, transparent 50%),
+                radial-gradient(circle at 80% 80%, rgba(245, 87, 108, 0.15) 0%, transparent 50%);
+            z-index: -1;
+        }
+        
+        /* Header */
+        .app-header {
+            background: rgba(0, 0, 0, 0.4);
+            backdrop-filter: blur(20px);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            padding: 1rem;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+        
+        .header-content {
+            max-width: 800px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .header-title {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+        
+        .header-icon {
+            width: 40px;
+            height: 40px;
+            background: var(--gradient-3);
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+        }
+        
+        .header-text h1 {
+            color: var(--light);
+            font-size: 1.1rem;
+            font-weight: 700;
+            line-height: 1.2;
+        }
+        
+        .header-text p {
+            color: rgba(247, 247, 255, 0.6);
+            font-size: 0.75rem;
+        }
+        
+        .btn-refresh {
+            width: 40px;
+            height: 40px;
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 10px;
+            color: var(--light);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s ease;
+        }
+        
+        .btn-refresh:hover {
+            background: rgba(255, 255, 255, 0.2);
+            transform: rotate(180deg);
+        }
+        
+        /* Container */
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 1rem;
+        }
+        
+        /* Stats Cards */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 0.75rem;
+            margin-bottom: 1rem;
+        }
+        
+        .stat-card {
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(20px);
+            border-radius: 12px;
+            padding: 1rem;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .stat-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 3px;
+        }
+        
+        .stat-card.gudang-a::before {
+            background: var(--gradient-1);
+        }
+        
+        .stat-card.gudang-b::before {
+            background: var(--gradient-3);
+        }
+        
+        .stat-label {
+            color: rgba(247, 247, 255, 0.7);
+            font-size: 0.8rem;
+            margin-bottom: 0.375rem;
+            display: flex;
+            align-items: center;
+            gap: 0.375rem;
+        }
+        
+        .stat-value {
+            color: var(--light);
+            font-size: 1.75rem;
+            font-weight: 800;
+            line-height: 1;
+        }
+        
+        /* Search Box */
+        .search-box {
+            position: relative;
+            margin-bottom: 1rem;
+        }
+        
+        .search-input {
+            width: 100%;
+            padding: 0.875rem 3rem 0.875rem 2.75rem;
+            background: rgba(255, 255, 255, 0.08);
+            border: 2px solid rgba(255, 255, 255, 0.1);
+            border-radius: 12px;
+            color: var(--light);
+            font-family: 'Outfit', sans-serif;
+            font-size: 0.9rem;
+            transition: all 0.3s ease;
+        }
+        
+        .search-input:focus {
+            outline: none;
+            border-color: var(--primary);
+            background: rgba(255, 255, 255, 0.12);
+        }
+        
+        .search-input::placeholder {
+            color: rgba(247, 247, 255, 0.4);
+        }
+        
+        .search-icon {
+            position: absolute;
+            left: 1rem;
+            top: 50%;
+            transform: translateY(-50%);
+            color: rgba(247, 247, 255, 0.5);
+            font-size: 1rem;
+        }
+        
+        .clear-btn {
+            position: absolute;
+            right: 0.5rem;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 32px;
+            height: 32px;
+            background: rgba(239, 71, 111, 0.2);
+            border: 1px solid var(--danger);
+            border-radius: 8px;
+            color: var(--danger);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s ease;
+        }
+        
+        .clear-btn:hover {
+            background: var(--danger);
+            color: white;
+        }
+        
+        /* Item List */
+        .item-list {
+            display: grid;
+            gap: 0.75rem;
+        }
+        
+        .item-card {
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(20px);
+            border-radius: 12px;
+            padding: 1rem;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            transition: all 0.3s ease;
+            animation: fadeInUp 0.4s ease;
+        }
+        
+        .item-card:hover {
+            transform: translateY(-2px);
+            border-color: rgba(255, 255, 255, 0.3);
+            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3);
+        }
+        
+        .item-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: start;
+            margin-bottom: 0.625rem;
+        }
+        
+        .item-name {
+            color: var(--light);
+            font-size: 1rem;
+            font-weight: 700;
+            margin-bottom: 0.25rem;
+        }
+        
+        .item-id {
+            color: rgba(247, 247, 255, 0.6);
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.75rem;
+        }
+        
+        .item-badge {
+            padding: 0.3rem 0.625rem;
+            border-radius: 6px;
+            font-size: 0.7rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+        
+        .item-meta {
+            display: flex;
+            gap: 0.875rem;
+            margin-bottom: 0.625rem;
+            flex-wrap: wrap;
+        }
+        
+        .meta-item {
+            display: flex;
+            align-items: center;
+            gap: 0.375rem;
+            color: rgba(247, 247, 255, 0.7);
+            font-size: 0.8rem;
+        }
+        
+        .meta-item i {
+            color: var(--accent);
+            font-size: 0.75rem;
+        }
+        
+        .stock-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 0.625rem;
+        }
+        
+        .stock-box {
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: 8px;
+            padding: 0.625rem;
+            text-align: center;
+        }
+        
+        .stock-box.gudang-a {
+            border: 1px solid rgba(102, 126, 234, 0.3);
+        }
+        
+        .stock-box.gudang-b {
+            border: 1px solid rgba(79, 172, 254, 0.3);
+        }
+        
+        .stock-label {
+            color: rgba(247, 247, 255, 0.6);
+            font-size: 0.7rem;
+            margin-bottom: 0.25rem;
+        }
+        
+        .stock-number {
+            color: var(--light);
+            font-size: 1.25rem;
+            font-weight: 800;
+        }
+        
+        .stock-unit {
+            color: rgba(247, 247, 255, 0.5);
+            font-size: 0.7rem;
+        }
+        
+        /* Low Stock Warning */
+        .stock-box.low-stock {
+            border-color: var(--danger);
+            background: rgba(239, 71, 111, 0.1);
+        }
+        
+        .stock-box.low-stock .stock-number {
+            color: var(--danger);
+        }
+        
+        /* Loading */
+        .loading-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.8);
+            backdrop-filter: blur(10px);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 9999;
+        }
+        
+        .loading-overlay.show {
+            display: flex;
+        }
+        
+        .spinner {
+            width: 50px;
+            height: 50px;
+            border: 4px solid rgba(255, 255, 255, 0.2);
+            border-top-color: white;
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+        }
+        
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+        
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        /* Floating Action Button */
+        .fab {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            width: 56px;
+            height: 56px;
+            background: var(--gradient-2);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 1.5rem;
+            box-shadow: 0 4px 16px rgba(245, 87, 108, 0.4);
+            cursor: pointer;
+            transition: all 0.3s ease;
+            z-index: 999;
+        }
+        
+        .fab:hover {
+            transform: translateY(-4px) scale(1.05);
+            box-shadow: 0 8px 24px rgba(245, 87, 108, 0.5);
+        }
+        
+        /* Empty State */
+        .empty-state {
+            text-align: center;
+            padding: 3rem 1rem;
+            color: rgba(247, 247, 255, 0.5);
+        }
+        
+        .empty-state i {
+            font-size: 4rem;
+            margin-bottom: 1rem;
+            opacity: 0.3;
+        }
+        
+        /* Mobile Optimizations */
+        @media (max-width: 480px) {
+            .container {
+                padding: 1rem 0.75rem;
+            }
+            
+            .stats-grid {
+                gap: 0.75rem;
+            }
+            
+            .stat-card {
+                padding: 1rem;
+            }
+            
+            .stat-value {
+                font-size: 1.75rem;
+            }
+            
+            .item-card {
+                padding: 1rem;
+            }
+            
+            .item-name {
+                font-size: 1rem;
+            }
+            
+            .stock-number {
+                font-size: 1.25rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <div class="app-header">
+        <div class="header-content">
+            <div class="header-title">
+                <div class="header-icon">
+                    <i class="fas fa-chart-bar"></i>
+                </div>
+                <div class="header-text">
+                    <h1>DATA STOK</h1>
+                    <p>Update Real-time</p>
+                </div>
+            </div>
+            <button class="btn-refresh" id="btnRefresh" title="Refresh Data">
+                <i class="fas fa-sync-alt"></i>
+            </button>
+        </div>
+    </div>
+    
+    <!-- Main Container -->
+    <div class="container">
+        <!-- Stats -->
+        <div class="stats-grid">
+            <div class="stat-card gudang-a">
+                <div class="stat-label">
+                    <i class="fas fa-warehouse"></i>
+                    Gudang A
+                </div>
+                <div class="stat-value" id="totalA">0</div>
+            </div>
+            
+            <div class="stat-card gudang-b">
+                <div class="stat-label">
+                    <i class="fas fa-building"></i>
+                    Gudang B
+                </div>
+                <div class="stat-value" id="totalB">0</div>
+            </div>
+        </div>
+        
+        <!-- Search Box -->
+        <div class="search-box">
+            <i class="fas fa-search search-icon"></i>
+            <input type="text" 
+                   id="searchInput" 
+                   class="search-input" 
+                   placeholder="Cari barang berdasarkan nama, ID, atau kategori...">
+            <button class="clear-btn" id="btnClear" style="display: none;">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+        
+        <!-- Item List -->
+        <div class="item-list" id="inventoryContainer">
+            <!-- Items will be loaded here -->
+        </div>
+    </div>
+    
+    <!-- Floating Action Button -->
+    <a href="index.html" class="fab" title="Kembali ke Input">
+        <i class="fas fa-arrow-left"></i>
+    </a>
+    
+    <!-- Loading Overlay -->
+    <div class="loading-overlay" id="loader">
+        <div class="spinner"></div>
+    </div>
+    
+    <!-- Scripts -->
+    <script src="config.js"></script>
+    <script src="login.js"></script>
+    
+    <script>
+        // Global data storage
+        let allItems = [];
+        let filteredItems = [];
+        
+        // Initialize on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            // Check authentication
+            if (!AUTH.isLoggedIn()) {
+                window.location.href = 'login.html';
+                return;
+            }
+            
+            // Load data
+            loadDataBarang();
+            
+            // Refresh button
+            document.getElementById('btnRefresh').addEventListener('click', function() {
+                this.style.transform = 'rotate(360deg)';
+                setTimeout(() => {
+                    this.style.transform = '';
+                }, 300);
+                loadDataBarang();
+            });
+            
+            // Search functionality
+            const searchInput = document.getElementById('searchInput');
+            const clearBtn = document.getElementById('btnClear');
+            
+            searchInput.addEventListener('input', function(e) {
+                const query = e.target.value.toLowerCase().trim();
+                
+                // Show/hide clear button
+                if (query.length > 0) {
+                    clearBtn.style.display = 'flex';
+                } else {
+                    clearBtn.style.display = 'none';
+                }
+                
+                // Filter items
+                if (query.length === 0) {
+                    filteredItems = allItems;
+                } else {
+                    filteredItems = allItems.filter(item => {
+                        return item.nama.toLowerCase().includes(query) ||
+                               item.id.toLowerCase().includes(query) ||
+                               item.kategori.toLowerCase().includes(query);
+                    });
+                }
+                
+                // Render filtered items
+                renderItems(filteredItems);
+            });
+            
+            // Clear button
+            clearBtn.addEventListener('click', function() {
+                searchInput.value = '';
+                clearBtn.style.display = 'none';
+                filteredItems = allItems;
+                renderItems(filteredItems);
+                searchInput.focus();
+            });
+        });
+        
+        // Load data from API
+        async function loadDataBarang() {
+            const loader = document.getElementById('loader');
+            const container = document.getElementById('inventoryContainer');
+            
+            try {
+                loader.classList.add('show');
+                
+                const data = await API.get('getBarangList');
+                allItems = data;
+                filteredItems = data;
+                
+                // Calculate totals
+                const totalA = data.reduce((sum, item) => sum + (Number(item.stokA) || 0), 0);
+                const totalB = data.reduce((sum, item) => sum + (Number(item.stokB) || 0), 0);
+                
+                document.getElementById('totalA').textContent = totalA;
+                document.getElementById('totalB').textContent = totalB;
+                
+                // Render items
+                renderItems(data);
+                
+            } catch (error) {
+                console.error('Error loading data:', error);
+                container.innerHTML = `
+                    <div class="empty-state">
+                        <i class="fas fa-exclamation-triangle"></i>
+                        <p>Gagal memuat data: ${error.message}</p>
+                    </div>
+                `;
+            } finally {
+                loader.classList.remove('show');
+            }
+        }
+        
+        // Render items to DOM
+        function renderItems(items) {
+            const container = document.getElementById('inventoryContainer');
+            
+            if (!items || items.length === 0) {
+                container.innerHTML = `
+                    <div class="empty-state">
+                        <i class="fas fa-inbox"></i>
+                        <p>Tidak ada data yang ditemukan</p>
+                    </div>
+                `;
+                return;
+            }
+            
+            const html = items.map(item => {
+                const stokA = Number(item.stokA) || 0;
+                const stokB = Number(item.stokB) || 0;
+                const lowStockA = stokA < 10;
+                const lowStockB = stokB < 10;
+                
+                // Generate badge color based on category
+                const badgeColors = {
+                    'Elektronik': 'background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);',
+                    'Furniture': 'background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);',
+                    'ATK': 'background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);'
+                };
+                const badgeStyle = badgeColors[item.kategori] || 'background: rgba(255, 255, 255, 0.2);';
+                
+                return `
+                    <div class="item-card">
+                        <div class="item-header">
+                            <div>
+                                <div class="item-name">${item.nama}</div>
+                                <div class="item-id">ID: ${item.id}</div>
+                            </div>
+                            <div class="item-badge" style="${badgeStyle}">${item.kategori}</div>
+                        </div>
+                        
+                        <div class="item-meta">
+                            <div class="meta-item">
+                                <i class="fas fa-tag"></i>
+                                <span>${item.kategori}</span>
+                            </div>
+                            <div class="meta-item">
+                                <i class="fas fa-balance-scale"></i>
+                                <span>${item.satuan}</span>
+                            </div>
+                        </div>
+                        
+                        <div class="stock-row">
+                            <div class="stock-box gudang-a ${lowStockA ? 'low-stock' : ''}">
+                                <div class="stock-label">Gudang A</div>
+                                <div class="stock-number">${stokA}</div>
+                                <div class="stock-unit">${item.satuan}</div>
+                            </div>
+                            <div class="stock-box gudang-b ${lowStockB ? 'low-stock' : ''}">
+                                <div class="stock-label">Gudang B</div>
+                                <div class="stock-number">${stokB}</div>
+                                <div class="stock-unit">${item.satuan}</div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+            
+            container.innerHTML = html;
+        }
+    </script>
+</body>
+</html>

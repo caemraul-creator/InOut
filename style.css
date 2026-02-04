@@ -1,0 +1,1943 @@
+/* ============================================
+   MOBILE-OPTIMIZED CSS - COMPACT VERSION
+   Tambahkan ini di bagian bawah style.css
+   atau ganti <style> di index.html
+   ============================================ */
+
+/* Mobile optimizations - Compact version */
+@media (max-width: 768px) {
+    /* Header lebih compact */
+    .app-header {
+        padding: 0.5rem 0.75rem;
+    }
+    
+    .header-icon {
+        width: 32px;
+        height: 32px;
+    }
+    
+    .header-text h1 {
+        font-size: 0.95rem;
+    }
+    
+    .header-text p {
+        font-size: 0.65rem;
+    }
+    
+    .user-badge {
+        padding: 0.4rem 0.6rem;
+    }
+    
+    .user-name {
+        font-size: 0.75rem;
+    }
+    
+    /* Container & Card lebih compact */
+    .container {
+        padding: 0.75rem;
+    }
+    
+    .card {
+        padding: 0.75rem;
+        margin-bottom: 0.75rem;
+        border-radius: 12px;
+    }
+    
+    .section-title {
+        font-size: 0.7rem;
+        margin-bottom: 0.5rem;
+    }
+    
+    /* Warehouse & Type Toggle lebih compact */
+    .warehouse-toggle,
+    .transaction-type {
+        gap: 0.4rem;
+        margin-bottom: 0.75rem;
+    }
+    
+    .warehouse-btn,
+    .type-btn {
+        padding: 0.5rem;
+        font-size: 0.75rem;
+        border-radius: 8px;
+    }
+    
+    .warehouse-btn i,
+    .type-btn i {
+        font-size: 1rem;
+    }
+    
+    /* Search & Scanner lebih compact */
+    .search-box {
+        padding: 0.6rem 0.75rem;
+        font-size: 0.85rem;
+    }
+    
+    .search-box i {
+        font-size: 1rem;
+    }
+    
+    #manualIdInput {
+        font-size: 0.85rem;
+    }
+    
+    .scan-btn {
+        padding: 0.6rem 0.75rem;
+        font-size: 0.75rem;
+    }
+    
+    /* Item Result lebih compact */
+    .item-card {
+        padding: 0.75rem;
+        gap: 0.5rem;
+    }
+    
+    .item-icon {
+        width: 40px;
+        height: 40px;
+        font-size: 1.1rem;
+    }
+    
+    .item-name {
+        font-size: 0.9rem;
+    }
+    
+    .item-id {
+        font-size: 0.65rem;
+    }
+    
+    .item-meta {
+        gap: 0.4rem;
+        margin-top: 0.4rem;
+    }
+    
+    .meta-badge {
+        padding: 0.25rem 0.5rem;
+        font-size: 0.65rem;
+    }
+    
+    .stock-info {
+        padding: 0.5rem;
+        margin-top: 0.5rem;
+    }
+    
+    .stock-label {
+        font-size: 0.65rem;
+    }
+    
+    .stock-value {
+        font-size: 0.95rem;
+    }
+    
+    .action-buttons {
+        gap: 0.4rem;
+        margin-top: 0.5rem;
+    }
+    
+    .btn-action {
+        padding: 0.5rem;
+        font-size: 0.75rem;
+    }
+    
+    /* Input Group lebih compact */
+    .input-group {
+        margin-bottom: 0.75rem;
+    }
+    
+    .input-group label {
+        font-size: 0.75rem;
+        margin-bottom: 0.4rem;
+    }
+    
+    .input-control {
+        padding: 0.6rem 0.75rem;
+        font-size: 0.85rem;
+    }
+    
+    textarea.input-control {
+        min-height: 60px;
+    }
+    
+    /* Submit button lebih compact */
+    .submit-btn {
+        padding: 0.75rem;
+        font-size: 0.9rem;
+        margin-top: 0.75rem;
+    }
+    
+    .submit-btn i {
+        font-size: 1rem;
+    }
+    
+    /* Bottom Nav lebih compact */
+    .bottom-nav {
+        padding: 0.5rem;
+        height: 60px;
+    }
+    
+    .nav-item {
+        padding: 0.4rem;
+        gap: 0.25rem;
+    }
+    
+    .nav-item i {
+        font-size: 1.1rem;
+    }
+    
+    .nav-item span {
+        font-size: 0.65rem;
+    }
+    
+    /* Modal lebih compact */
+    .modal-content {
+        padding: 0;
+        margin: 0.5rem;
+        max-height: 95vh;
+    }
+    
+    .modal-header {
+        padding: 1rem;
+    }
+    
+    .modal-icon {
+        width: 50px;
+        height: 50px;
+        margin-bottom: 0.75rem;
+    }
+    
+    .modal-title {
+        font-size: 1.2rem;
+    }
+    
+    .modal-subtitle {
+        font-size: 0.8rem;
+    }
+    
+    .modal-body {
+        padding: 1rem;
+    }
+    
+    .modal-tabs {
+        padding: 0.75rem;
+        gap: 0.4rem;
+    }
+    
+    .modal-tab-btn {
+        padding: 0.6rem;
+        font-size: 0.8rem;
+    }
+    
+    .input-field {
+        padding: 0.6rem;
+        font-size: 0.85rem;
+    }
+    
+    .modal-actions {
+        gap: 0.5rem;
+        margin-top: 1rem;
+    }
+    
+    .btn-modal {
+        padding: 0.65rem 1rem;
+        font-size: 0.85rem;
+    }
+    
+    /* Confirmation Modal lebih compact */
+    .confirm-details {
+        gap: 0.5rem;
+        padding: 0.75rem;
+    }
+    
+    .detail-row {
+        padding: 0.5rem 0;
+    }
+    
+    .detail-label {
+        font-size: 0.7rem;
+    }
+    
+    .detail-value {
+        font-size: 0.85rem;
+    }
+    
+    /* Reader (QR Scanner) lebih compact */
+    #reader {
+        margin-top: 0.5rem;
+    }
+    
+    /* Reduce overall body padding on mobile */
+    body {
+        padding-bottom: 65px;
+    }
+}
+
+/* Extra small screens (< 400px) */
+@media (max-width: 400px) {
+    .container {
+        padding: 0.5rem;
+    }
+    
+    .card {
+        padding: 0.6rem;
+    }
+    
+    .header-text h1 {
+        font-size: 0.85rem;
+    }
+    
+    .warehouse-btn,
+    .type-btn {
+        padding: 0.4rem;
+        font-size: 0.7rem;
+    }
+    
+    .input-control {
+        padding: 0.5rem 0.6rem;
+        font-size: 0.8rem;
+    }
+    
+    .submit-btn {
+        padding: 0.65rem;
+        font-size: 0.85rem;
+    }
+    
+    .modal-content {
+        margin: 0.25rem;
+    }
+}
+
+/* ============================================
+   ALTERNATIVE COMPACT LAYOUT
+   Gunakan ini jika ingin layout horizontal
+   di beberapa bagian
+   ============================================ */
+
+@media (max-width: 768px) {
+    /* Horizontal layout untuk warehouse & type */
+    .compact-layout {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 0.75rem;
+    }
+    
+    .compact-layout .card {
+        margin-bottom: 0;
+    }
+    
+    /* Inline label & input untuk form yang lebih compact */
+    .input-group.inline {
+        display: grid;
+        grid-template-columns: 80px 1fr;
+        align-items: center;
+        gap: 0.5rem;
+        margin-bottom: 0.5rem;
+    }
+    
+    .input-group.inline label {
+        margin-bottom: 0;
+        font-size: 0.75rem;
+        text-align: right;
+    }
+    
+    /* Smaller gaps between sections */
+    .section-gap-small {
+        margin-bottom: 0.5rem;
+    }
+}
+
+/* ============================================
+   COMPACT BUTTONS
+   ============================================ */
+
+@media (max-width: 768px) {
+    /* Icon-only buttons for very compact mode */
+    .btn-icon-only {
+        padding: 0.5rem;
+        width: 38px;
+        height: 38px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+    
+    .btn-icon-only span {
+        display: none;
+    }
+    
+    /* Compact action row */
+    .action-row-compact {
+        display: flex;
+        gap: 0.4rem;
+        flex-wrap: wrap;
+    }
+    
+    .action-row-compact > * {
+        flex: 1;
+        min-width: 100px;
+    }
+}
+
+/* ============================================
+   SCROLLABLE SECTIONS
+   Untuk area yang panjang
+   ============================================ */
+
+@media (max-width: 768px) {
+    .scrollable-x {
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+        scrollbar-width: thin;
+    }
+    
+    .scrollable-x::-webkit-scrollbar {
+        height: 4px;
+    }
+    
+    .scrollable-x::-webkit-scrollbar-thumb {
+        background: rgba(255, 255, 255, 0.3);
+        border-radius: 2px;
+    }
+}
+
+/* ============================================
+   COMPACT TYPOGRAPHY
+   ============================================ */
+
+@media (max-width: 768px) {
+    /* Smaller line heights */
+    body {
+        line-height: 1.4;
+    }
+    
+    h1, h2, h3, h4, h5, h6 {
+        line-height: 1.2;
+    }
+    
+    /* Tighter letter spacing */
+    .section-title {
+        letter-spacing: 0.05em;
+    }
+}
+
+/* ============================================
+   ULTRA COMPACT CSS - INDEX & DATA
+   Dengan warna berbeda untuk Gudang A & B
+   ============================================ */
+
+/* ============================================
+   ULTRA COMPACT MOBILE (< 768px)
+   ============================================ */
+
+@media (max-width: 768px) {
+    /* Header EXTRA compact */
+    .app-header {
+        padding: 0.4rem 0.6rem;
+    }
+    
+    .header-icon {
+        width: 28px;
+        height: 28px;
+        font-size: 0.9rem;
+    }
+    
+    .header-text h1 {
+        font-size: 0.85rem;
+        line-height: 1.1;
+    }
+    
+    .header-text p {
+        font-size: 0.6rem;
+        display: none; /* Sembunyikan subtitle */
+    }
+    
+    .user-badge {
+        padding: 0.3rem 0.5rem;
+    }
+    
+    .user-name {
+        font-size: 0.7rem;
+    }
+    
+    /* Container EXTRA compact */
+    .container {
+        padding: 0.5rem;
+    }
+    
+    .card {
+        padding: 0.5rem;
+        margin-bottom: 0.5rem;
+        border-radius: 10px;
+    }
+    
+    .section-title {
+        font-size: 0.65rem;
+        margin-bottom: 0.4rem;
+        letter-spacing: 0.03em;
+    }
+    
+    /* Warehouse Toggle - EXTRA compact dengan warna berbeda */
+    .warehouse-toggle {
+        gap: 0.3rem;
+        margin-bottom: 0.5rem;
+    }
+    
+    .warehouse-btn {
+        padding: 0.4rem 0.5rem;
+        font-size: 0.7rem;
+        border-radius: 8px;
+        min-height: 44px; /* Touch friendly */
+    }
+    
+    .warehouse-btn i {
+        font-size: 1rem;
+        margin-bottom: 0.2rem;
+    }
+    
+    /* 🎨 WARNA BERBEDA PER GUDANG */
+    .warehouse-btn[data-warehouse="Gudang A"] {
+        border-color: rgba(59, 130, 246, 0.3);
+        background: rgba(59, 130, 246, 0.05);
+    }
+    
+    .warehouse-btn[data-warehouse="Gudang A"].active {
+        border-color: #3B82F6;
+        background: linear-gradient(135deg, rgba(59, 130, 246, 0.25), rgba(37, 99, 235, 0.25));
+        color: #60A5FA;
+    }
+    
+    .warehouse-btn[data-warehouse="Gudang B"] {
+        border-color: rgba(34, 197, 94, 0.3);
+        background: rgba(34, 197, 94, 0.05);
+    }
+    
+    .warehouse-btn[data-warehouse="Gudang B"].active {
+        border-color: #22C55E;
+        background: linear-gradient(135deg, rgba(34, 197, 94, 0.25), rgba(21, 128, 61, 0.25));
+        color: #4ADE80;
+    }
+    
+    /* Transaction Type - EXTRA compact */
+    .transaction-type {
+        gap: 0.3rem;
+        margin-bottom: 0.5rem;
+    }
+    
+    .type-btn {
+        padding: 0.4rem 0.5rem;
+        font-size: 0.7rem;
+        border-radius: 8px;
+        min-height: 44px;
+    }
+    
+    .type-btn i {
+        font-size: 1rem;
+        margin-bottom: 0.2rem;
+    }
+    
+    /* Search Box - EXTRA compact */
+    .search-box {
+        padding: 0.5rem 0.6rem;
+        font-size: 0.8rem;
+        margin-bottom: 0.5rem;
+    }
+    
+    .search-box i {
+        font-size: 0.9rem;
+    }
+    
+    #manualIdInput {
+        font-size: 0.8rem;
+        padding: 0;
+    }
+    
+    .scan-btn {
+        padding: 0.5rem 0.6rem;
+        font-size: 0.7rem;
+    }
+    
+    .scan-btn i {
+        font-size: 0.9rem;
+    }
+    
+    /* Item Result - EXTRA compact dengan warna gudang */
+    .item-card {
+        padding: 0.6rem;
+        gap: 0.4rem;
+    }
+    
+    /* Warna border item sesuai gudang aktif */
+    .item-card.gudang-a {
+        border-left: 3px solid #3B82F6;
+        background: linear-gradient(90deg, rgba(59, 130, 246, 0.08), rgba(255, 255, 255, 0.05));
+    }
+    
+    .item-card.gudang-b {
+        border-left: 3px solid #22C55E;
+        background: linear-gradient(90deg, rgba(34, 197, 94, 0.08), rgba(255, 255, 255, 0.05));
+    }
+    
+    .item-icon {
+        width: 36px;
+        height: 36px;
+        font-size: 1rem;
+    }
+    
+    .item-name {
+        font-size: 0.85rem;
+        line-height: 1.2;
+    }
+    
+    .item-id {
+        font-size: 0.6rem;
+        margin-top: 0.1rem;
+    }
+    
+    .item-meta {
+        gap: 0.3rem;
+        margin-top: 0.3rem;
+    }
+    
+    .meta-badge {
+        padding: 0.2rem 0.4rem;
+        font-size: 0.6rem;
+        border-radius: 4px;
+    }
+    
+    /* Stock Info dengan warna gudang */
+    .stock-info {
+        padding: 0.4rem 0.5rem;
+        margin-top: 0.4rem;
+        border-radius: 6px;
+    }
+    
+    .stock-info.gudang-a {
+        background: linear-gradient(135deg, rgba(59, 130, 246, 0.15), rgba(37, 99, 235, 0.15));
+        border: 1px solid rgba(59, 130, 246, 0.3);
+    }
+    
+    .stock-info.gudang-b {
+        background: linear-gradient(135deg, rgba(34, 197, 94, 0.15), rgba(21, 128, 61, 0.15));
+        border: 1px solid rgba(34, 197, 94, 0.3);
+    }
+    
+    .stock-label {
+        font-size: 0.6rem;
+    }
+    
+    .stock-value {
+        font-size: 0.9rem;
+        font-weight: 700;
+    }
+    
+    .action-buttons {
+        gap: 0.3rem;
+        margin-top: 0.4rem;
+    }
+    
+    .btn-action {
+        padding: 0.4rem 0.5rem;
+        font-size: 0.7rem;
+    }
+    
+    /* Input Group - ULTRA compact */
+    .input-group {
+        margin-bottom: 0.5rem;
+    }
+    
+    .input-group label {
+        font-size: 0.7rem;
+        margin-bottom: 0.3rem;
+        font-weight: 600;
+    }
+    
+    .input-control {
+        padding: 0.5rem 0.6rem;
+        font-size: 0.8rem;
+        border-radius: 8px;
+    }
+    
+    textarea.input-control {
+        min-height: 50px;
+    }
+    
+    /* Submit Button - Compact dengan warna gudang */
+    .submit-btn {
+        padding: 0.65rem;
+        font-size: 0.85rem;
+        margin-top: 0.5rem;
+    }
+    
+    .submit-btn.gudang-a {
+        background: linear-gradient(135deg, #3B82F6, #2563EB);
+    }
+    
+    .submit-btn.gudang-b {
+        background: linear-gradient(135deg, #22C55E, #16A34A);
+    }
+    
+    .submit-btn i {
+        font-size: 0.9rem;
+    }
+    
+    /* Bottom Nav - EXTRA compact */
+    .bottom-nav {
+        padding: 0.3rem;
+        height: 55px;
+    }
+    
+    .nav-item {
+        padding: 0.3rem;
+        gap: 0.2rem;
+    }
+    
+    .nav-item i {
+        font-size: 1rem;
+    }
+    
+    .nav-item span {
+        font-size: 0.6rem;
+    }
+    
+    /* Modal - EXTRA compact */
+    .modal-content {
+        margin: 0.5rem;
+        border-radius: 16px;
+    }
+    
+    .modal-header {
+        padding: 0.75rem;
+    }
+    
+    .modal-icon {
+        width: 45px;
+        height: 45px;
+        margin-bottom: 0.5rem;
+    }
+    
+    .modal-title {
+        font-size: 1.1rem;
+        margin-bottom: 0.3rem;
+    }
+    
+    .modal-subtitle {
+        font-size: 0.75rem;
+    }
+    
+    .modal-body {
+        padding: 0.75rem;
+    }
+    
+    .modal-tabs {
+        padding: 0.6rem;
+        gap: 0.3rem;
+    }
+    
+    .modal-tab-btn {
+        padding: 0.5rem;
+        font-size: 0.75rem;
+    }
+    
+    .input-field {
+        padding: 0.5rem 0.6rem;
+        font-size: 0.8rem;
+    }
+    
+    .modal-actions {
+        gap: 0.4rem;
+        margin-top: 0.75rem;
+    }
+    
+    .btn-modal {
+        padding: 0.6rem 0.9rem;
+        font-size: 0.8rem;
+    }
+    
+    /* Confirmation Modal - Compact */
+    .confirm-details {
+        gap: 0.4rem;
+        padding: 0.6rem;
+    }
+    
+    .detail-row {
+        padding: 0.4rem 0;
+    }
+    
+    .detail-label {
+        font-size: 0.65rem;
+    }
+    
+    .detail-value {
+        font-size: 0.8rem;
+    }
+    
+    /* Reader QR */
+    #reader {
+        margin-top: 0.5rem;
+        border-radius: 10px;
+        overflow: hidden;
+    }
+    
+    /* Reduce body padding */
+    body {
+        padding-bottom: 58px;
+    }
+}
+
+/* ============================================
+   DATA PAGE - ULTRA COMPACT TABLE
+   ============================================ */
+
+@media (max-width: 768px) {
+    /* Table container */
+    .table-container {
+        margin: 0;
+        padding: 0.5rem;
+    }
+    
+    /* Table styling - compact */
+    table {
+        font-size: 0.7rem;
+    }
+    
+    table thead th {
+        padding: 0.4rem 0.3rem;
+        font-size: 0.65rem;
+        line-height: 1.2;
+    }
+    
+    table tbody td {
+        padding: 0.4rem 0.3rem;
+        font-size: 0.7rem;
+        line-height: 1.3;
+    }
+    
+    /* Stock badges - smaller */
+    .stock-badge {
+        padding: 0.15rem 0.3rem;
+        font-size: 0.6rem;
+        border-radius: 3px;
+    }
+    
+    /* Action buttons in table */
+    .btn-table-action {
+        padding: 0.3rem 0.4rem;
+        font-size: 0.65rem;
+    }
+    
+    /* Search & Filter bar */
+    .data-filters {
+        padding: 0.5rem;
+        gap: 0.4rem;
+    }
+    
+    .filter-input {
+        padding: 0.4rem 0.5rem;
+        font-size: 0.75rem;
+    }
+    
+    /* Stats cards pada data page */
+    .stats-grid {
+        grid-template-columns: 1fr 1fr;
+        gap: 0.4rem;
+        margin-bottom: 0.5rem;
+    }
+    
+    .stat-card {
+        padding: 0.5rem;
+        border-radius: 8px;
+    }
+    
+    .stat-label {
+        font-size: 0.6rem;
+    }
+    
+    .stat-value {
+        font-size: 1.1rem;
+    }
+    
+    /* Gudang A - Blue theme untuk stats */
+    .stat-card.gudang-a {
+        background: linear-gradient(135deg, rgba(59, 130, 246, 0.15), rgba(37, 99, 235, 0.1));
+        border: 1px solid rgba(59, 130, 246, 0.3);
+    }
+    
+    .stat-card.gudang-a .stat-value {
+        color: #60A5FA;
+    }
+    
+    /* Gudang B - Green theme untuk stats */
+    .stat-card.gudang-b {
+        background: linear-gradient(135deg, rgba(34, 197, 94, 0.15), rgba(21, 128, 61, 0.1));
+        border: 1px solid rgba(34, 197, 94, 0.3);
+    }
+    
+    .stat-card.gudang-b .stat-value {
+        color: #4ADE80;
+    }
+}
+
+/* ============================================
+   EXTRA SMALL SCREENS (< 400px)
+   Lebih compact lagi!
+   ============================================ */
+
+@media (max-width: 400px) {
+    .container {
+        padding: 0.4rem;
+    }
+    
+    .card {
+        padding: 0.4rem;
+        margin-bottom: 0.4rem;
+    }
+    
+    .header-text h1 {
+        font-size: 0.8rem;
+    }
+    
+    .warehouse-btn,
+    .type-btn {
+        padding: 0.35rem 0.4rem;
+        font-size: 0.65rem;
+    }
+    
+    .input-control {
+        padding: 0.45rem 0.5rem;
+        font-size: 0.75rem;
+    }
+    
+    .submit-btn {
+        padding: 0.6rem;
+        font-size: 0.8rem;
+    }
+    
+    .modal-content {
+        margin: 0.3rem;
+    }
+    
+    /* Table even more compact */
+    table {
+        font-size: 0.65rem;
+    }
+    
+    table thead th,
+    table tbody td {
+        padding: 0.3rem 0.2rem;
+    }
+}
+
+/* ============================================
+   UTILITY CLASSES - Warna Gudang
+   ============================================ */
+
+/* Text colors */
+.text-gudang-a {
+    color: #3B82F6 !important;
+}
+
+.text-gudang-b {
+    color: #22C55E !important;
+}
+
+/* Background colors */
+.bg-gudang-a {
+    background: linear-gradient(135deg, rgba(59, 130, 246, 0.15), rgba(37, 99, 235, 0.1)) !important;
+    border: 1px solid rgba(59, 130, 246, 0.3) !important;
+}
+
+.bg-gudang-b {
+    background: linear-gradient(135deg, rgba(34, 197, 94, 0.15), rgba(21, 128, 61, 0.1)) !important;
+    border: 1px solid rgba(34, 197, 94, 0.3) !important;
+}
+
+/* Badge colors */
+.badge-gudang-a {
+    background: rgba(59, 130, 246, 0.2);
+    color: #60A5FA;
+    border: 1px solid rgba(59, 130, 246, 0.4);
+}
+
+.badge-gudang-b {
+    background: rgba(34, 197, 94, 0.2);
+    color: #4ADE80;
+    border: 1px solid rgba(34, 197, 94, 0.4);
+}
+
+/* ============================================
+   INDICATOR - Gudang Aktif
+   ============================================ */
+
+/* Indicator di header untuk gudang aktif */
+.gudang-indicator {
+    position: fixed;
+    top: 70px;
+    right: 10px;
+    padding: 0.3rem 0.6rem;
+    border-radius: 20px;
+    font-size: 0.65rem;
+    font-weight: 700;
+    z-index: 99;
+    display: none;
+}
+
+.gudang-indicator.active {
+    display: block;
+}
+
+.gudang-indicator.gudang-a {
+    background: linear-gradient(135deg, #3B82F6, #2563EB);
+    color: white;
+    box-shadow: 0 2px 8px rgba(59, 130, 246, 0.4);
+}
+
+.gudang-indicator.gudang-b {
+    background: linear-gradient(135deg, #22C55E, #16A34A);
+    color: white;
+    box-shadow: 0 2px 8px rgba(34, 197, 94, 0.4);
+}
+
+/* ============================================
+   ANIMATION - Smooth transitions
+   ============================================ */
+
+.warehouse-btn,
+.type-btn,
+.item-card,
+.stock-info,
+.submit-btn {
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.warehouse-btn:active,
+.type-btn:active {
+    transform: scale(0.95);
+}
+
+/* ============================================
+   SCROLLBAR - Thin & Themed
+   ============================================ */
+
+@media (max-width: 768px) {
+    /* Webkit browsers */
+    ::-webkit-scrollbar {
+        width: 4px;
+        height: 4px;
+    }
+    
+    ::-webkit-scrollbar-track {
+        background: rgba(255, 255, 255, 0.05);
+    }
+    
+    ::-webkit-scrollbar-thumb {
+        background: rgba(255, 255, 255, 0.2);
+        border-radius: 2px;
+    }
+    
+    ::-webkit-scrollbar-thumb:hover {
+        background: rgba(255, 255, 255, 0.3);
+    }
+    
+    /* Firefox */
+    * {
+        scrollbar-width: thin;
+        scrollbar-color: rgba(255, 255, 255, 0.2) rgba(255, 255, 255, 0.05);
+    }
+}
+
+/* ============================================
+   FIX: WARNA GUDANG BERBEDA
+   Replace CSS warna gudang yang lama dengan ini
+   ============================================ */
+
+/* ============================================
+   WAREHOUSE BUTTON COLORS - SPECIFIC OVERRIDE
+   ============================================ */
+
+/* Reset default yellow color */
+.warehouse-btn {
+    border-color: rgba(255, 255, 255, 0.1) !important;
+    background: rgba(255, 255, 255, 0.05) !important;
+}
+
+/* GUDANG A - BLUE (Default state) */
+.warehouse-btn[data-warehouse="Gudang A"] {
+    border-color: rgba(59, 130, 246, 0.4) !important;
+    background: rgba(59, 130, 246, 0.1) !important;
+    color: rgba(147, 197, 253, 0.8) !important;
+}
+
+/* GUDANG A - BLUE (Active state) */
+.warehouse-btn[data-warehouse="Gudang A"].active {
+    border-color: #3B82F6 !important;
+    background: linear-gradient(135deg, rgba(59, 130, 246, 0.3), rgba(37, 99, 235, 0.3)) !important;
+    color: #60A5FA !important;
+    box-shadow: 0 0 15px rgba(59, 130, 246, 0.3) !important;
+}
+
+/* GUDANG B - GREEN (Default state) */
+.warehouse-btn[data-warehouse="Gudang B"] {
+    border-color: rgba(34, 197, 94, 0.4) !important;
+    background: rgba(34, 197, 94, 0.1) !important;
+    color: rgba(134, 239, 172, 0.8) !important;
+}
+
+/* GUDANG B - GREEN (Active state) */
+.warehouse-btn[data-warehouse="Gudang B"].active {
+    border-color: #22C55E !important;
+    background: linear-gradient(135deg, rgba(34, 197, 94, 0.3), rgba(21, 128, 61, 0.3)) !important;
+    color: #4ADE80 !important;
+    box-shadow: 0 0 15px rgba(34, 197, 94, 0.3) !important;
+}
+
+/* Hover effects */
+.warehouse-btn[data-warehouse="Gudang A"]:hover {
+    border-color: rgba(59, 130, 246, 0.6) !important;
+    background: rgba(59, 130, 246, 0.15) !important;
+}
+
+.warehouse-btn[data-warehouse="Gudang B"]:hover {
+    border-color: rgba(34, 197, 94, 0.6) !important;
+    background: rgba(34, 197, 94, 0.15) !important;
+}
+
+/* ============================================
+   TRANSACTION TYPE COLORS (Optional)
+   Biar Masuk & Keluar juga beda warna
+   ============================================ */
+
+/* Masuk - Green */
+.type-btn[data-type="Masuk"] {
+    border-color: rgba(34, 197, 94, 0.3) !important;
+    background: rgba(34, 197, 94, 0.05) !important;
+}
+
+.type-btn[data-type="Masuk"].active {
+    border-color: #22C55E !important;
+    background: linear-gradient(135deg, rgba(34, 197, 94, 0.25), rgba(21, 128, 61, 0.25)) !important;
+    color: #4ADE80 !important;
+}
+
+/* Keluar - Red/Orange */
+.type-btn[data-type="Keluar"] {
+    border-color: rgba(239, 68, 68, 0.3) !important;
+    background: rgba(239, 68, 68, 0.05) !important;
+}
+
+.type-btn[data-type="Keluar"].active {
+    border-color: #EF4444 !important;
+    background: linear-gradient(135deg, rgba(239, 68, 68, 0.25), rgba(220, 38, 38, 0.25)) !important;
+    color: #F87171 !important;
+}
+
+/* ============================================
+   MOBILE RESPONSIVE - Tetap berbeda di mobile
+   ============================================ */
+
+@media (max-width: 768px) {
+    /* Gudang A - Blue */
+    .warehouse-btn[data-warehouse="Gudang A"] {
+        border-color: rgba(59, 130, 246, 0.4) !important;
+        background: rgba(59, 130, 246, 0.1) !important;
+    }
+    
+    .warehouse-btn[data-warehouse="Gudang A"].active {
+        border-color: #3B82F6 !important;
+        background: linear-gradient(135deg, rgba(59, 130, 246, 0.3), rgba(37, 99, 235, 0.3)) !important;
+        color: #60A5FA !important;
+    }
+    
+    /* Gudang B - Green */
+    .warehouse-btn[data-warehouse="Gudang B"] {
+        border-color: rgba(34, 197, 94, 0.4) !important;
+        background: rgba(34, 197, 94, 0.1) !important;
+    }
+    
+    .warehouse-btn[data-warehouse="Gudang B"].active {
+        border-color: #22C55E !important;
+        background: linear-gradient(135deg, rgba(34, 197, 94, 0.3), rgba(21, 128, 61, 0.3)) !important;
+        color: #4ADE80 !important;
+    }
+}
+
+/* ============================================
+   ALTERNATIVE COLOR SCHEMES
+   Uncomment salah satu jika ingin warna lain
+   ============================================ */
+
+/* OPTION 1: Gudang A = Purple, Gudang B = Orange
+.warehouse-btn[data-warehouse="Gudang A"].active {
+    border-color: #A855F7 !important;
+    background: linear-gradient(135deg, rgba(168, 85, 247, 0.3), rgba(147, 51, 234, 0.3)) !important;
+    color: #C084FC !important;
+}
+
+.warehouse-btn[data-warehouse="Gudang B"].active {
+    border-color: #F97316 !important;
+    background: linear-gradient(135deg, rgba(249, 115, 22, 0.3), rgba(234, 88, 12, 0.3)) !important;
+    color: #FB923C !important;
+}
+*/
+
+/* OPTION 2: Gudang A = Cyan, Gudang B = Pink
+.warehouse-btn[data-warehouse="Gudang A"].active {
+    border-color: #06B6D4 !important;
+    background: linear-gradient(135deg, rgba(6, 182, 212, 0.3), rgba(8, 145, 178, 0.3)) !important;
+    color: #22D3EE !important;
+}
+
+.warehouse-btn[data-warehouse="Gudang B"].active {
+    border-color: #EC4899 !important;
+    background: linear-gradient(135deg, rgba(236, 72, 153, 0.3), rgba(219, 39, 119, 0.3)) !important;
+    color: #F472B6 !important;
+}
+*/
+
+/* ============================================
+   ITEM CARD & STOCK INFO COLORS
+   Update sesuai gudang aktif
+   ============================================ */
+
+/* Item card with gudang colors */
+.item-card.gudang-a {
+    border-left: 3px solid #3B82F6 !important;
+    background: linear-gradient(90deg, rgba(59, 130, 246, 0.1), rgba(255, 255, 255, 0.05)) !important;
+}
+
+.item-card.gudang-b {
+    border-left: 3px solid #22C55E !important;
+    background: linear-gradient(90deg, rgba(34, 197, 94, 0.1), rgba(255, 255, 255, 0.05)) !important;
+}
+
+/* Stock info box */
+.stock-info.gudang-a {
+    background: linear-gradient(135deg, rgba(59, 130, 246, 0.2), rgba(37, 99, 235, 0.15)) !important;
+    border: 1px solid rgba(59, 130, 246, 0.4) !important;
+}
+
+.stock-info.gudang-b {
+    background: linear-gradient(135deg, rgba(34, 197, 94, 0.2), rgba(21, 128, 61, 0.15)) !important;
+    border: 1px solid rgba(34, 197, 94, 0.4) !important;
+}
+
+/* Submit button */
+.submit-btn.gudang-a {
+    background: linear-gradient(135deg, #3B82F6, #2563EB) !important;
+    border: none !important;
+}
+
+.submit-btn.gudang-a:hover {
+    background: linear-gradient(135deg, #2563EB, #1D4ED8) !important;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(59, 130, 246, 0.4) !important;
+}
+
+.submit-btn.gudang-b {
+    background: linear-gradient(135deg, #22C55E, #16A34A) !important;
+    border: none !important;
+}
+
+.submit-btn.gudang-b:hover {
+    background: linear-gradient(135deg, #16A34A, #15803D) !important;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(34, 197, 94, 0.4) !important;
+}
+
+/* ============================================
+   GUDANG INDICATOR (Top-right badge)
+   ============================================ */
+
+.gudang-indicator {
+    position: fixed;
+    top: 70px;
+    right: 10px;
+    padding: 0.4rem 0.8rem;
+    border-radius: 20px;
+    font-size: 0.7rem;
+    font-weight: 700;
+    z-index: 99;
+    display: none;
+    animation: slideIn 0.3s ease;
+}
+
+@keyframes slideIn {
+    from {
+        opacity: 0;
+        transform: translateX(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+.gudang-indicator.active {
+    display: block;
+}
+
+.gudang-indicator.gudang-a {
+    background: linear-gradient(135deg, #3B82F6, #2563EB) !important;
+    color: white !important;
+    box-shadow: 0 2px 8px rgba(59, 130, 246, 0.5) !important;
+}
+
+.gudang-indicator.gudang-b {
+    background: linear-gradient(135deg, #22C55E, #16A34A) !important;
+    color: white !important;
+    box-shadow: 0 2px 8px rgba(34, 197, 94, 0.5) !important;
+}
+
+/* ============================================
+   DEBUG - Check if colors are applied
+   Add this temporarily to test
+   ============================================ */
+
+/* Uncomment untuk test
+.warehouse-btn[data-warehouse="Gudang A"] {
+    outline: 2px solid blue !important;
+}
+
+.warehouse-btn[data-warehouse="Gudang B"] {
+    outline: 2px solid green !important;
+}
+*/
+
+/* ============================================
+   OVERRIDE WAREHOUSE COLORS - IMPORTANT!
+   ============================================ */
+
+/* Hapus warna kuning dari index.html */
+.warehouse-btn {
+    border-color: rgba(255, 255, 255, 0.1) !important;
+    background: rgba(255, 255, 255, 0.05) !important;
+    color: var(--light) !important;
+}
+
+/* GUDANG A - BIRU */
+.warehouse-btn[data-warehouse="Gudang A"] {
+    border-color: rgba(59, 130, 246, 0.4) !important;
+    background: rgba(59, 130, 246, 0.1) !important;
+    color: rgba(147, 197, 253, 0.8) !important;
+}
+
+.warehouse-btn[data-warehouse="Gudang A"].active {
+    border-color: #3B82F6 !important;
+    background: linear-gradient(135deg, rgba(59, 130, 246, 0.3), rgba(37, 99, 235, 0.3)) !important;
+    color: #60A5FA !important;
+    box-shadow: 0 0 15px rgba(59, 130, 246, 0.3) !important;
+}
+
+/* GUDANG B - HIJAU */
+.warehouse-btn[data-warehouse="Gudang B"] {
+    border-color: rgba(34, 197, 94, 0.4) !important;
+    background: rgba(34, 197, 94, 0.1) !important;
+    color: rgba(134, 239, 172, 0.8) !important;
+}
+
+.warehouse-btn[data-warehouse="Gudang B"].active {
+    border-color: #22C55E !important;
+    background: linear-gradient(135deg, rgba(34, 197, 94, 0.3), rgba(21, 128, 61, 0.3)) !important;
+    color: #4ADE80 !important;
+    box-shadow: 0 0 15px rgba(34, 197, 94, 0.3) !important;
+}
+
+/* Hover effects */
+.warehouse-btn[data-warehouse="Gudang A"]:hover {
+    border-color: rgba(59, 130, 246, 0.6) !important;
+    background: rgba(59, 130, 246, 0.15) !important;
+}
+
+.warehouse-btn[data-warehouse="Gudang B"]:hover {
+    border-color: rgba(34, 197, 94, 0.6) !important;
+    background: rgba(34, 197, 94, 0.15) !important;
+}
+
+/* Mobile responsive */
+@media (max-width: 768px) {
+    .warehouse-btn {
+        padding: 0.4rem 0.5rem !important;
+        font-size: 0.7rem !important;
+        min-height: 44px !important;
+    }
+    
+    .warehouse-btn i {
+        font-size: 1rem !important;
+        margin-bottom: 0.2rem !important;
+    }
+}
+
+/* ============================================
+   WARNA DEFAULT ABU-ABU TRANSPARAN UNTUK GUDANG
+   ============================================ */
+
+/* Reset warna default - buat semua tombol gudang abu-abu transparan */
+.warehouse-btn:not(.active) {
+    border-color: rgba(255, 255, 255, 0.1) !important;
+    background: rgba(255, 255, 255, 0.05) !important;
+    color: rgba(255, 255, 255, 0.7) !important;
+}
+
+/* Icon juga abu-abu saat tidak aktif */
+.warehouse-btn:not(.active) i {
+    color: rgba(255, 255, 255, 0.5) !important;
+}
+
+/* Hover state untuk tombol tidak aktif */
+.warehouse-btn:not(.active):hover {
+    border-color: rgba(255, 255, 255, 0.2) !important;
+    background: rgba(255, 255, 255, 0.08) !important;
+    color: rgba(255, 255, 255, 0.9) !important;
+}
+
+/* Warna aktif tetap seperti yang sudah ada di CSS sebelumnya */
+/* (Kode warna aktif sudah ada di CSS sebelumnya) */
+
+/* ============================================
+   OVERRIDE FORCE: WARNA TRANSACTION TYPE
+   (Untuk override CSS di index.html)
+   ============================================ */
+
+/* RESET KUAT semua type-btn ke abu-abu */
+button.type-btn[data-type="Masuk"],
+button.type-btn[data-type="Keluar"] {
+    border-color: rgba(255, 255, 255, 0.1) !important;
+    background: rgba(255, 255, 255, 0.05) !important;
+    color: rgba(255, 255, 255, 0.7) !important;
+}
+
+/* Override icon */
+button.type-btn[data-type="Masuk"] i,
+button.type-btn[data-type="Keluar"] i {
+    color: rgba(255, 255, 255, 0.5) !important;
+}
+
+/* Override hover dari index.html */
+button.type-btn[data-type="Masuk"]:hover:not(.active),
+button.type-btn[data-type="Keluar"]:hover:not(.active) {
+    border-color: rgba(255, 255, 255, 0.2) !important;
+    background: rgba(255, 255, 255, 0.08) !important;
+    color: rgba(255, 255, 255, 0.9) !important;
+    transform: translateY(-2px) !important;
+}
+
+/* Override active state dari index.html */
+button.type-btn[data-type="Masuk"].active {
+    border-color: #22C55E !important;
+    background: linear-gradient(135deg, rgba(34, 197, 94, 0.25), rgba(21, 128, 61, 0.25)) !important;
+    color: #86EFAC !important;
+    box-shadow: 0 0 15px rgba(34, 197, 94, 0.3) !important;
+}
+
+button.type-btn[data-type="Keluar"].active {
+    border-color: #EF4444 !important;
+    background: linear-gradient(135deg, rgba(239, 68, 68, 0.25), rgba(220, 38, 38, 0.25)) !important;
+    color: #FCA5A5 !important;
+    box-shadow: 0 0 15px rgba(239, 68, 68, 0.3) !important;
+}
+
+/* Override icon active */
+button.type-btn[data-type="Masuk"].active i {
+    color: #22C55E !important;
+}
+
+button.type-btn[data-type="Keluar"].active i {
+    color: #EF4444 !important;
+}
+
+/* Hover hint warna */
+button.type-btn[data-type="Masuk"]:hover:not(.active) {
+    border-color: rgba(34, 197, 94, 0.2) !important;
+    background: rgba(34, 197, 94, 0.05) !important;
+    color: rgba(134, 239, 172, 0.8) !important;
+}
+
+button.type-btn[data-type="Masuk"]:hover:not(.active) i {
+    color: rgba(134, 239, 172, 0.8) !important;
+}
+
+button.type-btn[data-type="Keluar"]:hover:not(.active) {
+    border-color: rgba(239, 68, 68, 0.2) !important;
+    background: rgba(239, 68, 68, 0.05) !important;
+    color: rgba(252, 165, 165, 0.8) !important;
+}
+
+button.type-btn[data-type="Keluar"]:hover:not(.active) i {
+    color: rgba(252, 165, 165, 0.8) !important;
+}
+
+/* ============================================
+   NAVIGATION BUTTONS - Index & Log Pages
+   ============================================ */
+
+/* HEADER ACTIONS CONTAINER */
+.header-actions {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+/* LOG BUTTON (index.html) */
+.log-btn {
+    padding: 0.5rem 0.875rem;
+    background: var(--gradient-3);
+    border: none;
+    border-radius: 8px;
+    color: white;
+    text-decoration: none;
+    font-family: 'Outfit', sans-serif;
+    font-size: 0.8rem;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: 0.375rem;
+    transition: all 0.3s ease;
+    box-shadow: 0 2px 8px rgba(79, 172, 254, 0.3);
+}
+
+.log-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(79, 172, 254, 0.4);
+}
+
+.log-btn:active {
+    transform: translateY(0);
+}
+
+/* INPUT TRANSACTION BUTTON (log.html) */
+.input-transaction-btn {
+    padding: 0.5rem 0.875rem;
+    background: var(--gradient-2);
+    border: none;
+    border-radius: 8px;
+    color: white;
+    text-decoration: none;
+    font-family: 'Urbanist', sans-serif;
+    font-size: 0.8rem;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: 0.375rem;
+    transition: all 0.3s ease;
+    box-shadow: 0 2px 8px rgba(245, 87, 108, 0.3);
+}
+
+.input-transaction-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(245, 87, 108, 0.4);
+}
+
+/* BACK HOME BUTTON (log.html) */
+.back-home-btn {
+    padding: 0.5rem 0.75rem;
+    background: rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: 8px;
+    color: var(--text-primary);
+    text-decoration: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.3s ease;
+}
+
+.back-home-btn:hover {
+    background: rgba(255, 255, 255, 0.15);
+    border-color: var(--accent-purple);
+    transform: translateX(-3px);
+}
+
+.header-title-left {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+}
+
+/* USER BADGE FOR LOG PAGE */
+.user-badge-log {
+    background: rgba(255, 255, 255, 0.1);
+    padding: 0.5rem 0.75rem;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.user-badge-log i {
+    color: var(--accent-cyan);
+}
+
+.user-name-log {
+    color: var(--text-primary);
+    font-size: 0.875rem;
+    font-weight: 600;
+}
+
+/* MOBILE RESPONSIVE */
+@media (max-width: 768px) {
+    /* Index Page */
+    .log-btn {
+        padding: 0.4rem 0.6rem;
+        font-size: 0.75rem;
+    }
+    
+    .log-btn .log-text {
+        display: none; /* Sembunyikan teks di mobile */
+    }
+    
+    .log-btn {
+        width: 36px;
+        height: 36px;
+        justify-content: center;
+    }
+    
+    /* Log Page */
+    .input-transaction-btn .btn-text {
+        display: none; /* Sembunyikan teks di mobile */
+    }
+    
+    .input-transaction-btn {
+        width: 36px;
+        height: 36px;
+        justify-content: center;
+        padding: 0;
+    }
+    
+    .back-home-btn {
+        padding: 0.4rem 0.5rem;
+    }
+    
+    .user-badge-log .user-name-log {
+        display: none; /* Sembunyikan nama di mobile */
+    }
+    
+    .user-badge-log {
+        padding: 0.4rem;
+    }
+}
+
+@media (max-width: 480px) {
+    .header-actions {
+        gap: 0.3rem;
+    }
+    
+    .log-btn, 
+    .input-transaction-btn {
+        width: 32px;
+        height: 32px;
+    }
+    
+    .user-badge-log {
+        padding: 0.3rem;
+    }
+}
+
+/* ============================================
+   FLOATING NAVIGATION BUTTONS (Optional)
+   ============================================ */
+
+/* FAB Navigation Group */
+.fab-nav-group {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    z-index: 999;
+}
+
+.fab-nav {
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-size: 1.2rem;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+    text-decoration: none;
+    transition: all 0.3s ease;
+}
+
+.fab-nav:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.4);
+}
+
+.fab-nav-data {
+    background: var(--gradient-3); /* Blue gradient */
+}
+
+.fab-nav-log {
+    background: var(--gradient-1); /* Purple gradient */
+}
+
+.fab-nav-index {
+    background: var(--gradient-2); /* Pink gradient */
+}
+
+/* For Index Page */
+.fab-nav-group.index {
+    bottom: 80px; /* Above existing FAB */
+    right: 20px;
+}
+
+/* For Log Page */
+.fab-nav-group.log {
+    bottom: 20px;
+    right: 20px;
+}
+
+/* ============================================
+   QUICK NAVIGATION BAR (Alternative)
+   ============================================ */
+
+.quick-nav {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background: rgba(0, 0, 0, 0.9);
+    backdrop-filter: blur(20px);
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+    padding: 0.5rem 1rem;
+    z-index: 999;
+    display: none; /* Hidden by default, enable if needed */
+}
+
+.quick-nav-items {
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
+}
+
+.quick-nav-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-decoration: none;
+    color: rgba(255, 255, 255, 0.6);
+    padding: 0.5rem;
+    border-radius: 8px;
+    transition: all 0.3s ease;
+    flex: 1;
+    max-width: 100px;
+}
+
+.quick-nav-item:hover {
+    color: white;
+    background: rgba(255, 255, 255, 0.1);
+}
+
+.quick-nav-item.active {
+    color: var(--primary);
+    background: rgba(255, 107, 53, 0.1);
+}
+
+.quick-nav-item i {
+    font-size: 1.2rem;
+    margin-bottom: 0.25rem;
+}
+
+.quick-nav-item span {
+    font-size: 0.7rem;
+    font-weight: 600;
+}
+
+/* Show on mobile only */
+@media (max-width: 768px) {
+    .quick-nav {
+        display: block;
+    }
+    
+    body {
+        padding-bottom: 70px; /* Adjust for quick nav */
+    }
+}
+
+/* ============================================
+   BREADCRUMB NAVIGATION
+   ============================================ */
+
+.breadcrumb {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.5rem 1rem;
+    background: rgba(0, 0, 0, 0.3);
+    border-radius: 8px;
+    margin-bottom: 1rem;
+}
+
+.breadcrumb-item {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    color: rgba(255, 255, 255, 0.6);
+    text-decoration: none;
+    font-size: 0.85rem;
+    transition: color 0.3s ease;
+}
+
+.breadcrumb-item:hover {
+    color: var(--primary);
+}
+
+.breadcrumb-item.active {
+    color: var(--primary);
+    font-weight: 600;
+}
+
+.breadcrumb-separator {
+    color: rgba(255, 255, 255, 0.3);
+}
+
+/* ============================================
+   NAVIGATION INDICATORS
+   ============================================ */
+
+.nav-indicator {
+    position: relative;
+}
+
+.nav-indicator::after {
+    content: '';
+    position: absolute;
+    bottom: -5px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 0;
+    height: 2px;
+    background: var(--primary);
+    transition: width 0.3s ease;
+}
+
+.nav-indicator.active::after {
+    width: 100%;
+}
+
+/* ============================================
+   PAGE TRANSITION ANIMATIONS
+   ============================================ */
+
+.page-transition {
+    animation: fadeIn 0.3s ease;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* ============================================
+   ACTIVE PAGE STYLING
+   ============================================ */
+
+/* For Index Page */
+body.index-page .log-btn {
+    border: 2px solid rgba(79, 172, 254, 0.5);
+    box-shadow: 0 0 10px rgba(79, 172, 254, 0.3);
+}
+
+/* For Log Page */
+body.log-page .input-transaction-btn {
+    border: 2px solid rgba(245, 87, 108, 0.5);
+    box-shadow: 0 0 10px rgba(245, 87, 108, 0.3);
+}
+
+/* ============================================
+   ULTRA COMPACT MOBILE NAVIGATION
+   ============================================ */
+
+@media (max-width: 400px) {
+    /* Ultra compact buttons */
+    .log-btn,
+    .input-transaction-btn,
+    .back-home-btn {
+        width: 30px;
+        height: 30px;
+        padding: 0;
+        font-size: 0.7rem;
+    }
+    
+    /* Ultra compact user badge */
+    .user-badge,
+    .user-badge-log {
+        padding: 0.3rem;
+    }
+    
+    /* Adjust header spacing */
+    .header-actions {
+        gap: 0.2rem;
+    }
+    
+    /* For Log Page */
+    .header-title-left {
+        gap: 0.4rem;
+    }
+    
+    .page-title {
+        font-size: 1.5rem;
+    }
+}
+
+/* ============================================
+   DARK MODE ENHANCEMENTS
+   ============================================ */
+
+/* Dark mode specific button styles */
+@media (prefers-color-scheme: dark) {
+    .log-btn,
+    .input-transaction-btn {
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+    }
+    
+    .log-btn:hover,
+    .input-transaction-btn:hover {
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+    }
+}
+
+/* ============================================
+   ACCESSIBILITY IMPROVEMENTS
+   ============================================ */
+
+/* Focus states for keyboard navigation */
+.log-btn:focus,
+.input-transaction-btn:focus,
+.back-home-btn:focus {
+    outline: 2px solid var(--primary);
+    outline-offset: 2px;
+}
+
+/* High contrast mode */
+@media (prefers-contrast: high) {
+    .log-btn,
+    .input-transaction-btn {
+        border: 2px solid white;
+    }
+    
+    .back-home-btn {
+        border: 2px solid var(--text-primary);
+    }
+}
+
+/* ============================================
+   PRINT STYLES
+   ============================================ */
+
+@media print {
+    .log-btn,
+    .input-transaction-btn,
+    .back-home-btn,
+    .fab-nav-group,
+    .quick-nav {
+        display: none !important;
+    }
+}

@@ -1,0 +1,1378 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Input Transaksi - Warehouse Pro</title>
+    
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+    
+    <!-- Font Awesome -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="style.css">
+    
+    <!-- HTML5 QR Code Scanner -->
+    <script src="https://unpkg.com/html5-qrcode"></script>
+    
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        :root {
+            --primary: #FF6B35;
+            --secondary: #004E89;
+            --accent: #F7B801;
+            --dark: #1A1423;
+            --light: #F7F7FF;
+            --success: #06D6A0;
+            --danger: #EF476F;
+            --gradient-1: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            --gradient-2: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            --gradient-3: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+            --blue: #3B82F6;
+            --blue-light: #60A5FA;
+            --orange: #FB923C;
+            --orange-light: #FDBA74;
+            --grey: #6B7280;
+            --grey-light: #9CA3AF;
+        }
+        
+        body {
+            font-family: 'Outfit', sans-serif;
+            background: var(--dark);
+            min-height: 100vh;
+            padding-bottom: 80px;
+            position: relative;
+        }
+        
+        /* Animated Background */
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: 
+                radial-gradient(circle at 20% 50%, rgba(102, 126, 234, 0.15) 0%, transparent 50%),
+                radial-gradient(circle at 80% 80%, rgba(245, 87, 108, 0.15) 0%, transparent 50%);
+            z-index: -1;
+        }
+        
+        /* Header */
+        .app-header {
+            background: rgba(0, 0, 0, 0.4);
+            backdrop-filter: blur(20px);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            padding: 1rem;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+        
+        .header-content {
+            max-width: 600px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .header-title {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+        
+        .header-icon {
+            width: 40px;
+            height: 40px;
+            background: var(--gradient-1);
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+        }
+        
+        .header-text h1 {
+            color: var(--light);
+            font-size: 1.1rem;
+            font-weight: 700;
+            line-height: 1.2;
+        }
+        
+        .header-text p {
+            color: rgba(247, 247, 255, 0.6);
+            font-size: 0.75rem;
+        }
+        
+        .header-actions {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+        
+        /* Tombol Log Transaksi */
+        .log-btn {
+            padding: 0.5rem 0.875rem;
+            background: var(--gradient-3);
+            border: none;
+            border-radius: 8px;
+            color: white;
+            text-decoration: none;
+            font-family: 'Outfit', sans-serif;
+            font-size: 0.8rem;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 0.375rem;
+            transition: all 0.3s ease;
+            box-shadow: 0 2px 8px rgba(79, 172, 254, 0.3);
+        }
+        
+        .log-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(79, 172, 254, 0.4);
+        }
+        
+        .log-btn:active {
+            transform: translateY(0);
+        }
+        
+        .user-badge {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 0.5rem 0.75rem;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        
+        .user-badge i {
+            color: var(--accent);
+        }
+        
+        .user-name {
+            color: var(--light);
+            font-size: 0.875rem;
+            font-weight: 600;
+        }
+        
+        /* Main Container */
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 1rem;
+        }
+        
+        .card {
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(20px);
+            border-radius: 16px;
+            padding: 1rem;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            margin-bottom: 1rem;
+        }
+        
+        .section-title {
+            color: var(--light);
+            font-size: 0.8rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            margin-bottom: 0.75rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        
+        .section-title i {
+            color: var(--accent);
+        }
+        
+        /* Warehouse Toggle */
+        .warehouse-toggle {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 0.5rem;
+            margin-bottom: 1rem;
+        }
+        
+        .warehouse-btn {
+            padding: 0.75rem;
+            border: 2px solid rgba(255, 255, 255, 0.1);
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 10px;
+            color: var(--light);
+            font-family: 'Outfit', sans-serif;
+            font-size: 0.85rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 0.375rem;
+        }
+        
+        .warehouse-btn i {
+            font-size: 1.25rem;
+        }
+        
+        /* WAREHOUSE COLORS - GUDANG BERBEDA WARNA */
+        .warehouse-btn {
+            border-color: rgba(255, 255, 255, 0.1);
+            background: rgba(255, 255, 255, 0.05);
+            color: rgba(255, 255, 255, 0.7);
+        }
+        
+        .warehouse-btn:hover {
+            border-color: rgba(255, 255, 255, 0.3);
+            background: rgba(255, 255, 255, 0.08);
+            transform: translateY(-2px);
+        }
+        
+        /* Gudang A - BIRU ketika ACTIVE */
+        .warehouse-btn[data-warehouse="Gudang A"]:hover {
+            border-color: rgba(59, 130, 246, 0.3);
+            background: rgba(59, 130, 246, 0.08);
+            color: rgba(147, 197, 253, 0.9);
+        }
+        
+        .warehouse-btn[data-warehouse="Gudang A"].active {
+            border-color: var(--blue) !important;
+            background: linear-gradient(135deg, rgba(59, 130, 246, 0.25), rgba(37, 99, 235, 0.25)) !important;
+            color: var(--blue-light) !important;
+            box-shadow: 0 0 15px rgba(59, 130, 246, 0.3) !important;
+        }
+        
+        /* Gudang B - ORANGE ketika ACTIVE */
+        .warehouse-btn[data-warehouse="Gudang B"]:hover {
+            border-color: rgba(251, 146, 60, 0.3);
+            background: rgba(251, 146, 60, 0.08);
+            color: rgba(253, 186, 116, 0.9);
+        }
+        
+        .warehouse-btn[data-warehouse="Gudang B"].active {
+            border-color: var(--orange) !important;
+            background: linear-gradient(135deg, rgba(251, 146, 60, 0.25), rgba(249, 115, 22, 0.25)) !important;
+            color: var(--orange-light) !important;
+            box-shadow: 0 0 15px rgba(251, 146, 60, 0.3) !important;
+        }
+        
+        /* Transaction Type */
+        .transaction-type {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 0.5rem;
+            margin-bottom: 1rem;
+        }
+        
+        .type-btn {
+            padding: 0.75rem;
+            border: 2px solid rgba(255, 255, 255, 0.1);
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 10px;
+            color: var(--light);
+            font-family: 'Outfit', sans-serif;
+            font-size: 0.85rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 0.375rem;
+        }
+        
+        .type-btn i {
+            font-size: 1.25rem;
+        }
+        
+        .type-btn[data-type="Masuk"]:hover,
+        .type-btn[data-type="Masuk"].active {
+            border-color: var(--success);
+            background: rgba(6, 214, 160, 0.2);
+        }
+        
+        .type-btn[data-type="Keluar"]:hover,
+        .type-btn[data-type="Keluar"].active {
+            border-color: var(--danger);
+            background: rgba(239, 71, 111, 0.2);
+        }
+        
+        /* Search Input */
+        .search-wrapper {
+            position: relative;
+            margin-bottom: 1rem;
+        }
+        
+        .search-input {
+            width: 100%;
+            padding: 1.125rem 3rem 1.125rem 1rem;
+            background: rgba(255, 255, 255, 0.08);
+            border: 2px solid rgba(255, 255, 255, 0.1);
+            border-radius: 12px;
+            color: var(--light);
+            font-family: 'Outfit', sans-serif;
+            font-size: 0.95rem;
+            min-height: 52px;
+        }
+        
+        .search-input:focus {
+            outline: none;
+            border-color: var(--primary);
+            background: rgba(255, 255, 255, 0.12);
+        }
+        
+        .search-input::placeholder {
+            color: rgba(247, 247, 255, 0.4);
+        }
+        
+        .scan-btn {
+            position: absolute;
+            right: 0.4rem;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 44px;
+            height: 44px;
+            background: var(--gradient-1);
+            border: none;
+            border-radius: 8px;
+            color: white;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s ease;
+            font-size: 1rem;
+        }
+        
+        .scan-btn:hover {
+            transform: translateY(-50%) scale(1.05);
+        }
+        
+        /* Item Result Card */
+        .item-result {
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 12px;
+            padding: 1rem;
+            margin-bottom: 1rem;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .item-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: start;
+            margin-bottom: 0.75rem;
+        }
+        
+        .item-name {
+            color: var(--light);
+            font-size: 1.1rem;
+            font-weight: 700;
+            margin-bottom: 0.25rem;
+        }
+        
+        .item-id {
+            color: rgba(247, 247, 255, 0.6);
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.85rem;
+        }
+        
+        .btn-reset {
+            width: 32px;
+            height: 32px;
+            background: rgba(239, 71, 111, 0.2);
+            border: 1px solid var(--danger);
+            border-radius: 8px;
+            color: var(--danger);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s ease;
+        }
+        
+        .btn-reset:hover {
+            background: var(--danger);
+            color: white;
+        }
+        
+        .item-meta {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 0.75rem;
+        }
+        
+        .meta-item {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            color: rgba(247, 247, 255, 0.7);
+            font-size: 0.875rem;
+        }
+        
+        .meta-item i {
+            color: var(--accent);
+        }
+        
+        .stock-display {
+            background: rgba(79, 172, 254, 0.15);
+            border: 1px solid rgba(79, 172, 254, 0.3);
+            border-radius: 8px;
+            padding: 0.75rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .stock-label {
+            color: rgba(247, 247, 255, 0.8);
+            font-size: 0.875rem;
+        }
+        
+        .stock-value {
+            color: var(--light);
+            font-size: 1.25rem;
+            font-weight: 700;
+        }
+        
+        /* Form Inputs */
+        .input-group {
+            margin-bottom: 0.75rem;
+        }
+        
+        .input-group label {
+            display: block;
+            color: rgba(247, 247, 255, 0.9);
+            font-size: 0.8rem;
+            font-weight: 600;
+            margin-bottom: 0.375rem;
+        }
+        
+        .input-field {
+            width: 100%;
+            padding: 0.75rem 0.875rem;
+            background: rgba(255, 255, 255, 0.08);
+            border: 2px solid rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+            color: var(--light);
+            font-family: 'Outfit', sans-serif;
+            font-size: 0.9rem;
+        }
+        
+        .input-field:focus {
+            outline: none;
+            border-color: var(--primary);
+            background: rgba(255, 255, 255, 0.12);
+        }
+        
+        textarea.input-field {
+            resize: vertical;
+            min-height: 80px;
+        }
+        
+        /* Submit Button */
+        .btn-submit {
+            width: 100%;
+            padding: 1.125rem;
+            background: var(--gradient-2);
+            border: none;
+            border-radius: 12px;
+            color: white;
+            font-family: 'Outfit', sans-serif;
+            font-size: 1rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 16px rgba(245, 87, 108, 0.4);
+        }
+        
+        .btn-submit:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 24px rgba(245, 87, 108, 0.5);
+        }
+        
+        .btn-submit:active {
+            transform: translateY(0);
+        }
+        
+        /* Floating Action Button */
+        .fab {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            width: 56px;
+            height: 56px;
+            background: var(--gradient-1);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 1.5rem;
+            box-shadow: 0 4px 16px rgba(102, 126, 234, 0.4);
+            cursor: pointer;
+            transition: all 0.3s ease;
+            z-index: 999;
+        }
+        
+        .fab:hover {
+            transform: translateY(-4px) scale(1.05);
+            box-shadow: 0 8px 24px rgba(102, 126, 234, 0.5);
+        }
+        
+        /* Loading Overlay */
+        .loading-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.8);
+            backdrop-filter: blur(10px);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 9999;
+        }
+        
+        .loading-overlay.show {
+            display: flex;
+        }
+        
+        .spinner {
+            width: 50px;
+            height: 50px;
+            border: 4px solid rgba(255, 255, 255, 0.2);
+            border-top-color: white;
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+        }
+        
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+        
+        /* Alert */
+        .alert-container {
+            position: fixed;
+            top: 80px;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 10000;
+            min-width: 300px;
+            max-width: 90%;
+        }
+        
+        .alert {
+            padding: 1rem 1.25rem;
+            border-radius: 12px;
+            margin-bottom: 0.5rem;
+            font-size: 0.875rem;
+            animation: slideDown 0.3s ease;
+            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
+        }
+        
+        .alert-success {
+            background: var(--success);
+            color: white;
+        }
+        
+        .alert-danger {
+            background: var(--danger);
+            color: white;
+        }
+        
+        .alert-info {
+            background: var(--secondary);
+            color: white;
+        }
+        
+        @keyframes slideDown {
+            from {
+                opacity: 0;
+                transform: translateY(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        /* Mobile Optimizations */
+        @media (max-width: 768px) {
+            .container {
+                padding: 1rem 0.75rem;
+            }
+            
+            .card {
+                padding: 1.25rem;
+            }
+            
+            .warehouse-toggle,
+            .transaction-type {
+                gap: 0.5rem;
+            }
+            
+            .warehouse-btn,
+            .type-btn {
+                padding: 0.875rem;
+                font-size: 0.875rem;
+            }
+            
+            .fab {
+                bottom: 15px;
+                right: 15px;
+                width: 50px;
+                height: 50px;
+            }
+            
+            /* Tombol Log untuk mobile */
+            .log-btn .log-text {
+                display: none;
+            }
+            
+            .log-btn {
+                width: 40px;
+                height: 40px;
+                justify-content: center;
+                padding: 0;
+            }
+
+            /* Tombol scan barcode proporsional di mobile */
+            .scan-btn {
+                width: 40px;
+                height: 40px;
+                font-size: 0.95rem;
+            }
+        }
+        
+        @media (max-width: 480px) {
+            .header-actions {
+                gap: 0.5rem;
+            }
+            
+            .log-btn {
+                width: 36px;
+                height: 36px;
+            }
+            
+            .user-name {
+                font-size: 0.75rem;
+            }
+
+            /* Tombol scan barcode di layar sangat kecil */
+            .scan-btn {
+                width: 38px;
+                height: 38px;
+                font-size: 0.9rem;
+            }
+        }
+        
+        /* Hidden Elements */
+        .hidden {
+            display: none !important;
+        }
+        
+        /* Confirmation Modal */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.8);
+            backdrop-filter: blur(10px);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 10000;
+            padding: 1rem;
+        }
+        
+        .modal-overlay.show {
+            display: flex;
+        }
+        
+        .modal-content {
+            background: rgba(26, 20, 35, 0.95);
+            backdrop-filter: blur(20px);
+            border-radius: 20px;
+            padding: 2rem;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            max-width: 500px;
+            width: 100%;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+        }
+        
+        .modal-header {
+            text-align: center;
+            margin-bottom: 1.5rem;
+        }
+        
+        .modal-icon {
+            width: 60px;
+            height: 60px;
+            background: var(--gradient-1);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 1rem;
+            font-size: 1.75rem;
+            color: white;
+        }
+        
+        .modal-title {
+            color: var(--light);
+            font-size: 1.25rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+        }
+        
+        .modal-subtitle {
+            color: rgba(247, 247, 255, 0.6);
+            font-size: 0.875rem;
+        }
+        
+        .confirm-details {
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 12px;
+            padding: 1rem;
+            margin-bottom: 1.5rem;
+        }
+        
+        .detail-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 0.5rem 0;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+            font-size: 0.875rem;
+        }
+        
+        .detail-row:last-child {
+            border-bottom: none;
+        }
+        
+        .detail-label {
+            color: rgba(247, 247, 255, 0.6);
+            font-weight: 600;
+        }
+        
+        .detail-value {
+            color: var(--light);
+            font-weight: 700;
+            text-align: right;
+        }
+        
+        .modal-actions {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 0.75rem;
+        }
+        
+        .btn-modal {
+            padding: 0.875rem;
+            border: none;
+            border-radius: 10px;
+            font-family: 'Outfit', sans-serif;
+            font-size: 0.9rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .btn-cancel {
+            background: rgba(255, 255, 255, 0.1);
+            border: 2px solid rgba(255, 255, 255, 0.2);
+            color: var(--light);
+        }
+        
+        .btn-cancel:hover {
+            background: rgba(255, 255, 255, 0.15);
+        }
+        
+        .btn-confirm {
+            background: var(--gradient-2);
+            color: white;
+            box-shadow: 0 4px 16px rgba(245, 87, 108, 0.4);
+        }
+        
+        .btn-confirm:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 24px rgba(245, 87, 108, 0.5);
+        }
+
+        /* Add Item Button */
+        .btn-add-item {
+            width: 100%;
+            padding: 1rem;
+            background: var(--gradient-3);
+            border: none;
+            border-radius: 12px;
+            color: white;
+            font-family: 'Outfit', sans-serif;
+            font-size: 0.95rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-top: 1rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+        }
+        
+        .btn-add-item:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(79, 172, 254, 0.4);
+        }
+
+        /* Modal Tabs */
+        .modal-tabs {
+            display: flex;
+            gap: 5px;
+            margin-bottom: 20px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            padding-bottom: 10px;
+        }
+
+        .modal-tab-btn {
+            flex: 1;
+            padding: 10px;
+            background: rgba(255, 255, 255, 0.05);
+            border: none;
+            border-radius: 8px;
+            color: rgba(247, 247, 255, 0.7);
+            font-family: 'Outfit', sans-serif;
+            font-size: 0.85rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 5px;
+        }
+
+        .modal-tab-btn:hover {
+            background: rgba(255, 255, 255, 0.1);
+            color: var(--light);
+        }
+
+        .modal-tab-btn.active {
+            background: var(--gradient-3);
+            color: white;
+        }
+
+        .modal-tab-content {
+            display: none;
+        }
+
+        .modal-tab-content.active {
+            display: block;
+            animation: fadeIn 0.3s ease;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .btn-close-modal {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            background: none;
+            border: none;
+            color: rgba(247, 247, 255, 0.6);
+            font-size: 1.2rem;
+            cursor: pointer;
+            transition: color 0.3s ease;
+        }
+
+        .btn-close-modal:hover {
+            color: var(--light);
+        }
+    </style>
+</head>
+<body class="index-page">
+    <!-- Header -->
+    <div class="app-header">
+        <div class="header-content">
+            <div class="header-title">
+                <div class="header-icon">
+                    <i class="fas fa-layer-group"></i>
+                </div>
+                <div class="header-text">
+                    <h1>WAREHOUSE PRO</h1>
+                    <p>Input Transaksi</p>
+                </div>
+            </div>
+            <div class="header-actions">
+                <!-- Tombol Log Transaksi -->
+                <a href="log.html" class="log-btn" title="Lihat Log Transaksi">
+                    <i class="fas fa-history"></i>
+                    <span class="log-text">Log</span>
+                </a>
+                
+                <!-- User Badge -->
+                <div class="user-badge">
+                    <i class="fas fa-user-circle"></i>
+                    <span class="user-name" id="userName">User</span>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Main Container -->
+    <div class="container">
+        <form id="transaksiForm">
+            <!-- Warehouse Selection -->
+            <div class="card">
+                <div class="section-title">
+                    <i class="fas fa-map-marker-alt"></i>
+                    Pilih Lokasi Gudang
+                </div>
+                <div class="warehouse-toggle">
+                    <button type="button" class="warehouse-btn active" data-warehouse="Gudang A">
+                        <i class="fas fa-warehouse"></i>
+                        <span>Gudang A</span>
+                    </button>
+                    <button type="button" class="warehouse-btn" data-warehouse="Gudang B">
+                        <i class="fas fa-building"></i>
+                        <span>Gudang B</span>
+                    </button>
+                </div>
+            </div>
+            
+            <!-- Transaction Type -->
+            <div class="card">
+                <div class="section-title">
+                    <i class="fas fa-exchange-alt"></i>
+                    Jenis Transaksi
+                </div>
+                <div class="transaction-type">
+                    <button type="button" class="type-btn active" data-type="Masuk">
+                        <i class="fas fa-arrow-down"></i>
+                        <span>Barang Masuk</span>
+                    </button>
+                    <button type="button" class="type-btn" data-type="Keluar">
+                        <i class="fas fa-arrow-up"></i>
+                        <span>Barang Keluar</span>
+                    </button>
+                </div>
+            </div>
+            
+            <!-- Item Search -->
+            <div class="card">
+                <div class="section-title">
+                    <i class="fas fa-search"></i>
+                    Cari Barang
+                </div>
+                
+                <div class="search-wrapper">
+                    <input type="text" 
+                           id="manualIdInput" 
+                           class="search-input" 
+                           placeholder="Ketik ID/Nama atau scan barcode..."
+                           autocomplete="off">
+                    <button type="button" class="scan-btn" id="btnScan">
+                        <i class="fas fa-barcode"></i>
+                    </button>
+                </div>
+                
+                <!-- Scanner Area (Hidden by default) -->
+                <div id="reader" class="hidden"></div>
+                
+                <!-- Item Result (Hidden by default) -->
+                <div id="itemResult" class="item-result hidden">
+                    <div class="item-header">
+                        <div>
+                            <div class="item-name" id="itemName">Nama Barang</div>
+                            <div class="item-id" id="itemId">ID: XXX-XXX</div>
+                        </div>
+                        <button type="button" class="btn-reset" id="btnReset">
+                            <i class="fas fa-times"></i>
+                        </button>
+                    </div>
+                    
+                    <div class="item-meta">
+                        <div class="meta-item">
+                            <i class="fas fa-tag"></i>
+                            <span id="itemKategori">Kategori</span>
+                        </div>
+                        <div class="meta-item">
+                            <i class="fas fa-balance-scale"></i>
+                            <span id="itemSatuan">Unit</span>
+                        </div>
+                    </div>
+                    
+                    <div class="stock-display">
+                        <span class="stock-label">
+                            <i class="fas fa-boxes"></i> Stok <span id="stockGudang">Gudang A</span>
+                        </span>
+                        <span class="stock-value" id="stockValue">0</span>
+                    </div>
+                </div>
+                
+                <!-- Add Item Button (Hidden by default) -->
+                <button type="button" id="btnAddNew" class="btn-add-item hidden">
+                    <i class="fas fa-plus-circle"></i> Tambah Barang Baru
+                </button>
+            </div>
+            
+            <!-- Transaction Details -->
+            <div class="card">
+                <div class="section-title">
+                    <i class="fas fa-file-alt"></i>
+                    Detail Transaksi
+                </div>
+                
+                <div class="input-group">
+                    <label for="jumlah">Jumlah <span id="satuanLabel">Unit</span></label>
+                    <input type="number" 
+                           id="jumlah" 
+                           class="input-field" 
+                           placeholder="Masukkan jumlah"
+                           min="1"
+                           step="1"
+                           required>
+                </div>
+                
+                <div class="input-group">
+                    <label for="user">Petugas</label>
+                    <input type="text" 
+                           id="user" 
+                           class="input-field" 
+                           placeholder="Nama petugas"
+                           required>
+                </div>
+                
+                <div class="input-group">
+                    <label for="keterangan">Keterangan (Opsional)</label>
+                    <textarea id="keterangan" 
+                              class="input-field" 
+                              placeholder="Catatan tambahan..."></textarea>
+                </div>
+            </div>
+            
+            <!-- Submit Button -->
+            <button type="submit" class="btn-submit">
+                <i class="fas fa-save"></i> SIMPAN TRANSAKSI
+            </button>
+        </form>
+    </div>
+    
+    <!-- Floating Action Button -->
+    <a href="data.html" class="fab" title="Lihat Data Stok">
+        <i class="fas fa-chart-bar"></i>
+    </a>
+    
+    <!-- Loading Overlay -->
+    <div class="loading-overlay" id="loader">
+        <div class="spinner"></div>
+    </div>
+    
+    <!-- Alert Container -->
+    <div class="alert-container" id="alert-container"></div>
+    
+    <!-- Confirmation Modal -->
+    <div class="modal-overlay" id="confirmModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <div class="modal-icon">
+                    <i class="fas fa-clipboard-check"></i>
+                </div>
+                <h3 class="modal-title">Konfirmasi Transaksi</h3>
+                <p class="modal-subtitle">Pastikan data sudah benar sebelum menyimpan</p>
+            </div>
+            
+            <div class="confirm-details">
+                <div class="detail-row">
+                    <span class="detail-label">Gudang:</span>
+                    <span class="detail-value" id="confirmGudang">-</span>
+                </div>
+                <div class="detail-row">
+                    <span class="detail-label">Jenis:</span>
+                    <span class="detail-value" id="confirmJenis">-</span>
+                </div>
+                <div class="detail-row">
+                    <span class="detail-label">Barang:</span>
+                    <span class="detail-value" id="confirmBarang">-</span>
+                </div>
+                <div class="detail-row">
+                    <span class="detail-label">ID Barang:</span>
+                    <span class="detail-value" id="confirmId">-</span>
+                </div>
+                <div class="detail-row">
+                    <span class="detail-label">Jumlah:</span>
+                    <span class="detail-value" id="confirmJumlah">-</span>
+                </div>
+                <div class="detail-row">
+                    <span class="detail-label">Petugas:</span>
+                    <span class="detail-value" id="confirmPetugas">-</span>
+                </div>
+                <div class="detail-row" id="confirmKetRow">
+                    <span class="detail-label">Keterangan:</span>
+                    <span class="detail-value" id="confirmKeterangan">-</span>
+                </div>
+            </div>
+            
+            <div class="modal-actions">
+                <button type="button" class="btn-modal btn-cancel" id="btnCancelConfirm">
+                    <i class="fas fa-times"></i> Batal
+                </button>
+                <button type="button" class="btn-modal btn-confirm" id="btnOkConfirm">
+                    <i class="fas fa-check"></i> Simpan
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Add Item Modal -->
+    <div class="modal-overlay" id="addItemModal">
+        <div class="modal-content" style="max-width: 500px;">
+            <div class="modal-header">
+                <div class="modal-icon" style="background: var(--gradient-3);">
+                    <i class="fas fa-plus-circle"></i>
+                </div>
+                <h3 class="modal-title">Tambah Barang Baru</h3>
+                <p class="modal-subtitle">Barang tidak ditemukan di sistem</p>
+                <button class="btn-close-modal" id="btnCloseAddModal">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            
+            <div class="modal-tabs">
+                <button class="modal-tab-btn active" data-tab="barang">
+                    <i class="fas fa-box"></i> Barang Baru
+                </button>
+                <button class="modal-tab-btn" data-tab="kategori">
+                    <i class="fas fa-tag"></i> Kategori Baru
+                </button>
+            </div>
+            
+            <div class="modal-body">
+                <!-- Barang Tab -->
+                <div class="modal-tab-content active" id="barangTab">
+                    <form id="addItemForm">
+                        <div class="input-group">
+                            <label for="newItemId">ID Barang *</label>
+                            <input type="text" id="newItemId" class="input-field" readonly>
+                        </div>
+                        
+                        <div class="input-group">
+                            <label for="newItemNama">Nama Barang *</label>
+                            <input type="text" id="newItemNama" class="input-field" 
+                                   placeholder="Nama barang" required>
+                        </div>
+                        
+                        <div class="input-group">
+                            <label for="newItemKategori">Kategori *</label>
+                            <select id="newItemKategori" class="input-field" required>
+                                <option value="">Pilih kategori</option>
+                            </select>
+                        </div>
+                        
+                        <div class="input-group">
+                            <label for="newItemSatuan">Satuan *</label>
+                            <select id="newItemSatuan" class="input-field" required>
+                                <option value="Unit">Unit</option>
+                                <option value="Pcs">Pcs</option>
+                                <option value="Box">Box</option>
+                                <option value="Set">Set</option>
+                                <option value="Lembar">Lembar</option>
+                                <option value="Meter">Meter</option>
+                            </select>
+                        </div>
+                        
+                        <div class="input-group">
+                            <label for="newItemStok">Stok Awal *</label>
+                            <input type="number" id="newItemStok" class="input-field" 
+                                   value="0" min="0" required>
+                        </div>
+                        
+                        <div class="input-group">
+                            <label for="newItemGudang">Gudang *</label>
+                            <select id="newItemGudang" class="input-field" required>
+                                <option value="A">Gudang A</option>
+                                <option value="B">Gudang B</option>
+                            </select>
+                        </div>
+                        
+                        <div class="modal-actions">
+                            <button type="button" class="btn-modal btn-cancel" id="btnCancelAddItem">
+                                <i class="fas fa-times"></i> Batal
+                            </button>
+                            <button type="submit" class="btn-modal btn-confirm" id="btnSubmitAddItem">
+                                <i class="fas fa-save"></i> Simpan Barang
+                            </button>
+                        </div>
+                    </form>
+                </div>
+                
+                <!-- Kategori Tab -->
+                <div class="modal-tab-content" id="kategoriTab">
+                    <form id="addKategoriForm">
+                        <div class="input-group">
+                            <label for="newKategoriNama">Nama Kategori *</label>
+                            <input type="text" id="newKategoriNama" class="input-field" 
+                                   placeholder="Contoh: Elektronik" required>
+                        </div>
+                        
+                        <div class="input-group">
+                            <label for="newKategoriInisial">Inisial (untuk ID) *</label>
+                            <input type="text" id="newKategoriInisial" class="input-field" 
+                                   placeholder="Contoh: ELEC (maks 4 huruf)" 
+                                   maxlength="4" required>
+                            <small style="color: rgba(247, 247, 255, 0.6); display: block; margin-top: 5px;">
+                                Inisial akan digunakan untuk membuat ID barang (ELEC-001)
+                            </small>
+                        </div>
+                        
+                        <div class="modal-actions">
+                            <button type="button" class="btn-modal btn-cancel" onclick="switchTab('barang')">
+                                <i class="fas fa-arrow-left"></i> Kembali
+                            </button>
+                            <button type="submit" class="btn-modal btn-confirm">
+                                <i class="fas fa-save"></i> Simpan Kategori
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Scripts -->
+    <script src="config.js"></script>
+    <script src="login.js"></script>
+    <script src="app.js"></script>
+    
+    <script>
+        // Initialize on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            // Check authentication
+            if (!AUTH.isLoggedIn()) {
+                window.location.href = 'login.html';
+                return;
+            }
+            
+            // Display user name
+            const userName = AUTH.getUserName();
+            if (userName) {
+                document.getElementById('userName').textContent = userName;
+            }
+            
+            // Auto-fill user field and warehouse
+            if (AUTH && typeof AUTH.autoFillForm === 'function') {
+                AUTH.autoFillForm();
+            }
+            
+            // Setup warehouse buttons - WITH COLOR UPDATE
+            const warehouseBtns = document.querySelectorAll('.warehouse-btn');
+            warehouseBtns.forEach(btn => {
+                btn.addEventListener('click', function() {
+                    // Remove active from all
+                    warehouseBtns.forEach(b => b.classList.remove('active'));
+                    
+                    // Add active to clicked
+                    this.classList.add('active');
+                    
+                    // Update stock display gudang
+                    const gudang = this.dataset.warehouse;
+                    document.getElementById('stockGudang').textContent = gudang;
+                    
+                    // Update stock display if item is selected
+                    if (typeof updateStockDisplay === 'function') {
+                        updateStockDisplay();
+                    }
+                    
+                    // Update colors
+                    updateGudangColors();
+                });
+            });
+            
+            // Setup transaction type buttons
+            const typeBtns = document.querySelectorAll('.type-btn');
+            typeBtns.forEach(btn => {
+                btn.addEventListener('click', function() {
+                    typeBtns.forEach(b => b.classList.remove('active'));
+                    this.classList.add('active');
+                });
+            });
+            
+            // Initial color update
+            updateGudangColors();
+        });
+        
+        // Function to update gudang colors throughout the page
+        function updateGudangColors() {
+            const activeWarehouse = document.querySelector('.warehouse-btn.active');
+            if (!activeWarehouse) return;
+            
+            const gudang = activeWarehouse.dataset.warehouse; // "Gudang A" atau "Gudang B"
+            const gudangClass = gudang === 'Gudang A' ? 'gudang-a' : 'gudang-b';
+            
+            // Update item card
+            const itemCard = document.querySelector('.item-card');
+            if (itemCard) {
+                itemCard.classList.remove('gudang-a', 'gudang-b');
+                itemCard.classList.add(gudangClass);
+            }
+            
+            // Update stock info
+            const stockInfo = document.querySelector('.stock-info');
+            if (stockInfo) {
+                stockInfo.classList.remove('gudang-a', 'gudang-b');
+                stockInfo.classList.add(gudangClass);
+            }
+            
+            // Update submit button
+            const submitBtn = document.querySelector('.submit-btn');
+            if (submitBtn) {
+                submitBtn.classList.remove('gudang-a', 'gudang-b');
+                submitBtn.classList.add(gudangClass);
+            }
+            
+            // Update gudang indicator
+            updateGudangIndicator(gudang);
+        }
+        
+        // Function to show/update gudang indicator
+        function updateGudangIndicator(gudang) {
+            // Disabled - indicator removed from UI
+            return;
+            
+            /*
+            let indicator = document.getElementById('gudangIndicator');
+            
+            if (!indicator) {
+                // Create indicator
+                indicator = document.createElement('div');
+                indicator.id = 'gudangIndicator';
+                indicator.className = 'gudang-indicator';
+                document.body.appendChild(indicator);
+            }
+            
+            // Update class dan text
+            const gudangClass = gudang === 'Gudang A' ? 'gudang-a' : 'gudang-b';
+            indicator.className = 'gudang-indicator active ' + gudangClass;
+            indicator.innerHTML = `<i class="fas fa-warehouse"></i> ${gudang}`;
+            */
+        }
+    </script>
+</body>
+</html>
