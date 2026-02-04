@@ -48,7 +48,7 @@
         margin-bottom: 0.5rem;
     }
     
-    /* Warehouse & Type Toggle lebih compact */
+    /* Warehouse & Type Toggle lebih compact - NAMA FULL */
     .warehouse-toggle,
     .transaction-type {
         gap: 0.4rem;
@@ -57,14 +57,30 @@
     
     .warehouse-btn,
     .type-btn {
-        padding: 0.5rem;
+        padding: 0.5rem 0.3rem; /* Kurangi padding samping */
         font-size: 0.75rem;
         border-radius: 8px;
+        min-height: 48px; /* Touch friendly */
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
     }
     
     .warehouse-btn i,
     .type-btn i {
         font-size: 1rem;
+        margin-bottom: 0.2rem;
+    }
+    
+    /* TAMBAHKAN INI: Nama gudang full di mobile */
+    .warehouse-btn span {
+        font-size: 0.65rem !important; /* Font kecil */
+        line-height: 1.1;
+        text-align: center;
+        display: block;
+        word-break: keep-all; /* Jangan potong kata */
+        white-space: normal;
     }
     
     /* Search & Scanner lebih compact */
@@ -287,8 +303,13 @@
     
     .warehouse-btn,
     .type-btn {
-        padding: 0.4rem;
+        padding: 0.4rem 0.25rem; /* Lebih kecil horizontal */
         font-size: 0.7rem;
+        min-height: 46px;
+    }
+    
+    .warehouse-btn span {
+        font-size: 0.6rem !important; /* Lebih kecil untuk HP kecil */
     }
     
     .input-control {
@@ -475,22 +496,35 @@
         letter-spacing: 0.03em;
     }
     
-    /* Warehouse Toggle - EXTRA compact dengan warna berbeda */
+    /* Warehouse Toggle - EXTRA compact dengan warna berbeda - NAMA FULL */
     .warehouse-toggle {
         gap: 0.3rem;
         margin-bottom: 0.5rem;
     }
     
     .warehouse-btn {
-        padding: 0.4rem 0.5rem;
+        padding: 0.4rem 0.3rem; /* Kurangi padding samping */
         font-size: 0.7rem;
         border-radius: 8px;
         min-height: 44px; /* Touch friendly */
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
     }
     
     .warehouse-btn i {
         font-size: 1rem;
         margin-bottom: 0.2rem;
+    }
+    
+    /* TAMBAHKAN INI: Nama full untuk ULTRA COMPACT */
+    .warehouse-btn span {
+        font-size: 0.6rem !important;
+        line-height: 1.1;
+        text-align: center;
+        display: block;
+        word-break: keep-all;
     }
     
     /* 🎨 WARNA BERBEDA PER GUDANG */
@@ -523,7 +557,7 @@
     }
     
     .type-btn {
-        padding: 0.4rem 0.5rem;
+        padding: 0.4rem 0.3rem;
         font-size: 0.7rem;
         border-radius: 8px;
         min-height: 44px;
@@ -897,8 +931,13 @@
     
     .warehouse-btn,
     .type-btn {
-        padding: 0.35rem 0.4rem;
+        padding: 0.35rem 0.2rem; /* Sangat kecil horizontal */
         font-size: 0.65rem;
+        min-height: 42px;
+    }
+    
+    .warehouse-btn span {
+        font-size: 0.55rem !important; /* Sangat kecil tapi masih terbaca */
     }
     
     .input-control {
@@ -1154,670 +1193,4 @@
     }
 }
 
-/* ============================================
-   ITEM CARD & STOCK INFO COLORS
-   Update sesuai gudang aktif
-   ============================================ */
-
-/* Item card with gudang colors */
-.item-card.gudang-a {
-    border-left: 3px solid #3B82F6 !important;
-    background: linear-gradient(90deg, rgba(59, 130, 246, 0.1), rgba(255, 255, 255, 0.05)) !important;
-}
-
-.item-card.gudang-b {
-    border-left: 3px solid #f39c12 !important;
-    background: linear-gradient(90deg, rgba(243, 156, 18, 0.1), rgba(255, 255, 255, 0.05)) !important;
-}
-
-/* Stock info box */
-.stock-info.gudang-a {
-    background: linear-gradient(135deg, rgba(59, 130, 246, 0.2), rgba(37, 99, 235, 0.15)) !important;
-    border: 1px solid rgba(59, 130, 246, 0.4) !important;
-}
-
-.stock-info.gudang-b {
-    background: linear-gradient(135deg, rgba(243, 156, 18, 0.2), rgba(230, 126, 34, 0.15)) !important;
-    border: 1px solid rgba(243, 156, 18, 0.4) !important;
-}
-
-/* Submit button */
-.submit-btn.gudang-a {
-    background: linear-gradient(135deg, #3B82F6, #2563EB) !important;
-    border: none !important;
-}
-
-.submit-btn.gudang-a:hover {
-    background: linear-gradient(135deg, #2563EB, #1D4ED8) !important;
-    transform: translateY(-2px);
-    box-shadow: 0 4px 12px rgba(59, 130, 246, 0.4) !important;
-}
-
-.submit-btn.gudang-b {
-    background: linear-gradient(135deg, #f39c12, #e67e22) !important;
-    border: none !important;
-}
-
-.submit-btn.gudang-b:hover {
-    background: linear-gradient(135deg, #e67e22, #d35400) !important;
-    transform: translateY(-2px);
-    box-shadow: 0 4px 12px rgba(243, 156, 18, 0.4) !important;
-}
-
-/* ============================================
-   GUDANG INDICATOR (Top-right badge)
-   ============================================ */
-
-.gudang-indicator {
-    position: fixed;
-    top: 70px;
-    right: 10px;
-    padding: 0.4rem 0.8rem;
-    border-radius: 20px;
-    font-size: 0.7rem;
-    font-weight: 700;
-    z-index: 99;
-    display: none;
-    animation: slideIn 0.3s ease;
-}
-
-@keyframes slideIn {
-    from {
-        opacity: 0;
-        transform: translateX(20px);
-    }
-    to {
-        opacity: 1;
-        transform: translateX(0);
-    }
-}
-
-.gudang-indicator.active {
-    display: block;
-}
-
-.gudang-indicator.gudang-a {
-    background: linear-gradient(135deg, #3B82F6, #2563EB) !important;
-    color: white !important;
-    box-shadow: 0 2px 8px rgba(59, 130, 246, 0.5) !important;
-}
-
-.gudang-indicator.gudang-b {
-    background: linear-gradient(135deg, #f39c12, #e67e22) !important;
-    color: white !important;
-    box-shadow: 0 2px 8px rgba(243, 156, 18, 0.5) !important;
-}
-
-/* ============================================
-   WARNA DEFAULT ABU-ABU TRANSPARAN UNTUK GUDANG
-   ============================================ */
-
-/* Reset warna default - buat semua tombol gudang abu-abu transparan */
-.warehouse-btn:not(.active) {
-    border-color: rgba(255, 255, 255, 0.1) !important;
-    background: rgba(255, 255, 255, 0.05) !important;
-    color: rgba(255, 255, 255, 0.7) !important;
-}
-
-/* Icon juga abu-abu saat tidak aktif */
-.warehouse-btn:not(.active) i {
-    color: rgba(255, 255, 255, 0.5) !important;
-}
-
-/* Hover state untuk tombol tidak aktif */
-.warehouse-btn:not(.active):hover {
-    border-color: rgba(255, 255, 255, 0.2) !important;
-    background: rgba(255, 255, 255, 0.08) !important;
-    color: rgba(255, 255, 255, 0.9) !important;
-}
-
-/* ============================================
-   OVERRIDE FORCE: WARNA TRANSACTION TYPE
-   (Untuk override CSS di index.html)
-   ============================================ */
-
-/* RESET KUAT semua type-btn ke abu-abu */
-button.type-btn[data-type="Masuk"],
-button.type-btn[data-type="Keluar"] {
-    border-color: rgba(255, 255, 255, 0.1) !important;
-    background: rgba(255, 255, 255, 0.05) !important;
-    color: rgba(255, 255, 255, 0.7) !important;
-}
-
-/* Override icon */
-button.type-btn[data-type="Masuk"] i,
-button.type-btn[data-type="Keluar"] i {
-    color: rgba(255, 255, 255, 0.5) !important;
-}
-
-/* Override hover dari index.html */
-button.type-btn[data-type="Masuk"]:hover:not(.active),
-button.type-btn[data-type="Keluar"]:hover:not(.active) {
-    border-color: rgba(255, 255, 255, 0.2) !important;
-    background: rgba(255, 255, 255, 0.08) !important;
-    color: rgba(255, 255, 255, 0.9) !important;
-    transform: translateY(-2px) !important;
-}
-
-/* Override active state dari index.html */
-button.type-btn[data-type="Masuk"].active {
-    border-color: #22C55E !important;
-    background: linear-gradient(135deg, rgba(34, 197, 94, 0.25), rgba(21, 128, 61, 0.25)) !important;
-    color: #86EFAC !important;
-    box-shadow: 0 0 15px rgba(34, 197, 94, 0.3) !important;
-}
-
-button.type-btn[data-type="Keluar"].active {
-    border-color: #EF4444 !important;
-    background: linear-gradient(135deg, rgba(239, 68, 68, 0.25), rgba(220, 38, 38, 0.25)) !important;
-    color: #FCA5A5 !important;
-    box-shadow: 0 0 15px rgba(239, 68, 68, 0.3) !important;
-}
-
-/* Override icon active */
-button.type-btn[data-type="Masuk"].active i {
-    color: #22C55E !important;
-}
-
-button.type-btn[data-type="Keluar"].active i {
-    color: #EF4444 !important;
-}
-
-/* Hover hint warna */
-button.type-btn[data-type="Masuk"]:hover:not(.active) {
-    border-color: rgba(34, 197, 94, 0.2) !important;
-    background: rgba(34, 197, 94, 0.05) !important;
-    color: rgba(134, 239, 172, 0.8) !important;
-}
-
-button.type-btn[data-type="Masuk"]:hover:not(.active) i {
-    color: rgba(134, 239, 172, 0.8) !important;
-}
-
-button.type-btn[data-type="Keluar"]:hover:not(.active) {
-    border-color: rgba(239, 68, 68, 0.2) !important;
-    background: rgba(239, 68, 68, 0.05) !important;
-    color: rgba(252, 165, 165, 0.8) !important;
-}
-
-button.type-btn[data-type="Keluar"]:hover:not(.active) i {
-    color: rgba(252, 165, 165, 0.8) !important;
-}
-
-/* ============================================
-   NAVIGATION BUTTONS - Index & Log Pages
-   ============================================ */
-
-/* HEADER ACTIONS CONTAINER */
-.header-actions {
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-}
-
-/* LOG BUTTON (index.html) */
-.log-btn {
-    padding: 0.5rem 0.875rem;
-    background: var(--gradient-3);
-    border: none;
-    border-radius: 8px;
-    color: white;
-    text-decoration: none;
-    font-family: 'Outfit', sans-serif;
-    font-size: 0.8rem;
-    font-weight: 600;
-    display: flex;
-    align-items: center;
-    gap: 0.375rem;
-    transition: all 0.3s ease;
-    box-shadow: 0 2px 8px rgba(79, 172, 254, 0.3);
-}
-
-.log-btn:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 4px 12px rgba(79, 172, 254, 0.4);
-}
-
-.log-btn:active {
-    transform: translateY(0);
-}
-
-/* INPUT TRANSACTION BUTTON (log.html) */
-.input-transaction-btn {
-    padding: 0.5rem 0.875rem;
-    background: var(--gradient-2);
-    border: none;
-    border-radius: 8px;
-    color: white;
-    text-decoration: none;
-    font-family: 'Urbanist', sans-serif;
-    font-size: 0.8rem;
-    font-weight: 600;
-    display: flex;
-    align-items: center;
-    gap: 0.375rem;
-    transition: all 0.3s ease;
-    box-shadow: 0 2px 8px rgba(245, 87, 108, 0.3);
-}
-
-.input-transaction-btn:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 4px 12px rgba(245, 87, 108, 0.4);
-}
-
-/* BACK HOME BUTTON (log.html) */
-.back-home-btn {
-    padding: 0.5rem 0.75rem;
-    background: rgba(255, 255, 255, 0.1);
-    border: 1px solid rgba(255, 255, 255, 0.2);
-    border-radius: 8px;
-    color: var(--text-primary);
-    text-decoration: none;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    transition: all 0.3s ease;
-}
-
-.back-home-btn:hover {
-    background: rgba(255, 255, 255, 0.15);
-    border-color: var(--accent-purple);
-    transform: translateX(-3px);
-}
-
-.header-title-left {
-    display: flex;
-    align-items: center;
-    gap: 0.75rem;
-}
-
-/* USER BADGE FOR LOG PAGE */
-.user-badge-log {
-    background: rgba(255, 255, 255, 0.1);
-    padding: 0.5rem 0.75rem;
-    border-radius: 8px;
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-}
-
-.user-badge-log i {
-    color: var(--accent-cyan);
-}
-
-.user-name-log {
-    color: var(--text-primary);
-    font-size: 0.875rem;
-    font-weight: 600;
-}
-
-/* MOBILE RESPONSIVE */
-@media (max-width: 768px) {
-    /* Index Page */
-    .log-btn {
-        padding: 0.4rem 0.6rem;
-        font-size: 0.75rem;
-    }
-    
-    .log-btn .log-text {
-        display: none; /* Sembunyikan teks di mobile */
-    }
-    
-    .log-btn {
-        width: 36px;
-        height: 36px;
-        justify-content: center;
-    }
-    
-    /* Log Page */
-    .input-transaction-btn .btn-text {
-        display: none; /* Sembunyikan teks di mobile */
-    }
-    
-    .input-transaction-btn {
-        width: 36px;
-        height: 36px;
-        justify-content: center;
-        padding: 0;
-    }
-    
-    .back-home-btn {
-        padding: 0.4rem 0.5rem;
-    }
-    
-    .user-badge-log .user-name-log {
-        display: none; /* Sembunyikan nama di mobile */
-    }
-    
-    .user-badge-log {
-        padding: 0.4rem;
-    }
-}
-
-@media (max-width: 480px) {
-    .header-actions {
-        gap: 0.3rem;
-    }
-    
-    .log-btn, 
-    .input-transaction-btn {
-        width: 32px;
-        height: 32px;
-    }
-    
-    .user-badge-log {
-        padding: 0.3rem;
-    }
-}
-
-/* ============================================
-   FLOATING NAVIGATION BUTTONS (Optional)
-   ============================================ */
-
-/* FAB Navigation Group */
-.fab-nav-group {
-    position: fixed;
-    bottom: 20px;
-    right: 20px;
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
-    z-index: 999;
-}
-
-.fab-nav {
-    width: 50px;
-    height: 50px;
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    color: white;
-    font-size: 1.2rem;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
-    text-decoration: none;
-    transition: all 0.3s ease;
-}
-
-.fab-nav:hover {
-    transform: translateY(-3px);
-    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.4);
-}
-
-.fab-nav-data {
-    background: var(--gradient-3); /* Blue gradient */
-}
-
-.fab-nav-log {
-    background: var(--gradient-1); /* Purple gradient */
-}
-
-.fab-nav-index {
-    background: var(--gradient-2); /* Pink gradient */
-}
-
-/* For Index Page */
-.fab-nav-group.index {
-    bottom: 80px; /* Above existing FAB */
-    right: 20px;
-}
-
-/* For Log Page */
-.fab-nav-group.log {
-    bottom: 20px;
-    right: 20px;
-}
-
-/* ============================================
-   QUICK NAVIGATION BAR (Alternative)
-   ============================================ */
-
-.quick-nav {
-    position: fixed;
-    bottom: 0;
-    left: 0;
-    right: 0;
-    background: rgba(0, 0, 0, 0.9);
-    backdrop-filter: blur(20px);
-    border-top: 1px solid rgba(255, 255, 255, 0.1);
-    padding: 0.5rem 1rem;
-    z-index: 999;
-    display: none; /* Hidden by default, enable if needed */
-}
-
-.quick-nav-items {
-    display: flex;
-    justify-content: space-around;
-    align-items: center;
-}
-
-.quick-nav-item {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    text-decoration: none;
-    color: rgba(255, 255, 255, 0.6);
-    padding: 0.5rem;
-    border-radius: 8px;
-    transition: all 0.3s ease;
-    flex: 1;
-    max-width: 100px;
-}
-
-.quick-nav-item:hover {
-    color: white;
-    background: rgba(255, 255, 255, 0.1);
-}
-
-.quick-nav-item.active {
-    color: var(--primary);
-    background: rgba(255, 107, 53, 0.1);
-}
-
-.quick-nav-item i {
-    font-size: 1.2rem;
-    margin-bottom: 0.25rem;
-}
-
-.quick-nav-item span {
-    font-size: 0.7rem;
-    font-weight: 600;
-}
-
-/* Show on mobile only */
-@media (max-width: 768px) {
-    .quick-nav {
-        display: block;
-    }
-    
-    body {
-        padding-bottom: 70px; /* Adjust for quick nav */
-    }
-}
-
-/* ============================================
-   BREADCRUMB NAVIGATION
-   ============================================ */
-
-.breadcrumb {
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-    padding: 0.5rem 1rem;
-    background: rgba(0, 0, 0, 0.3);
-    border-radius: 8px;
-    margin-bottom: 1rem;
-}
-
-.breadcrumb-item {
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-    color: rgba(255, 255, 255, 0.6);
-    text-decoration: none;
-    font-size: 0.85rem;
-    transition: color 0.3s ease;
-}
-
-.breadcrumb-item:hover {
-    color: var(--primary);
-}
-
-.breadcrumb-item.active {
-    color: var(--primary);
-    font-weight: 600;
-}
-
-.breadcrumb-separator {
-    color: rgba(255, 255, 255, 0.3);
-}
-
-/* ============================================
-   NAVIGATION INDICATORS
-   ============================================ */
-
-.nav-indicator {
-    position: relative;
-}
-
-.nav-indicator::after {
-    content: '';
-    position: absolute;
-    bottom: -5px;
-    left: 50%;
-    transform: translateX(-50%);
-    width: 0;
-    height: 2px;
-    background: var(--primary);
-    transition: width 0.3s ease;
-}
-
-.nav-indicator.active::after {
-    width: 100%;
-}
-
-/* ============================================
-   PAGE TRANSITION ANIMATIONS
-   ============================================ */
-
-.page-transition {
-    animation: fadeIn 0.3s ease;
-}
-
-@keyframes fadeIn {
-    from {
-        opacity: 0;
-        transform: translateY(10px);
-    }
-    to {
-        opacity: 1;
-        transform: translateY(0);
-    }
-}
-
-/* ============================================
-   ACTIVE PAGE STYLING
-   ============================================ */
-
-/* For Index Page */
-body.index-page .log-btn {
-    border: 2px solid rgba(79, 172, 254, 0.5);
-    box-shadow: 0 0 10px rgba(79, 172, 254, 0.3);
-}
-
-/* For Log Page */
-body.log-page .input-transaction-btn {
-    border: 2px solid rgba(245, 87, 108, 0.5);
-    box-shadow: 0 0 10px rgba(245, 87, 108, 0.3);
-}
-
-/* ============================================
-   ULTRA COMPACT MOBILE NAVIGATION
-   ============================================ */
-
-@media (max-width: 400px) {
-    /* Ultra compact buttons */
-    .log-btn,
-    .input-transaction-btn,
-    .back-home-btn {
-        width: 30px;
-        height: 30px;
-        padding: 0;
-        font-size: 0.7rem;
-    }
-    
-    /* Ultra compact user badge */
-    .user-badge,
-    .user-badge-log {
-        padding: 0.3rem;
-    }
-    
-    /* Adjust header spacing */
-    .header-actions {
-        gap: 0.2rem;
-    }
-    
-    /* For Log Page */
-    .header-title-left {
-        gap: 0.4rem;
-    }
-    
-    .page-title {
-        font-size: 1.5rem;
-    }
-}
-
-/* ============================================
-   DARK MODE ENHANCEMENTS
-   ============================================ */
-
-/* Dark mode specific button styles */
-@media (prefers-color-scheme: dark) {
-    .log-btn,
-    .input-transaction-btn {
-        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
-    }
-    
-    .log-btn:hover,
-    .input-transaction-btn:hover {
-        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
-    }
-}
-
-/* ============================================
-   ACCESSIBILITY IMPROVEMENTS
-   ============================================ */
-
-/* Focus states for keyboard navigation */
-.log-btn:focus,
-.input-transaction-btn:focus,
-.back-home-btn:focus {
-    outline: 2px solid var(--primary);
-    outline-offset: 2px;
-}
-
-/* High contrast mode */
-@media (prefers-contrast: high) {
-    .log-btn,
-    .input-transaction-btn {
-        border: 2px solid white;
-    }
-    
-    .back-home-btn {
-        border: 2px solid var(--text-primary);
-    }
-}
-
-/* ============================================
-   PRINT STYLES
-   ============================================ */
-
-@media print {
-    .log-btn,
-    .input-transaction-btn,
-    .back-home-btn,
-    .fab-nav-group,
-    .quick-nav {
-        display: none !important;
-    }
-}
+/* =========================================
