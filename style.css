@@ -506,14 +506,14 @@
     }
     
     .warehouse-btn[data-warehouse="Gudang B"] {
-        border-color: rgba(34, 197, 94, 0.3);
-        background: rgba(34, 197, 94, 0.05);
+        border-color: rgba(243, 156, 18, 0.3);
+        background: rgba(243, 156, 18, 0.05);
     }
     
     .warehouse-btn[data-warehouse="Gudang B"].active {
-        border-color: #22C55E;
-        background: linear-gradient(135deg, rgba(34, 197, 94, 0.25), rgba(21, 128, 61, 0.25));
-        color: #4ADE80;
+        border-color: #f39c12;
+        background: linear-gradient(135deg, rgba(243, 156, 18, 0.25), rgba(230, 126, 34, 0.25));
+        color: #f7dc6f;
     }
     
     /* Transaction Type - EXTRA compact */
@@ -572,8 +572,8 @@
     }
     
     .item-card.gudang-b {
-        border-left: 3px solid #22C55E;
-        background: linear-gradient(90deg, rgba(34, 197, 94, 0.08), rgba(255, 255, 255, 0.05));
+        border-left: 3px solid #f39c12;
+        background: linear-gradient(90deg, rgba(243, 156, 18, 0.08), rgba(255, 255, 255, 0.05));
     }
     
     .item-icon {
@@ -616,8 +616,8 @@
     }
     
     .stock-info.gudang-b {
-        background: linear-gradient(135deg, rgba(34, 197, 94, 0.15), rgba(21, 128, 61, 0.15));
-        border: 1px solid rgba(34, 197, 94, 0.3);
+        background: linear-gradient(135deg, rgba(243, 156, 18, 0.15), rgba(230, 126, 34, 0.15));
+        border: 1px solid rgba(243, 156, 18, 0.3);
     }
     
     .stock-label {
@@ -672,7 +672,7 @@
     }
     
     .submit-btn.gudang-b {
-        background: linear-gradient(135deg, #22C55E, #16A34A);
+        background: linear-gradient(135deg, #f39c12, #e67e22);
     }
     
     .submit-btn i {
@@ -865,14 +865,14 @@
         color: #60A5FA;
     }
     
-    /* Gudang B - Green theme untuk stats */
+    /* Gudang B - ORANGE theme untuk stats */
     .stat-card.gudang-b {
-        background: linear-gradient(135deg, rgba(34, 197, 94, 0.15), rgba(21, 128, 61, 0.1));
-        border: 1px solid rgba(34, 197, 94, 0.3);
+        background: linear-gradient(135deg, rgba(243, 156, 18, 0.15), rgba(230, 126, 34, 0.1));
+        border: 1px solid rgba(243, 156, 18, 0.3);
     }
     
     .stat-card.gudang-b .stat-value {
-        color: #4ADE80;
+        color: #f7dc6f;
     }
 }
 
@@ -936,7 +936,7 @@
 }
 
 .text-gudang-b {
-    color: #22C55E !important;
+    color: #f39c12 !important;
 }
 
 /* Background colors */
@@ -946,8 +946,8 @@
 }
 
 .bg-gudang-b {
-    background: linear-gradient(135deg, rgba(34, 197, 94, 0.15), rgba(21, 128, 61, 0.1)) !important;
-    border: 1px solid rgba(34, 197, 94, 0.3) !important;
+    background: linear-gradient(135deg, rgba(243, 156, 18, 0.15), rgba(230, 126, 34, 0.1)) !important;
+    border: 1px solid rgba(243, 156, 18, 0.3) !important;
 }
 
 /* Badge colors */
@@ -958,9 +958,9 @@
 }
 
 .badge-gudang-b {
-    background: rgba(34, 197, 94, 0.2);
-    color: #4ADE80;
-    border: 1px solid rgba(34, 197, 94, 0.4);
+    background: rgba(243, 156, 18, 0.2);
+    color: #f7dc6f;
+    border: 1px solid rgba(243, 156, 18, 0.4);
 }
 
 /* ============================================
@@ -991,9 +991,9 @@
 }
 
 .gudang-indicator.gudang-b {
-    background: linear-gradient(135deg, #22C55E, #16A34A);
+    background: linear-gradient(135deg, #f39c12, #e67e22);
     color: white;
-    box-shadow: 0 2px 8px rgba(34, 197, 94, 0.4);
+    box-shadow: 0 2px 8px rgba(243, 156, 18, 0.4);
 }
 
 /* ============================================
@@ -1045,11 +1045,6 @@
 }
 
 /* ============================================
-   FIX: WARNA GUDANG BERBEDA
-   Replace CSS warna gudang yang lama dengan ini
-   ============================================ */
-
-/* ============================================
    WAREHOUSE BUTTON COLORS - SPECIFIC OVERRIDE
    ============================================ */
 
@@ -1074,19 +1069,19 @@
     box-shadow: 0 0 15px rgba(59, 130, 246, 0.3) !important;
 }
 
-/* GUDANG B - GREEN (Default state) */
+/* GUDANG B - ORANGE (Default state) */
 .warehouse-btn[data-warehouse="Gudang B"] {
-    border-color: rgba(34, 197, 94, 0.4) !important;
-    background: rgba(34, 197, 94, 0.1) !important;
-    color: rgba(134, 239, 172, 0.8) !important;
+    border-color: rgba(243, 156, 18, 0.4) !important;
+    background: rgba(243, 156, 18, 0.1) !important;
+    color: rgba(247, 220, 111, 0.8) !important;
 }
 
-/* GUDANG B - GREEN (Active state) */
+/* GUDANG B - ORANGE (Active state) */
 .warehouse-btn[data-warehouse="Gudang B"].active {
-    border-color: #22C55E !important;
-    background: linear-gradient(135deg, rgba(34, 197, 94, 0.3), rgba(21, 128, 61, 0.3)) !important;
-    color: #4ADE80 !important;
-    box-shadow: 0 0 15px rgba(34, 197, 94, 0.3) !important;
+    border-color: #f39c12 !important;
+    background: linear-gradient(135deg, rgba(243, 156, 18, 0.3), rgba(230, 126, 34, 0.3)) !important;
+    color: #f7dc6f !important;
+    box-shadow: 0 0 15px rgba(243, 156, 18, 0.3) !important;
 }
 
 /* Hover effects */
@@ -1096,8 +1091,8 @@
 }
 
 .warehouse-btn[data-warehouse="Gudang B"]:hover {
-    border-color: rgba(34, 197, 94, 0.6) !important;
-    background: rgba(34, 197, 94, 0.15) !important;
+    border-color: rgba(243, 156, 18, 0.6) !important;
+    background: rgba(243, 156, 18, 0.15) !important;
 }
 
 /* ============================================
@@ -1146,51 +1141,18 @@
         color: #60A5FA !important;
     }
     
-    /* Gudang B - Green */
+    /* Gudang B - ORANGE */
     .warehouse-btn[data-warehouse="Gudang B"] {
-        border-color: rgba(34, 197, 94, 0.4) !important;
-        background: rgba(34, 197, 94, 0.1) !important;
+        border-color: rgba(243, 156, 18, 0.4) !important;
+        background: rgba(243, 156, 18, 0.1) !important;
     }
     
     .warehouse-btn[data-warehouse="Gudang B"].active {
-        border-color: #22C55E !important;
-        background: linear-gradient(135deg, rgba(34, 197, 94, 0.3), rgba(21, 128, 61, 0.3)) !important;
-        color: #4ADE80 !important;
+        border-color: #f39c12 !important;
+        background: linear-gradient(135deg, rgba(243, 156, 18, 0.3), rgba(230, 126, 34, 0.3)) !important;
+        color: #f7dc6f !important;
     }
 }
-
-/* ============================================
-   ALTERNATIVE COLOR SCHEMES
-   Uncomment salah satu jika ingin warna lain
-   ============================================ */
-
-/* OPTION 1: Gudang A = Purple, Gudang B = Orange
-.warehouse-btn[data-warehouse="Gudang A"].active {
-    border-color: #A855F7 !important;
-    background: linear-gradient(135deg, rgba(168, 85, 247, 0.3), rgba(147, 51, 234, 0.3)) !important;
-    color: #C084FC !important;
-}
-
-.warehouse-btn[data-warehouse="Gudang B"].active {
-    border-color: #F97316 !important;
-    background: linear-gradient(135deg, rgba(249, 115, 22, 0.3), rgba(234, 88, 12, 0.3)) !important;
-    color: #FB923C !important;
-}
-*/
-
-/* OPTION 2: Gudang A = Cyan, Gudang B = Pink
-.warehouse-btn[data-warehouse="Gudang A"].active {
-    border-color: #06B6D4 !important;
-    background: linear-gradient(135deg, rgba(6, 182, 212, 0.3), rgba(8, 145, 178, 0.3)) !important;
-    color: #22D3EE !important;
-}
-
-.warehouse-btn[data-warehouse="Gudang B"].active {
-    border-color: #EC4899 !important;
-    background: linear-gradient(135deg, rgba(236, 72, 153, 0.3), rgba(219, 39, 119, 0.3)) !important;
-    color: #F472B6 !important;
-}
-*/
 
 /* ============================================
    ITEM CARD & STOCK INFO COLORS
@@ -1204,8 +1166,8 @@
 }
 
 .item-card.gudang-b {
-    border-left: 3px solid #22C55E !important;
-    background: linear-gradient(90deg, rgba(34, 197, 94, 0.1), rgba(255, 255, 255, 0.05)) !important;
+    border-left: 3px solid #f39c12 !important;
+    background: linear-gradient(90deg, rgba(243, 156, 18, 0.1), rgba(255, 255, 255, 0.05)) !important;
 }
 
 /* Stock info box */
@@ -1215,8 +1177,8 @@
 }
 
 .stock-info.gudang-b {
-    background: linear-gradient(135deg, rgba(34, 197, 94, 0.2), rgba(21, 128, 61, 0.15)) !important;
-    border: 1px solid rgba(34, 197, 94, 0.4) !important;
+    background: linear-gradient(135deg, rgba(243, 156, 18, 0.2), rgba(230, 126, 34, 0.15)) !important;
+    border: 1px solid rgba(243, 156, 18, 0.4) !important;
 }
 
 /* Submit button */
@@ -1232,14 +1194,14 @@
 }
 
 .submit-btn.gudang-b {
-    background: linear-gradient(135deg, #22C55E, #16A34A) !important;
+    background: linear-gradient(135deg, #f39c12, #e67e22) !important;
     border: none !important;
 }
 
 .submit-btn.gudang-b:hover {
-    background: linear-gradient(135deg, #16A34A, #15803D) !important;
+    background: linear-gradient(135deg, #e67e22, #d35400) !important;
     transform: translateY(-2px);
-    box-shadow: 0 4px 12px rgba(34, 197, 94, 0.4) !important;
+    box-shadow: 0 4px 12px rgba(243, 156, 18, 0.4) !important;
 }
 
 /* ============================================
@@ -1281,88 +1243,9 @@
 }
 
 .gudang-indicator.gudang-b {
-    background: linear-gradient(135deg, #22C55E, #16A34A) !important;
+    background: linear-gradient(135deg, #f39c12, #e67e22) !important;
     color: white !important;
-    box-shadow: 0 2px 8px rgba(34, 197, 94, 0.5) !important;
-}
-
-/* ============================================
-   DEBUG - Check if colors are applied
-   Add this temporarily to test
-   ============================================ */
-
-/* Uncomment untuk test
-.warehouse-btn[data-warehouse="Gudang A"] {
-    outline: 2px solid blue !important;
-}
-
-.warehouse-btn[data-warehouse="Gudang B"] {
-    outline: 2px solid green !important;
-}
-*/
-
-/* ============================================
-   OVERRIDE WAREHOUSE COLORS - IMPORTANT!
-   ============================================ */
-
-/* Hapus warna kuning dari index.html */
-.warehouse-btn {
-    border-color: rgba(255, 255, 255, 0.1) !important;
-    background: rgba(255, 255, 255, 0.05) !important;
-    color: var(--light) !important;
-}
-
-/* GUDANG A - BIRU */
-.warehouse-btn[data-warehouse="Gudang A"] {
-    border-color: rgba(59, 130, 246, 0.4) !important;
-    background: rgba(59, 130, 246, 0.1) !important;
-    color: rgba(147, 197, 253, 0.8) !important;
-}
-
-.warehouse-btn[data-warehouse="Gudang A"].active {
-    border-color: #3B82F6 !important;
-    background: linear-gradient(135deg, rgba(59, 130, 246, 0.3), rgba(37, 99, 235, 0.3)) !important;
-    color: #60A5FA !important;
-    box-shadow: 0 0 15px rgba(59, 130, 246, 0.3) !important;
-}
-
-/* GUDANG B - HIJAU */
-.warehouse-btn[data-warehouse="Gudang B"] {
-    border-color: rgba(34, 197, 94, 0.4) !important;
-    background: rgba(34, 197, 94, 0.1) !important;
-    color: rgba(134, 239, 172, 0.8) !important;
-}
-
-.warehouse-btn[data-warehouse="Gudang B"].active {
-    border-color: #22C55E !important;
-    background: linear-gradient(135deg, rgba(34, 197, 94, 0.3), rgba(21, 128, 61, 0.3)) !important;
-    color: #4ADE80 !important;
-    box-shadow: 0 0 15px rgba(34, 197, 94, 0.3) !important;
-}
-
-/* Hover effects */
-.warehouse-btn[data-warehouse="Gudang A"]:hover {
-    border-color: rgba(59, 130, 246, 0.6) !important;
-    background: rgba(59, 130, 246, 0.15) !important;
-}
-
-.warehouse-btn[data-warehouse="Gudang B"]:hover {
-    border-color: rgba(34, 197, 94, 0.6) !important;
-    background: rgba(34, 197, 94, 0.15) !important;
-}
-
-/* Mobile responsive */
-@media (max-width: 768px) {
-    .warehouse-btn {
-        padding: 0.4rem 0.5rem !important;
-        font-size: 0.7rem !important;
-        min-height: 44px !important;
-    }
-    
-    .warehouse-btn i {
-        font-size: 1rem !important;
-        margin-bottom: 0.2rem !important;
-    }
+    box-shadow: 0 2px 8px rgba(243, 156, 18, 0.5) !important;
 }
 
 /* ============================================
@@ -1387,9 +1270,6 @@
     background: rgba(255, 255, 255, 0.08) !important;
     color: rgba(255, 255, 255, 0.9) !important;
 }
-
-/* Warna aktif tetap seperti yang sudah ada di CSS sebelumnya */
-/* (Kode warna aktif sudah ada di CSS sebelumnya) */
 
 /* ============================================
    OVERRIDE FORCE: WARNA TRANSACTION TYPE
