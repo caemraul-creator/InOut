@@ -39,8 +39,8 @@
             --gradient-3: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
             --blue: #3B82F6;
             --blue-light: #60A5FA;
-            --orange: #FB923C;
-            --orange-light: #FDBA74;
+            --green: #22C55E;
+            --green-light: #4ADE80;
             --grey: #6B7280;
             --grey-light: #9CA3AF;
         }
@@ -241,32 +241,32 @@
             transform: translateY(-2px);
         }
         
-        /* Gudang A - BIRU ketika ACTIVE */
-        .warehouse-btn[data-warehouse="Gudang A"]:hover {
+        /* Gudang Kalipucang - BIRU ketika ACTIVE */
+        .warehouse-btn[data-warehouse="Kalipucang"]:hover {
             border-color: rgba(59, 130, 246, 0.3);
             background: rgba(59, 130, 246, 0.08);
             color: rgba(147, 197, 253, 0.9);
         }
         
-        .warehouse-btn[data-warehouse="Gudang A"].active {
+        .warehouse-btn[data-warehouse="Kalipucang"].active {
             border-color: var(--blue) !important;
             background: linear-gradient(135deg, rgba(59, 130, 246, 0.25), rgba(37, 99, 235, 0.25)) !important;
             color: var(--blue-light) !important;
             box-shadow: 0 0 15px rgba(59, 130, 246, 0.3) !important;
         }
         
-        /* Gudang B - ORANGE ketika ACTIVE */
-        .warehouse-btn[data-warehouse="Gudang B"]:hover {
-            border-color: rgba(251, 146, 60, 0.3);
-            background: rgba(251, 146, 60, 0.08);
-            color: rgba(253, 186, 116, 0.9);
+        /* Gudang Troso - HIJAU ketika ACTIVE */
+        .warehouse-btn[data-warehouse="Troso"]:hover {
+            border-color: rgba(34, 197, 94, 0.3);
+            background: rgba(34, 197, 94, 0.08);
+            color: rgba(134, 239, 172, 0.9);
         }
         
-        .warehouse-btn[data-warehouse="Gudang B"].active {
-            border-color: var(--orange) !important;
-            background: linear-gradient(135deg, rgba(251, 146, 60, 0.25), rgba(249, 115, 22, 0.25)) !important;
-            color: var(--orange-light) !important;
-            box-shadow: 0 0 15px rgba(251, 146, 60, 0.3) !important;
+        .warehouse-btn[data-warehouse="Troso"].active {
+            border-color: var(--green) !important;
+            background: linear-gradient(135deg, rgba(34, 197, 94, 0.25), rgba(21, 128, 61, 0.25)) !important;
+            color: var(--green-light) !important;
+            box-shadow: 0 0 15px rgba(34, 197, 94, 0.3) !important;
         }
         
         /* Transaction Type */
@@ -1041,7 +1041,7 @@
                 </div>
                 
                 <div class="input-group">
-                    <label for="jumlah">Jumlah <span id="satuanLabel">Satuan</span></label>
+                    <label for="jumlah">Jumlah <span id="satuanLabel">Unit</span></label>
                     <input type="number" 
                            id="jumlah" 
                            class="input-field" 
@@ -1207,8 +1207,8 @@
                         <div class="input-group">
                             <label for="newItemGudang">Gudang *</label>
                             <select id="newItemGudang" class="input-field" required>
-                                <option value="A">Gudang A</option>
-                                <option value="B">Gudang B</option>
+                                <option value="A">Gudang Kalipucang</option>
+                                <option value="B">Gudang Troso</option>
                             </select>
                         </div>
                         
@@ -1293,7 +1293,8 @@
                     
                     // Update stock display gudang
                     const gudang = this.dataset.warehouse;
-                    document.getElementById('stockGudang').textContent = gudang;
+                    const displayName = gudang === 'Kalipucang' ? 'Gudang Kalipucang' : 'Gudang Troso';
+                    document.getElementById('stockGudang').textContent = displayName;
                     
                     // Update stock display if item is selected
                     if (typeof updateStockDisplay === 'function') {
@@ -1323,8 +1324,8 @@
             const activeWarehouse = document.querySelector('.warehouse-btn.active');
             if (!activeWarehouse) return;
             
-            const gudang = activeWarehouse.dataset.warehouse; // "Gudang A" atau "Gudang B"
-            const gudangClass = gudang === 'Gudang A' ? 'gudang-a' : 'gudang-b';
+            const gudang = activeWarehouse.dataset.warehouse; // "Kalipucang" atau "Troso"
+            const gudangClass = gudang === 'Kalipucang' ? 'gudang-a' : 'gudang-b';
             
             // Update item card
             const itemCard = document.querySelector('.item-card');
@@ -1368,9 +1369,11 @@
             }
             
             // Update class dan text
-            const gudangClass = gudang === 'Gudang A' ? 'gudang-a' : 'gudang-b';
+            const gudangClass = gudang === 'Kalipucang' ? 'gudang-a' : 'gudang-b';
+            const displayName = gudang === 'Kalipucang' ? 'Gudang Kalipucang' : 'Gudang Troso';
+            
             indicator.className = 'gudang-indicator active ' + gudangClass;
-            indicator.innerHTML = `<i class="fas fa-warehouse"></i> ${gudang}`;
+            indicator.innerHTML = `<i class="fas fa-warehouse"></i> ${displayName}`;
             */
         }
     </script>
