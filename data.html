@@ -469,6 +469,41 @@
                 font-size: 1.25rem;
             }
         }
+        
+        /* Sort Info */
+        .sort-info {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 12px;
+            padding: 0.75rem 1rem;
+            margin-bottom: 1rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .btn-toggle-sort {
+            background: rgba(247, 184, 1, 0.2);
+            border: 1px solid rgba(247, 184, 1, 0.3);
+            border-radius: 8px;
+            width: 36px;
+            height: 36px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--accent);
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .btn-toggle-sort:hover {
+            background: rgba(247, 184, 1, 0.3);
+            transform: scale(1.05);
+        }
+        
+        .btn-toggle-sort:active {
+            transform: scale(0.95);
+        }
     </style>
 </head>
 <body>
@@ -523,6 +558,19 @@
             </button>
         </div>
         
+        <!-- Sort Options -->
+        <div class="sort-info">
+            <div style="display: flex; align-items: center; gap: 0.5rem;">
+                <i class="fas fa-sort-alpha-down" id="sortIcon" style="color: var(--accent);"></i>
+                <span style="color: rgba(247, 247, 255, 0.8); font-size: 0.85rem;">
+                    Diurutkan: <strong id="sortLabel">Nama (A-Z)</strong>
+                </span>
+            </div>
+            <button class="btn-toggle-sort" id="btnToggleSort" title="Ubah urutan">
+                <i class="fas fa-sort-alpha-down"></i>
+            </button>
+        </div>
+        
         <!-- Item List -->
         <div class="item-list" id="inventoryContainer">
             <!-- Items will be loaded here -->
@@ -547,6 +595,7 @@
         // Global data storage
         let allItems = [];
         let filteredItems = [];
+        let sortOrder = 'asc'; // Sort order: 'asc' atau 'desc'
         
         // Initialize on page load
         document.addEventListener('DOMContentLoaded', function() {
@@ -606,6 +655,32 @@
                 searchInput.focus();
             });
         });
+            
+            // Toggle Sort Button
+            const btnToggleSort = document.getElementById('btnToggleSort');
+            if (btnToggleSort) {
+                btnToggleSort.addEventListener('click', function() {
+                    sortOrder = sortOrder === 'asc' ? 'desc' : 'asc';
+                    
+                    // Update UI
+                    const sortIcon = this.querySelector('i');
+                    const sortLabel = document.getElementById('sortLabel');
+                    const headerSortIcon = document.getElementById('sortIcon');
+                    
+                    if (sortOrder === 'asc') {
+                        sortIcon.className = 'fas fa-sort-alpha-down';
+                        if (headerSortIcon) headerSortIcon.className = 'fas fa-sort-alpha-down';
+                        sortLabel.textContent = 'Nama (A-Z)';
+                    } else {
+                        sortIcon.className = 'fas fa-sort-alpha-up';
+                        if (headerSortIcon) headerSortIcon.className = 'fas fa-sort-alpha-up';
+                        sortLabel.textContent = 'Nama (Z-A)';
+                    }
+                    
+                    // Re-render dengan sorting baru
+                    renderItems(filteredItems);
+                });
+            }
         
         // Load data from API
         async function loadDataBarang() {
@@ -656,7 +731,18 @@
                 return;
             }
             
-            const html = items.map(item => {
+            // SORTING OTOMATIS: Urutkan berdasarkan abjad (nama barang)
+            const sortedItems = [...items].sort((a, b) => {
+                const nameA = (a.nama || '').toLowerCase();
+                const nameB = (b.nama || '').toLowerCase();
+                if (sortOrder === 'asc') {
+                    return nameA.localeCompare(nameB);
+                } else {
+                    return nameB.localeCompare(nameA);
+                }
+            });
+            
+            const html = sortedItems.map(item => {
                 const stokA = Number(item.stokA) || 0;
                 const stokB = Number(item.stokB) || 0;
                 const lowStockA = stokA < 10;
