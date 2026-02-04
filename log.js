@@ -1,10 +1,16 @@
 // ============================================
-// LOG.JS - Transaction Log Functions
+// LOG.JS - Transaction Log Functions (MODIFIED)
 // ============================================
 
 let currentWarehouse = 'A';
 let allTransactions = [];
 let filteredTransactions = [];
+
+// Gudang mapping helper
+const GudangMapping = {
+    'A': { display: 'Gudang Kalipucang', value: 'Kalipucang' },
+    'B': { display: 'Gudang Troso', value: 'Troso' }
+};
 
 // Initialize log page
 document.addEventListener('DOMContentLoaded', function() {
@@ -52,6 +58,11 @@ function switchWarehouse(warehouse) {
     document.getElementById('tabA').classList.remove('active');
     document.getElementById('tabB').classList.remove('active');
     document.getElementById('tab' + warehouse).classList.add('active');
+    
+    // Update page title dengan nama gudang yang benar
+    const gudangInfo = GudangMapping[warehouse];
+    document.querySelector('.page-title').innerHTML = 
+        `<i class="fas fa-clipboard-list"></i> Log - ${gudangInfo.display}`;
     
     // Reload transactions
     loadTransactions();
@@ -235,6 +246,9 @@ function exportToCSV() {
         return;
     }
     
+    // Get gudang display name for filename
+    const gudangDisplay = GudangMapping[currentWarehouse].display;
+    
     let csv = 'Tanggal & Waktu,Jenis,ID Barang,Nama Barang,Jumlah,Keterangan,User/Petugas\n';
     
     filteredTransactions.forEach(t => {
@@ -247,12 +261,19 @@ function exportToCSV() {
     const url = URL.createObjectURL(blob);
     
     link.setAttribute('href', url);
-    link.setAttribute('download', `log_gudang_${currentWarehouse}_${new Date().toISOString().split('T')[0]}.csv`);
+    link.setAttribute('download', `log_${gudangDisplay}_${new Date().toISOString().split('T')[0]}.csv`);
     link.style.visibility = 'hidden';
     
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
     
-    UI.showAlert('Data berhasil di-export ke CSV', 'success');
+    UI.showAlert(`Data ${gudangDisplay} berhasil di-export ke CSV`, 'success');
 }
+
+// Export functions untuk digunakan di file lain
+window.LogHelper = {
+    switchWarehouse: switchWarehouse,
+    applyFilters: applyFilters,
+    exportToCSV: exportToCSV
+};

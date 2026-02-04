@@ -1,6 +1,7 @@
 // ============================================
-// APP.JS - FINAL VERSION
-// Support user tracking & all fixes
+// APP.JS - FINAL VERSION (MODIFIED)
+// Support Gudang Kalipucang & Gudang Troso
+// Spreadsheet tetap pakai A/B
 // ============================================
 
 let dataMaster = [];
@@ -296,8 +297,8 @@ async function submitNewItem() {
             kategori: kategori,
             satuan: satuan,
             stokAwal: stokAwal,
-            gudang: gudang,
-            user: user  // ✅ SEND USER
+            gudang: gudang, // Kirim A/B
+            user: user
         });
         
         console.log('✅ New item added:', result);
@@ -395,7 +396,10 @@ function showConfirmation() {
         return;
     }
     
-    const gudang = document.querySelector('.warehouse-btn.active').dataset.warehouse;
+    const gudangBtn = document.querySelector('.warehouse-btn.active');
+    const gudangValue = gudangBtn.dataset.warehouse; // "Kalipucang" atau "Troso"
+    const gudangDisplay = getGudangDisplayNameFromValue(gudangValue);
+    
     const jenis = document.querySelector('.type-btn.active').dataset.type;
     const barangNama = tempSelectedItem ? tempSelectedItem.nama : '-';
     const barangId = tempSelectedItem ? tempSelectedItem.id : '-';
@@ -404,8 +408,11 @@ function showConfirmation() {
     const petugas = document.getElementById('user').value;
     const keterangan = document.getElementById('keterangan').value;
     
+    // Kirim A/B ke API, tampilkan nama lengkap ke user
+    const gudangApi = gudangValue === 'Kalipucang' ? 'A' : 'B';
+    
     pendingTransaction = {
-        lokasiGudang: gudang,
+        lokasiGudang: gudangApi, // Kirim "A" atau "B" ke API
         jenis: jenis,
         idBarang: barangId,
         namaBarang: barangNama,
@@ -417,7 +424,7 @@ function showConfirmation() {
     
     console.log('📦 Pending transaction:', pendingTransaction);
     
-    document.getElementById('confirmGudang').textContent = gudang;
+    document.getElementById('confirmGudang').textContent = gudangDisplay;
     document.getElementById('confirmJenis').textContent = jenis;
     document.getElementById('confirmBarang').textContent = barangNama;
     document.getElementById('confirmId').textContent = barangId;
@@ -591,19 +598,25 @@ function selectItem(item) {
     
     document.getElementById('itemResult').classList.remove('hidden');
     document.getElementById('manualIdInput').value = item.nama;
+    
+    // ✅ TAMBAHKAN INI - Update gudang colors
+    updateGudangColors();
 }
 
 function updateStockDisplay() {
     if (!tempSelectedItem) return;
     
     const activeWarehouse = document.querySelector('.warehouse-btn.active');
-    const gudang = activeWarehouse ? activeWarehouse.dataset.warehouse : 'Gudang A';
+    const gudang = activeWarehouse ? activeWarehouse.dataset.warehouse : 'Kalipucang';
     
-    const stok = gudang === 'Gudang A' ? tempSelectedItem.stokA : tempSelectedItem.stokB;
+    // Mapping: Kalipucang = A, Troso = B
+    const gudangKey = gudang === 'Kalipucang' ? 'A' : 'B';
+    const stok = gudangKey === 'A' ? tempSelectedItem.stokA : tempSelectedItem.stokB;
     
-    console.log(`Stock for ${gudang}:`, stok);
+    console.log(`Stock for ${gudang} (${gudangKey}):`, stok);
     
-    document.getElementById('stockGudang').textContent = gudang;
+    const displayName = getGudangDisplayNameFromValue(gudang);
+    document.getElementById('stockGudang').textContent = displayName;
     document.getElementById('stockValue').textContent = `${stok} ${tempSelectedItem.satuan}`;
 }
 
@@ -698,8 +711,31 @@ function onScanFailure(error) {
 }
 
 // ============================================
+// HELPER FUNCTIONS - GUDANG MAPPING
+// ============================================
+
+// Konversi nilai gudang ke nama display
+function getGudangDisplayNameFromValue(gudangValue) {
+    return gudangValue === 'Kalipucang' ? 'Gudang Kalipucang' : 'Gudang Troso';
+}
+
+// Konversi nilai gudang ke kode API
+function getGudangApiCode(gudangValue) {
+    return gudangValue === 'Kalipucang' ? 'A' : 'B';
+}
+
+// Konversi kode API ke nilai gudang
+function getGudangValueFromApiCode(apiCode) {
+    return apiCode === 'A' ? 'Kalipucang' : 'Troso';
+}
+
+// Konversi kode API ke nama display
+function getGudangDisplayNameFromApiCode(apiCode) {
+    return apiCode === 'A' ? 'Gudang Kalipucang' : 'Gudang Troso';
+}
+
+// ============================================
 // GUDANG COLOR HELPER - Auto add color classes
-// Tambahkan di bagian bawah app.js atau file terpisah
 // ============================================
 
 // Function untuk update warna berdasarkan gudang aktif
@@ -707,8 +743,8 @@ function updateGudangColors() {
     const activeWarehouse = document.querySelector('.warehouse-btn.active');
     if (!activeWarehouse) return;
     
-    const gudang = activeWarehouse.dataset.warehouse; // "Gudang A" atau "Gudang B"
-    const gudangClass = gudang === 'Gudang A' ? 'gudang-a' : 'gudang-b';
+    const gudang = activeWarehouse.dataset.warehouse; // "Kalipucang" atau "Troso"
+    const gudangClass = gudang === 'Kalipucang' ? 'gudang-a' : 'gudang-b';
     
     console.log('🎨 Updating colors for:', gudang);
     
@@ -750,9 +786,11 @@ function updateGudangIndicator(gudang) {
     }
     
     // Update class dan text
-    const gudangClass = gudang === 'Gudang A' ? 'gudang-a' : 'gudang-b';
+    const gudangClass = gudang === 'Kalipucang' ? 'gudang-a' : 'gudang-b';
+    const displayName = getGudangDisplayNameFromValue(gudang);
+    
     indicator.className = 'gudang-indicator active ' + gudangClass;
-    indicator.innerHTML = `<i class="fas fa-warehouse"></i> ${gudang}`;
+    indicator.innerHTML = `<i class="fas fa-warehouse"></i> ${displayName}`;
 }
 
 // ============================================
@@ -784,32 +822,6 @@ function setupGudangColorListeners() {
 }
 
 // ============================================
-// MODIFY EXISTING selectItem() function
-// Tambahkan di bagian bawah function selectItem()
-// ============================================
-
-// Tambahkan ini di dalam function selectItem() yang sudah ada
-function selectItem(item) {
-    console.log('✅ Item selected:', item);
-    
-    tempSelectedItem = item;
-    
-    document.getElementById('itemName').textContent = item.nama;
-    document.getElementById('itemId').textContent = 'ID: ' + item.id;
-    document.getElementById('itemKategori').textContent = item.kategori;
-    document.getElementById('itemSatuan').textContent = item.satuan;
-    document.getElementById('satuanLabel').textContent = item.satuan;
-    
-    updateStockDisplay();
-    
-    document.getElementById('itemResult').classList.remove('hidden');
-    document.getElementById('manualIdInput').value = item.nama;
-    
-    // ✅ TAMBAHKAN INI - Update gudang colors
-    updateGudangColors();
-}
-
-// ============================================
 // INITIALIZE - Panggil saat page load
 // ============================================
 
@@ -835,9 +847,9 @@ function setupDataPageColors() {
     statCards.forEach(card => {
         const label = card.querySelector('.stat-label')?.textContent || '';
         
-        if (label.includes('Gudang A') || label.includes('Stok A')) {
+        if (label.includes('Kalipucang') || label.includes('Stok A')) {
             card.classList.add('gudang-a');
-        } else if (label.includes('Gudang B') || label.includes('Stok B')) {
+        } else if (label.includes('Troso') || label.includes('Stok B')) {
             card.classList.add('gudang-b');
         }
     });
@@ -868,4 +880,109 @@ function setupDataPageColors() {
 // Call on data page load
 if (window.location.pathname.includes('data.html')) {
     document.addEventListener('DOMContentLoaded', setupDataPageColors);
+}
+
+// ============================================
+// MOBILE RESPONSIVE FUNCTIONS
+// ============================================
+
+// Function untuk update warehouse buttons di mobile
+function updateWarehouseButtonsForMobile() {
+    const warehouseBtns = document.querySelectorAll('.warehouse-btn');
+    const isMobile = window.innerWidth <= 768;
+    
+    if (isMobile) {
+        warehouseBtns.forEach(btn => {
+            const warehouse = btn.dataset.warehouse;
+            const shortName = warehouse === 'Kalipucang' ? 'Kalip.' : 'Troso';
+            btn.querySelector('span').textContent = shortName;
+        });
+    } else {
+        warehouseBtns.forEach(btn => {
+            const warehouse = btn.dataset.warehouse;
+            const fullName = warehouse === 'Kalipucang' ? 'Gudang Kalipucang' : 'Gudang Troso';
+            btn.querySelector('span').textContent = fullName;
+        });
+    }
+}
+
+// Listen for window resize
+window.addEventListener('resize', updateWarehouseButtonsForMobile);
+
+// Initial call
+document.addEventListener('DOMContentLoaded', updateWarehouseButtonsForMobile);
+
+// ============================================
+// EXPORT FUNCTIONS (untuk file lain)
+// ============================================
+
+// Export fungsi helper gudang untuk digunakan di file lain
+window.GudangHelper = {
+    getDisplayName: function(gudangValue) {
+        return getGudangDisplayNameFromValue(gudangValue);
+    },
+    
+    getApiCode: function(gudangValue) {
+        return getGudangApiCode(gudangValue);
+    },
+    
+    getValueFromApiCode: function(apiCode) {
+        return getGudangValueFromApiCode(apiCode);
+    },
+    
+    getDisplayNameFromApiCode: function(apiCode) {
+        return getGudangDisplayNameFromApiCode(apiCode);
+    }
+};
+
+// ============================================
+// DEBUG FUNCTIONS
+// ============================================
+
+// Fungsi untuk debugging mapping gudang
+function debugGudangMapping() {
+    console.log('=== DEBUG GUDANG MAPPING ===');
+    console.log('Kalipucang -> API Code:', getGudangApiCode('Kalipucang'), '(should be A)');
+    console.log('Troso -> API Code:', getGudangApiCode('Troso'), '(should be B)');
+    console.log('A -> Display:', getGudangDisplayNameFromApiCode('A'), '(should be Gudang Kalipucang)');
+    console.log('B -> Display:', getGudangDisplayNameFromApiCode('B'), '(should be Gudang Troso)');
+    console.log('===========================');
+}
+
+// Panggil debug jika diperlukan
+// debugGudangMapping();
+
+// ============================================
+// GLOBAL FUNCTIONS
+// ============================================
+
+// Fungsi global untuk dipanggil dari HTML inline
+window.updateGudangColors = updateGudangColors;
+window.updateGudangIndicator = updateGudangIndicator;
+
+// Fungsi untuk mendapatkan gudang aktif saat ini
+window.getActiveGudang = function() {
+    const activeBtn = document.querySelector('.warehouse-btn.active');
+    return activeBtn ? activeBtn.dataset.warehouse : 'Kalipucang';
+};
+
+// Fungsi untuk mendapatkan display name gudang aktif
+window.getActiveGudangDisplayName = function() {
+    const activeGudang = getActiveGudang();
+    return getGudangDisplayNameFromValue(activeGudang);
+};
+
+// ============================================
+// AUTO-RUN FUNCTIONS
+// ============================================
+
+// Auto-setup untuk halaman index
+if (document.getElementById('transaksiForm')) {
+    // Setup initial colors
+    document.addEventListener('DOMContentLoaded', function() {
+        setTimeout(() => {
+            updateGudangColors();
+            updateWarehouseButtonsForMobile();
+        }, 100);
+    });
 }
