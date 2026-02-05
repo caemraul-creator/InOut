@@ -1402,3 +1402,131 @@
         font-size: 0.65rem !important;
     }
 }
+
+/* ============================================
+   SEARCH RESULTS DROPDOWN
+   ============================================ */
+
+.search-results-dropdown {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    right: 0;
+    background: rgba(20, 20, 30, 0.98);
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    border-radius: 8px;
+    margin-top: 0.5rem;
+    max-height: 300px;
+    overflow-y: auto;
+    z-index: 1000;
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.5);
+    backdrop-filter: blur(10px);
+    display: none;
+}
+
+.search-result-item {
+    padding: 0.75rem 1rem;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.search-result-item:hover,
+.search-result-item.active {
+    background: rgba(79, 172, 254, 0.1);
+    border-left: 3px solid var(--primary);
+}
+
+.search-result-item:last-child {
+    border-bottom: none;
+}
+
+.result-name {
+    font-weight: 600;
+    color: white;
+    margin-bottom: 0.25rem;
+    font-size: 0.95rem;
+}
+
+.result-name mark {
+    background: rgba(79, 172, 254, 0.3);
+    color: var(--primary);
+    padding: 0.1rem 0.2rem;
+    border-radius: 3px;
+}
+
+.result-details {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 1rem;
+    font-size: 0.75rem;
+    color: var(--text-secondary);
+}
+
+.result-id {
+    color: rgba(255, 255, 255, 0.6);
+}
+
+.result-id mark {
+    background: rgba(79, 172, 254, 0.2);
+    color: var(--primary);
+    padding: 0.1rem 0.2rem;
+    border-radius: 3px;
+}
+
+.result-stock {
+    color: var(--text-secondary);
+    font-weight: 500;
+}
+
+.search-result-more {
+    padding: 0.5rem 1rem;
+    text-align: center;
+    color: var(--text-secondary);
+    font-size: 0.8rem;
+    font-style: italic;
+    background: rgba(255, 255, 255, 0.02);
+}
+
+/* Mobile responsive untuk dropdown */
+@media (max-width: 768px) {
+    .search-results-dropdown {
+        max-height: 250px;
+        margin-top: 0.3rem;
+    }
+    
+    .search-result-item {
+        padding: 0.6rem 0.75rem;
+    }
+    
+    .result-name {
+        font-size: 0.85rem;
+    }
+    
+    .result-details {
+        font-size: 0.7rem;
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 0.25rem;
+    }
+}
+
+/* Scrollbar untuk dropdown */
+.search-results-dropdown::-webkit-scrollbar {
+    width: 6px;
+}
+
+.search-results-dropdown::-webkit-scrollbar-track {
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 3px;
+}
+
+.search-results-dropdown::-webkit-scrollbar-thumb {
+    background: rgba(79, 172, 254, 0.3);
+    border-radius: 3px;
+}
+
+.search-results-dropdown::-webkit-scrollbar-thumb:hover {
+    background: rgba(79, 172, 254, 0.5);
+}

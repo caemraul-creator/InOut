@@ -85,6 +85,55 @@ function setupEventListeners() {
             }, 150); // Dipercepat dari 300ms ke 150ms
         } else {
             hideItemResult();
+            hideSearchResults();
+        }
+    });
+    
+    // Keyboard navigation untuk dropdown
+    searchInput.addEventListener('keydown', function(e) {
+        const dropdown = document.getElementById('searchResultsDropdown');
+        if (!dropdown || dropdown.style.display === 'none') return;
+        
+        const items = dropdown.querySelectorAll('.search-result-item');
+        if (items.length === 0) return;
+        
+        let currentIndex = -1;
+        items.forEach((item, index) => {
+            if (item.classList.contains('active')) {
+                currentIndex = index;
+            }
+        });
+        
+        if (e.key === 'ArrowDown') {
+            e.preventDefault();
+            items.forEach(item => item.classList.remove('active'));
+            const nextIndex = (currentIndex + 1) % items.length;
+            items[nextIndex].classList.add('active');
+            items[nextIndex].scrollIntoView({ block: 'nearest' });
+        } else if (e.key === 'ArrowUp') {
+            e.preventDefault();
+            items.forEach(item => item.classList.remove('active'));
+            const prevIndex = currentIndex <= 0 ? items.length - 1 : currentIndex - 1;
+            items[prevIndex].classList.add('active');
+            items[prevIndex].scrollIntoView({ block: 'nearest' });
+        } else if (e.key === 'Enter') {
+            e.preventDefault();
+            if (currentIndex >= 0) {
+                items[currentIndex].click();
+            } else if (items.length > 0) {
+                items[0].click();
+            }
+        } else if (e.key === 'Escape') {
+            e.preventDefault();
+            hideSearchResults();
+        }
+    });
+    
+    // Click outside to close dropdown
+    document.addEventListener('click', function(e) {
+        const dropdown = document.getElementById('searchResultsDropdown');
+        if (dropdown && !searchInput.contains(e.target) && !dropdown.contains(e.target)) {
+            hideSearchResults();
         }
     });
     
@@ -563,23 +612,148 @@ async function loadKategori() {
 function searchBarang(query) {
     console.log('🔎 Searching for:', query);
     
-    const results = dataMaster.filter(item => {
-        return item.id.toLowerCase().includes(query.toLowerCase()) ||
-               item.nama.toLowerCase().includes(query.toLowerCase());
-    });
+    const queryLower = query.toLowerCase().trim();
     
-    console.log(`Found ${results.length} results`);
+    // Filter dengan scoring untuk prioritas
+    const scoredResults = dataMaster
+        .map(item => {
+            const idLower = item.id.toLowerCase();
+            const namaLower = item.nama.toLowerCase();
+            let score = 0;
+            
+            // EXACT MATCH (highest priority) - Score: 1000
+            if (idLower === queryLower || namaLower === queryLower) {
+                score = 1000;
+            }
+            // STARTS WITH (high priority) - Score: 500
+            else if (idLower.startsWith(queryLower) || namaLower.startsWith(queryLower)) {
+                score = 500;
+            }
+            // CONTAINS (medium priority) - Score: 100
+            else if (idLower.includes(queryLower) || namaLower.includes(queryLower)) {
+                score = 100;
+            }
+            // FUZZY MATCH (low priority) - Score: 10
+            else if (fuzzyMatch(queryLower, namaLower) || fuzzyMatch(queryLower, idLower)) {
+                score = 10;
+            }
+            
+            return { item, score };
+        })
+        .filter(result => result.score > 0)
+        .sort((a, b) => b.score - a.score);
+    
+    const results = scoredResults.map(r => r.item);
+    
+    console.log(`Found ${results.length} results (top score: ${scoredResults[0]?.score || 0})`);
     
     if (results.length > 0) {
-        selectItem(results[0]);
+        // Jika hanya 1 hasil atau hasil pertama exact match, langsung pilih
+        if (results.length === 1 || scoredResults[0].score === 1000) {
+            selectItem(results[0]);
+        } else {
+            // Tampilkan dropdown dengan multiple results
+            showSearchResults(results, query);
+        }
     } else {
         hideItemResult();
+        hideSearchResults();
         
         UI.showAlert('❌ Barang tidak ditemukan. Membuka form tambah barang...', 'warning', 2000);
         
         setTimeout(() => {
             openAddItemModal(query);
         }, 500);
+    }
+}
+
+// Fuzzy matching untuk toleransi typo
+function fuzzyMatch(query, target) {
+    // Hapus spasi dan karakter khusus
+    const cleanQuery = query.replace(/[\s-_]/g, '');
+    const cleanTarget = target.replace(/[\s-_]/g, '');
+    
+    // Cek apakah semua karakter query ada di target (dengan urutan)
+    let queryIndex = 0;
+    for (let i = 0; i < cleanTarget.length && queryIndex < cleanQuery.length; i++) {
+        if (cleanTarget[i] === cleanQuery[queryIndex]) {
+            queryIndex++;
+        }
+    }
+    
+    return queryIndex === cleanQuery.length;
+}
+
+// Tampilkan dropdown hasil pencarian
+function showSearchResults(results, query) {
+    console.log('📋 Showing search results dropdown');
+    
+    // Buat atau ambil dropdown container
+    let dropdown = document.getElementById('searchResultsDropdown');
+    if (!dropdown) {
+        dropdown = document.createElement('div');
+        dropdown.id = 'searchResultsDropdown';
+        dropdown.className = 'search-results-dropdown';
+        
+        const searchInput = document.getElementById('manualIdInput');
+        searchInput.parentElement.style.position = 'relative';
+        searchInput.parentElement.appendChild(dropdown);
+    }
+    
+    // Batasi hasil maksimal 5
+    const maxResults = 5;
+    const displayResults = results.slice(0, maxResults);
+    
+    let html = '';
+    displayResults.forEach((item, index) => {
+        const highlightedName = highlightMatch(item.nama, query);
+        const highlightedId = highlightMatch(item.id, query);
+        
+        html += `
+            <div class="search-result-item" onclick="window.selectItemFromDropdown(${index})" data-index="${index}">
+                <div class="result-name">${highlightedName}</div>
+                <div class="result-details">
+                    <span class="result-id">ID: ${highlightedId}</span>
+                    <span class="result-stock">Stok A: ${item.stokA} | B: ${item.stokB}</span>
+                </div>
+            </div>
+        `;
+    });
+    
+    if (results.length > maxResults) {
+        html += `
+            <div class="search-result-more">
+                +${results.length - maxResults} hasil lainnya...
+            </div>
+        `;
+    }
+    
+    dropdown.innerHTML = html;
+    dropdown.style.display = 'block';
+    
+    // Store results untuk dipilih
+    window.searchResultsCache = displayResults;
+}
+
+// Highlight matching text
+function highlightMatch(text, query) {
+    const regex = new RegExp(`(${query})`, 'gi');
+    return text.replace(regex, '<mark>$1</mark>');
+}
+
+// Pilih item dari dropdown
+window.selectItemFromDropdown = function(index) {
+    if (window.searchResultsCache && window.searchResultsCache[index]) {
+        selectItem(window.searchResultsCache[index]);
+        hideSearchResults();
+    }
+};
+
+// Sembunyikan dropdown hasil pencarian
+function hideSearchResults() {
+    const dropdown = document.getElementById('searchResultsDropdown');
+    if (dropdown) {
+        dropdown.style.display = 'none';
     }
 }
 
