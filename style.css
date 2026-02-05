@@ -1526,3 +1526,156 @@
 .search-results-dropdown::-webkit-scrollbar-thumb:hover {
     background: rgba(79, 172, 254, 0.5);
 }
+
+/* ============================================
+   DROPDOWN FIX - PASTIKAN DI ATAS SEMUA
+   ============================================ */
+
+/* Reset semua z-index yang mungkin mengganggu */
+body {
+    position: relative;
+    z-index: 1 !important;
+}
+
+.container, .card, .app-header, .search-wrapper {
+    position: relative;
+    z-index: 1 !important;
+}
+
+/* Dropdown HARUS di atas semua */
+.search-results-dropdown {
+    position: fixed !important;
+    background: rgba(20, 20, 30, 0.98) !important;
+    border: 1px solid rgba(255, 255, 255, 0.15) !important;
+    border-radius: 8px !important;
+    max-height: 300px !important;
+    overflow-y: auto !important;
+    z-index: 999999 !important; /* MAX VALUE */
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.9) !important;
+    backdrop-filter: blur(20px) !important;
+    display: none;
+    transform: translateZ(0);
+    will-change: transform, opacity;
+}
+
+.search-result-item {
+    padding: 0.75rem 1rem;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.search-result-item:hover,
+.search-result-item.active {
+    background: rgba(79, 172, 254, 0.1);
+    border-left: 3px solid var(--primary);
+}
+
+.search-result-item:last-child {
+    border-bottom: none;
+}
+
+.result-name {
+    font-weight: 600;
+    color: white;
+    margin-bottom: 0.25rem;
+    font-size: 0.95rem;
+}
+
+.result-name mark {
+    background: rgba(79, 172, 254, 0.3);
+    color: var(--primary);
+    padding: 0.1rem 0.2rem;
+    border-radius: 3px;
+}
+
+.result-details {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 1rem;
+    font-size: 0.75rem;
+    color: var(--text-secondary);
+}
+
+.result-id {
+    color: rgba(255, 255, 255, 0.6);
+}
+
+.result-id mark {
+    background: rgba(79, 172, 254, 0.2);
+    color: var(--primary);
+    padding: 0.1rem 0.2rem;
+    border-radius: 3px;
+}
+
+.result-stock {
+    color: var(--text-secondary);
+    font-weight: 500;
+}
+
+.search-result-more {
+    padding: 0.5rem 1rem;
+    text-align: center;
+    color: var(--text-secondary);
+    font-size: 0.8rem;
+    font-style: italic;
+    background: rgba(255, 255, 255, 0.02);
+}
+
+/* Mobile responsive untuk dropdown */
+@media (max-width: 768px) {
+    .search-results-dropdown {
+        max-height: 250px !important;
+        margin-top: 0.3rem !important;
+        z-index: 999999 !important;
+    }
+    
+    .search-result-item {
+        padding: 0.6rem 0.75rem;
+    }
+    
+    .result-name {
+        font-size: 0.85rem;
+    }
+    
+    .result-details {
+        font-size: 0.7rem;
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 0.25rem;
+    }
+}
+
+/* Scrollbar untuk dropdown */
+.search-results-dropdown::-webkit-scrollbar {
+    width: 6px;
+}
+
+.search-results-dropdown::-webkit-scrollbar-track {
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 3px;
+}
+
+.search-results-dropdown::-webkit-scrollbar-thumb {
+    background: rgba(79, 172, 254, 0.3);
+    border-radius: 3px;
+}
+
+.search-results-dropdown::-webkit-scrollbar-thumb:hover {
+    background: rgba(79, 172, 254, 0.5);
+}
+
+/* Pastikan modal dan loading tetap di atas dropdown */
+.modal-overlay {
+    z-index: 1000000 !important;
+}
+
+.loading-overlay {
+    z-index: 1000001 !important;
+}
+
+/* Override semua z-index yang mungkin mengganggu */
+*[style*="z-index"]:not(.search-results-dropdown):not(.modal-overlay):not(.loading-overlay) {
+    z-index: auto !important;
+}
