@@ -696,8 +696,10 @@ function showSearchResults(results, query) {
         dropdown.className = 'search-results-dropdown';
         
         const searchInput = document.getElementById('manualIdInput');
-        searchInput.parentElement.style.position = 'relative';
-        searchInput.parentElement.appendChild(dropdown);
+        const parentEl = searchInput.parentElement;
+        parentEl.style.position = 'relative';
+        parentEl.style.zIndex = '10000'; // Pastikan parent juga di atas
+        parentEl.appendChild(dropdown);
     }
     
     // Batasi hasil maksimal 5
@@ -730,6 +732,7 @@ function showSearchResults(results, query) {
     
     dropdown.innerHTML = html;
     dropdown.style.display = 'block';
+    dropdown.style.zIndex = '10001'; // Pastikan dropdown paling atas
     
     // Store results untuk dipilih
     window.searchResultsCache = displayResults;
