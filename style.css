@@ -1679,3 +1679,85 @@ body {
 *[style*="z-index"]:not(.search-results-dropdown):not(.modal-overlay):not(.loading-overlay) {
     z-index: auto !important;
 }
+
+/* ============================================
+   MOBILE KEYBOARD FIX
+   ============================================ */
+
+/* Prevent zoom on focus (iOS) */
+@media (max-width: 768px) {
+    input[type="text"],
+    input[type="number"],
+    input[type="search"],
+    textarea,
+    select {
+        font-size: 16px !important; /* Cegah zoom otomatis iOS */
+        touch-action: manipulation;
+        -webkit-user-select: text;
+        user-select: text;
+    }
+    
+    /* Special untuk input number */
+    input[type="number"] {
+        font-size: 18px !important; /* Lebih besar untuk mudah di-tap */
+    }
+    
+    /* Pastikan form tidak melompat */
+    .container {
+        padding-bottom: 100px; /* Ruang untuk keyboard */
+    }
+    
+    /* When input is focused */
+    body.keyboard-open {
+        padding-bottom: 300px; /* Extra space untuk keyboard */
+    }
+    
+    /* Kurangi tinggi header saat keyboard terbuka */
+    body.keyboard-open .app-header {
+        padding: 0.5rem !important;
+    }
+    
+    /* Scroll ke input yang aktif */
+    :focus {
+        scroll-margin-top: 100px; /* Biar tidak tertutup keyboard */
+    }
+}
+
+/* Samsung/Android fix */
+@media (max-height: 600px) {
+    /* Landscape mode atau layar kecil */
+    .container {
+        padding: 0.5rem !important;
+    }
+    
+    .card {
+        padding: 0.75rem !important;
+        margin-bottom: 0.5rem !important;
+    }
+    
+    .search-input {
+        font-size: 14px !important;
+        padding: 0.8rem !important;
+        min-height: 44px !important;
+    }
+    
+    .input-field {
+        padding: 0.6rem !important;
+        font-size: 16px !important;
+    }
+}
+
+/* iOS specific fixes */
+@supports (-webkit-touch-callout: none) {
+    .container {
+        min-height: -webkit-fill-available;
+    }
+    
+    /* Safari 15+ */
+    @media screen and (max-width: 768px) {
+        .search-input:focus,
+        .input-field:focus {
+            font-size: 16px !important;
+        }
+    }
+}

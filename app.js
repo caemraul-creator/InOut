@@ -1149,3 +1149,78 @@ if (document.getElementById('transaksiForm')) {
         }, 100);
     });
 }
+
+// ============================================
+// MOBILE KEYBOARD HANDLER
+// ============================================ 
+
+function setupMobileKeyboardHandler() {
+    if (!('ontouchstart' in window)) return; // Hanya untuk touch devices
+    
+    console.log('📱 Setting up mobile keyboard handler');
+    
+    const inputs = document.querySelectorAll('input, textarea, select');
+    let activeInput = null;
+    let keyboardHeight = 0;
+    
+    // Detect keyboard show/hide
+    function checkKeyboard() {
+        const viewportHeight = window.innerHeight;
+        const documentHeight = document.documentElement.clientHeight;
+        
+        // Jika keyboard muncul, height berubah
+        if (documentHeight > viewportHeight) {
+            keyboardHeight = documentHeight - viewportHeight;
+            document.body.classList.add('keyboard-open');
+            
+            // Scroll ke input yang aktif
+            if (activeInput) {
+                setTimeout(() => {
+                    activeInput.scrollIntoView({
+                        behavior: 'smooth',
+                        block: 'center'
+                    });
+                }, 100);
+            }
+        } else {
+            document.body.classList.remove('keyboard-open');
+            keyboardHeight = 0;
+        }
+    }
+    
+    // Track active input
+    inputs.forEach(input => {
+        input.addEventListener('focus', function() {
+            activeInput = this;
+            document.body.classList.add('input-focused');
+            
+            // Untuk Android, beri delay
+            setTimeout(checkKeyboard, 300);
+        });
+        
+        input.addEventListener('blur', function() {
+            activeInput = null;
+            document.body.classList.remove('input-focused');
+            
+            // Delay untuk memastikan keyboard benar-benar tertutup
+            setTimeout(checkKeyboard, 500);
+        });
+    });
+    
+    // Listen untuk resize (keyboard show/hide memicu resize di mobile)
+    let resizeTimeout;
+    window.addEventListener('resize', function() {
+        clearTimeout(resizeTimeout);
+        resizeTimeout = setTimeout(checkKeyboard, 100);
+    });
+    
+    // Initial check
+    setTimeout(checkKeyboard, 1000);
+}
+
+// Panggil saat page load
+if (document.getElementById('transaksiForm')) {
+    document.addEventListener('DOMContentLoaded', function() {
+        setTimeout(setupMobileKeyboardHandler, 500);
+    });
+}
