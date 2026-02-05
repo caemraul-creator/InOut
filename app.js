@@ -132,7 +132,12 @@ function setupEventListeners() {
     // Click outside to close dropdown
     document.addEventListener('click', function(e) {
         const dropdown = document.getElementById('searchResultsDropdown');
-        if (dropdown && !searchInput.contains(e.target) && !dropdown.contains(e.target)) {
+        const searchInput = document.getElementById('manualIdInput');
+        
+        if (dropdown && 
+            dropdown.style.display === 'block' &&
+            !searchInput.contains(e.target) && 
+            !dropdown.contains(e.target)) {
             hideSearchResults();
         }
     });
@@ -688,6 +693,9 @@ function fuzzyMatch(query, target) {
 function showSearchResults(results, query) {
     console.log('📋 Showing search results dropdown');
     
+    const searchInput = document.getElementById('manualIdInput');
+    const inputRect = searchInput.getBoundingClientRect();
+    
     // Buat atau ambil dropdown container
     let dropdown = document.getElementById('searchResultsDropdown');
     if (!dropdown) {
@@ -695,12 +703,15 @@ function showSearchResults(results, query) {
         dropdown.id = 'searchResultsDropdown';
         dropdown.className = 'search-results-dropdown';
         
-        const searchInput = document.getElementById('manualIdInput');
-        const parentEl = searchInput.parentElement;
-        parentEl.style.position = 'relative';
-        parentEl.style.zIndex = '10000'; // Pastikan parent juga di atas
-        parentEl.appendChild(dropdown);
+        // Append ke body, bukan ke parent input
+        document.body.appendChild(dropdown);
     }
+    
+    // Position dropdown di bawah input dengan fixed positioning
+    dropdown.style.position = 'fixed';
+    dropdown.style.top = (inputRect.bottom + 8) + 'px';
+    dropdown.style.left = inputRect.left + 'px';
+    dropdown.style.width = inputRect.width + 'px';
     
     // Batasi hasil maksimal 5
     const maxResults = 5;
@@ -732,10 +743,25 @@ function showSearchResults(results, query) {
     
     dropdown.innerHTML = html;
     dropdown.style.display = 'block';
-    dropdown.style.zIndex = '10001'; // Pastikan dropdown paling atas
     
     // Store results untuk dipilih
     window.searchResultsCache = displayResults;
+    
+    // Update posisi saat scroll atau resize
+    const updatePosition = () => {
+        const newRect = searchInput.getBoundingClientRect();
+        dropdown.style.top = (newRect.bottom + 8) + 'px';
+        dropdown.style.left = newRect.left + 'px';
+        dropdown.style.width = newRect.width + 'px';
+    };
+    
+    // Add scroll listener
+    window.removeEventListener('scroll', updatePosition);
+    window.addEventListener('scroll', updatePosition);
+    
+    // Add resize listener
+    window.removeEventListener('resize', updatePosition);
+    window.addEventListener('resize', updatePosition);
 }
 
 // Highlight matching text

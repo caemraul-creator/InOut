@@ -1407,45 +1407,16 @@
    SEARCH RESULTS DROPDOWN
    ============================================ */
 
-/* Ensure input-group has proper z-index when dropdown is active */
-.input-group {
-    position: relative;
-}
-
-.input-group:has(.search-results-dropdown[style*="display: block"]) {
-    z-index: 10000 !important;
-}
-
-/* Pastikan elemen di bawah dropdown tidak menutupi */
-.card,
-.item-card,
-.stock-info,
-.form-group {
-    position: relative;
-    z-index: 1;
-}
-
-/* Tapi search input parent harus lebih tinggi */
-.search-section,
-.search-box {
-    position: relative;
-    z-index: auto;
-}
-
 .search-results-dropdown {
-    position: absolute;
-    top: 100%;
-    left: 0;
-    right: 0;
+    position: fixed; /* Changed from absolute to fixed */
     background: rgba(20, 20, 30, 0.98);
     border: 1px solid rgba(255, 255, 255, 0.15);
     border-radius: 8px;
-    margin-top: 0.5rem;
     max-height: 300px;
     overflow-y: auto;
-    z-index: 10001 !important; /* Higher than everything */
-    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.5);
-    backdrop-filter: blur(10px);
+    z-index: 99999 !important; /* Very high z-index */
+    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.7);
+    backdrop-filter: blur(20px);
     display: none;
 }
 
