@@ -417,96 +417,31 @@ async function submitNewKategori() {
 }
 
 // ============================================
-// CONFIRMATION MODAL
+// CONFIRMATION MODAL (DEPRECATED - NOT USED ANYMORE)
 // ============================================
 
 function setupConfirmationModal() {
-    const modal = document.getElementById('confirmModal');
-    const btnCancel = document.getElementById('btnCancelConfirm');
-    const btnOk = document.getElementById('btnOkConfirm');
-    
-    if (btnCancel) {
-        btnCancel.addEventListener('click', hideConfirmation);
-    }
-    
-    if (btnOk) {
-        btnOk.addEventListener('click', submitTransaction);
-    }
-    
-    if (modal) {
-        modal.addEventListener('click', function(e) {
-            if (e.target === modal) {
-                hideConfirmation();
-            }
-        });
-    }
+    // Modal konfirmasi sudah tidak digunakan
+    // Function ini tetap ada untuk backward compatibility
+    console.log('⚠️ Confirmation modal is deprecated, transactions are now direct');
 }
 
 function showConfirmation() {
-    console.log('📋 Showing confirmation modal...');
+    console.log('📋 Validating and submitting transaction...');
     
     if (!validateForm()) {
         console.log('❌ Form validation failed');
         return;
     }
     
-    const gudangBtn = document.querySelector('.warehouse-btn.active');
-    const gudangValue = gudangBtn.dataset.warehouse; // "Kalipucang" atau "Troso"
-    const gudangDisplay = getGudangDisplayNameFromValue(gudangValue);
-    
-    const jenis = document.querySelector('.type-btn.active').dataset.type;
-    const barangNama = tempSelectedItem ? tempSelectedItem.nama : '-';
-    const barangId = tempSelectedItem ? tempSelectedItem.id : '-';
-    const jumlah = document.getElementById('jumlah').value;
-    const satuan = tempSelectedItem ? tempSelectedItem.satuan : 'Unit';
-    const petugas = document.getElementById('user').value;
-    const keterangan = document.getElementById('keterangan').value;
-    
-    // Kirim A/B ke API, tampilkan nama lengkap ke user
-    const gudangApi = gudangValue === 'Kalipucang' ? 'A' : 'B';
-    
-    pendingTransaction = {
-        lokasiGudang: gudangApi, // Kirim "A" atau "B" ke API
-        jenis: jenis,
-        idBarang: barangId,
-        namaBarang: barangNama,
-        jumlah: jumlah,
-        satuan: satuan,
-        user: petugas,
-        keterangan: keterangan
-    };
-    
-    console.log('📦 Pending transaction:', pendingTransaction);
-    
-    document.getElementById('confirmGudang').textContent = gudangDisplay;
-    document.getElementById('confirmJenis').textContent = jenis;
-    document.getElementById('confirmBarang').textContent = barangNama;
-    document.getElementById('confirmId').textContent = barangId;
-    document.getElementById('confirmJumlah').textContent = `${jumlah} ${satuan}`;
-    document.getElementById('confirmPetugas').textContent = petugas;
-    
-    const ketRow = document.getElementById('confirmKetRow');
-    if (keterangan && keterangan.trim() !== '') {
-        document.getElementById('confirmKeterangan').textContent = keterangan;
-        ketRow.style.display = 'flex';
-    } else {
-        ketRow.style.display = 'none';
-    }
-    
-    const modal = document.getElementById('confirmModal');
-    if (modal) {
-        modal.classList.add('show');
-        console.log('✅ Confirmation modal shown');
-    }
+    // Langsung submit tanpa modal konfirmasi
+    submitTransactionDirect();
 }
 
 function hideConfirmation() {
-    console.log('Hiding confirmation modal');
-    const modal = document.getElementById('confirmModal');
-    if (modal) {
-        modal.classList.remove('show');
-    }
-    pendingTransaction = null;
+    // Function ini tetap ada untuk backward compatibility
+    // Tapi tidak digunakan lagi
+    console.log('Hiding confirmation modal (deprecated)');
 }
 
 function validateForm() {
@@ -533,39 +468,64 @@ function validateForm() {
     return true;
 }
 
-async function submitTransaction() {
-    if (!pendingTransaction) {
-        console.error('❌ No pending transaction');
-        return;
-    }
-    
-    const btnOk = document.getElementById('btnOkConfirm');
-    const originalText = btnOk.innerHTML;
-    
+async function submitTransactionDirect() {
     try {
-        console.log('💾 Submitting transaction...');
-        console.log('Transaction data:', pendingTransaction);
+        console.log('💾 Submitting transaction directly...');
         
-        btnOk.disabled = true;
-        btnOk.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Menyimpan...';
+        const gudangBtn = document.querySelector('.warehouse-btn.active');
+        const gudangValue = gudangBtn.dataset.warehouse; // "Kalipucang" atau "Troso"
         
-        const result = await API.post('submitTransaksi', pendingTransaction);
+        const jenis = document.querySelector('.type-btn.active').dataset.type;
+        const barangNama = tempSelectedItem ? tempSelectedItem.nama : '-';
+        const barangId = tempSelectedItem ? tempSelectedItem.id : '-';
+        const jumlah = document.getElementById('jumlah').value;
+        const satuan = tempSelectedItem ? tempSelectedItem.satuan : 'Unit';
+        const petugas = document.getElementById('user').value;
+        const keterangan = document.getElementById('keterangan').value;
+        
+        // Kirim A/B ke API
+        const gudangApi = gudangValue === 'Kalipucang' ? 'A' : 'B';
+        
+        const transactionData = {
+            lokasiGudang: gudangApi,
+            jenis: jenis,
+            idBarang: barangId,
+            namaBarang: barangNama,
+            jumlah: jumlah,
+            satuan: satuan,
+            user: petugas,
+            keterangan: keterangan
+        };
+        
+        console.log('Transaction data:', transactionData);
+        
+        // Show loading
+        UI.showLoading();
+        
+        const result = await API.post('submitTransaksi', transactionData);
         
         console.log('✅ Transaction submitted successfully:', result);
         
-        hideConfirmation();
-        UI.showAlert('✅ Transaksi berhasil disimpan!', 'success');
+        UI.hideLoading();
         
-        setTimeout(() => {
-            resetForm();
-        }, 500);
+        // Show success message
+        const jenisText = jenis === 'Masuk' ? 'masuk' : 'keluar';
+        UI.showAlert(`✅ Transaksi ${jenisText} berhasil! ${barangNama} (${jumlah} ${satuan})`, 'success', 2000);
+        
+        // Reset form langsung tanpa delay
+        resetForm();
         
     } catch (error) {
         console.error('❌ Error submitting transaction:', error);
+        UI.hideLoading();
         UI.showAlert('❌ Gagal menyimpan transaksi: ' + error.message, 'danger');
-        btnOk.disabled = false;
-        btnOk.innerHTML = originalText;
     }
+}
+
+// Keep old submitTransaction for backward compatibility
+async function submitTransaction() {
+    // Redirect to direct submit
+    await submitTransactionDirect();
 }
 
 // ============================================
