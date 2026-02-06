@@ -22,10 +22,9 @@ document.addEventListener('DOMContentLoaded', function() {
         return;
     }
     
-    // Set default month to current month
-    const today = new Date();
-    const currentMonth = today.toISOString().slice(0, 7); // Format: YYYY-MM
-    document.getElementById('filterMonth').value = currentMonth;
+    // Set default month to EMPTY (show all)
+    // User can manually select month if needed
+    document.getElementById('filterMonth').value = '';
     
     // Load initial data
     loadTransactions();
@@ -116,26 +115,43 @@ function applyFilters() {
     
     // Filter transactions
     filteredTransactions = allTransactions.filter(transaction => {
-        // Search filter (ID or Name)
-        if (searchTerm) {
-            const matchId = (transaction.idBarang || '').toLowerCase().includes(searchTerm);
-            const matchName = (transaction.namaBarang || '').toLowerCase().includes(searchTerm);
-            if (!matchId && !matchName) return false;
-        }
-        
-        // Month filter
-        if (filterMonth) {
-            const transDate = parseIndonesianDate(transaction.tanggal);
-            const transMonth = transDate.toISOString().slice(0, 7); // Format: YYYY-MM
-            if (transMonth !== filterMonth) return false;
-        }
-        
-        // Transaction type filter
-        if (filterJenis && transaction.jenis !== filterJenis) {
+        try {
+            // Search filter (ID or Name)
+            if (searchTerm) {
+                const matchId = (transaction.idBarang || '').toLowerCase().includes(searchTerm);
+                const matchName = (transaction.namaBarang || '').toLowerCase().includes(searchTerm);
+                if (!matchId && !matchName) return false;
+            }
+            
+            // Month filter
+            if (filterMonth) {
+                const transDate = parseIndonesianDate(transaction.tanggal);
+                
+                // Skip invalid dates
+                if (!transDate || transDate.getTime() === 0) {
+                    console.warn('Skipping transaction with invalid date:', transaction.tanggal);
+                    return false;
+                }
+                
+                try {
+                    const transMonth = transDate.toISOString().slice(0, 7); // Format: YYYY-MM
+                    if (transMonth !== filterMonth) return false;
+                } catch (isoError) {
+                    console.warn('Cannot convert date to ISO:', transaction.tanggal, isoError);
+                    return false;
+                }
+            }
+            
+            // Transaction type filter
+            if (filterJenis && transaction.jenis !== filterJenis) {
+                return false;
+            }
+            
+            return true;
+        } catch (filterError) {
+            console.error('Error filtering transaction:', transaction, filterError);
             return false;
         }
-        
-        return true;
     });
     
     console.log('Filtered transactions:', filteredTransactions.length, 'of', allTransactions.length);
@@ -146,16 +162,37 @@ function applyFilters() {
 
 // Parse Indonesian date format (dd/MM/yyyy HH:mm:ss)
 function parseIndonesianDate(dateStr) {
-    if (!dateStr) return new Date();
+    if (!dateStr || dateStr === '-' || dateStr.trim() === '') {
+        console.warn('Empty or invalid date string:', dateStr);
+        return new Date(0); // Return epoch time for invalid dates
+    }
     
     try {
         // Format: "31/12/2024 23:59:59" or "31/12/2024"
-        const parts = dateStr.split(' ');
+        const parts = String(dateStr).trim().split(' ');
         const dateParts = parts[0].split('/');
+        
+        // Validate date parts
+        if (dateParts.length < 3) {
+            console.warn('Invalid date format (missing parts):', dateStr);
+            return new Date(0);
+        }
         
         const day = parseInt(dateParts[0]);
         const month = parseInt(dateParts[1]) - 1; // Month is 0-indexed
         const year = parseInt(dateParts[2]);
+        
+        // Validate numeric values
+        if (isNaN(day) || isNaN(month) || isNaN(year)) {
+            console.warn('Invalid date values:', { day, month, year, dateStr });
+            return new Date(0);
+        }
+        
+        // Validate ranges
+        if (day < 1 || day > 31 || month < 0 || month > 11 || year < 1900 || year > 2100) {
+            console.warn('Date values out of range:', { day, month, year, dateStr });
+            return new Date(0);
+        }
         
         let hours = 0, minutes = 0, seconds = 0;
         
@@ -166,10 +203,18 @@ function parseIndonesianDate(dateStr) {
             seconds = parseInt(timeParts[2]) || 0;
         }
         
-        return new Date(year, month, day, hours, minutes, seconds);
+        const date = new Date(year, month, day, hours, minutes, seconds);
+        
+        // Check if date is valid
+        if (isNaN(date.getTime())) {
+            console.warn('Constructed date is invalid:', dateStr, date);
+            return new Date(0);
+        }
+        
+        return date;
     } catch (error) {
-        console.error('Date parse error:', error, dateStr);
-        return new Date();
+        console.error('Date parse error:', error, 'for dateStr:', dateStr);
+        return new Date(0); // Return epoch time on error
     }
 }
 
@@ -189,11 +234,16 @@ function renderTable(transactions) {
         return;
     }
     
-    // Sort by date (newest first)
+    // Sort by date (newest first) - with safe date parsing
     transactions.sort((a, b) => {
-        const dateA = parseIndonesianDate(a.tanggal);
-        const dateB = parseIndonesianDate(b.tanggal);
-        return dateB - dateA;
+        try {
+            const dateA = parseIndonesianDate(a.tanggal);
+            const dateB = parseIndonesianDate(b.tanggal);
+            return dateB.getTime() - dateA.getTime();
+        } catch (error) {
+            console.warn('Error sorting transactions:', error);
+            return 0;
+        }
     });
     
     let html = '';
@@ -203,10 +253,10 @@ function renderTable(transactions) {
         const badgeText = transaction.jenis === 'In' ? 'Masuk' : 'Keluar';
         const badgeIcon = transaction.jenis === 'In' ? 'fa-arrow-down' : 'fa-arrow-up';
         
-        // Escape strings for onclick
-        const escapedNama = (transaction.namaBarang || '').replace(/'/g, "\\'").replace(/"/g, '&quot;');
-        const escapedId = (transaction.idBarang || '').replace(/'/g, "\\'").replace(/"/g, '&quot;');
-        const escapedJenis = (transaction.jenis || '').replace(/'/g, "\\'").replace(/"/g, '&quot;');
+        // Escape strings for data attributes
+        const escapedNama = (transaction.namaBarang || '').replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+        const escapedId = (transaction.idBarang || '').replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+        const escapedJenis = (transaction.jenis || '').replace(/"/g, '&quot;').replace(/'/g, '&#39;');
         
         html += `
             <tr style="animation: fadeInUp 0.3s ease ${index * 0.03}s both;" data-row-index="${transaction.rowIndex || 0}">
