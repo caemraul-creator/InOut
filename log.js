@@ -1,5 +1,5 @@
 // ============================================
-// LOG.JS - Transaction Log Functions (MODIFIED)
+// LOG.JS - Transaction Log Functions (WITH DELETE)
 // ============================================
 
 let currentWarehouse = 'A';
@@ -37,7 +37,7 @@ document.addEventListener('DOMContentLoaded', function() {
         clearTimeout(searchTimeout);
         searchTimeout = setTimeout(() => {
             applyFilters();
-        }, 200); // Dipercepat dari 500ms ke 200ms
+        }, 200);
     });
     
     // Enter key to search
@@ -180,7 +180,7 @@ function renderTable(transactions) {
     if (transactions.length === 0) {
         tbody.innerHTML = `
             <tr>
-                <td colspan="5" class="no-data">
+                <td colspan="6" class="no-data">
                     <i class="fas fa-inbox"></i>
                     <p>Tidak ada data transaksi yang sesuai dengan filter</p>
                 </td>
@@ -204,7 +204,7 @@ function renderTable(transactions) {
         const badgeIcon = transaction.jenis === 'In' ? 'fa-arrow-down' : 'fa-arrow-up';
         
         html += `
-            <tr style="animation: fadeInUp 0.3s ease ${index * 0.03}s both;">
+            <tr style="animation: fadeInUp 0.3s ease ${index * 0.03}s both;" data-row-index="${transaction.rowIndex || 0}">
                 <td data-label="Tanggal & Waktu">
                     <div style="display: flex; align-items: center; gap: 0.5rem;">
                         <i class="far fa-clock" style="color: var(--text-secondary);"></i>
@@ -230,6 +230,13 @@ function renderTable(transactions) {
                 <td data-label="Keterangan" style="color: var(--text-secondary);">
                     ${transaction.keterangan || '-'}
                 </td>
+                <td data-label="Aksi" style="text-align: center;">
+                    <button class="btn-delete-transaction" 
+                            onclick="deleteTransaction(${transaction.rowIndex}, '${transaction.idBarang}', '${transaction.jenis}', ${transaction.jumlah}, '${transaction.namaBarang}')"
+                            title="Hapus transaksi ini">
+                        <i class="fas fa-trash"></i>
+                    </button>
+                </td>
             </tr>
         `;
     });
@@ -237,6 +244,62 @@ function renderTable(transactions) {
     tbody.innerHTML = html;
     
     console.log('Table rendered with', transactions.length, 'rows');
+}
+
+// ============================================
+// DELETE TRANSACTION FUNCTION
+// ============================================
+
+async function deleteTransaction(rowIndex, idBarang, jenis, jumlah, namaBarang) {
+    // Confirm dialog
+    const confirmMsg = `Apakah Anda yakin ingin menghapus transaksi ini?\n\n` +
+                      `Barang: ${namaBarang}\n` +
+                      `Jenis: ${jenis === 'In' ? 'Masuk' : 'Keluar'}\n` +
+                      `Jumlah: ${jumlah}\n\n` +
+                      `Stock akan dikembalikan ke kondisi sebelum transaksi.`;
+    
+    if (!confirm(confirmMsg)) {
+        return;
+    }
+    
+    try {
+        UI.showLoading();
+        
+        console.log('Deleting transaction:', {
+            rowIndex,
+            idBarang,
+            jenis,
+            jumlah,
+            gudang: currentWarehouse
+        });
+        
+        // Call API to delete transaction
+        const response = await API.post('deleteTransaction', {
+            gudang: currentWarehouse,
+            rowIndex: rowIndex,
+            idBarang: idBarang,
+            jenis: jenis,
+            jumlah: jumlah
+        });
+        
+        console.log('Delete response:', response);
+        
+        if (response.success) {
+            UI.showAlert('✅ Transaksi berhasil dihapus dan stock dikembalikan', 'success');
+            
+            // Reload transactions
+            await loadTransactions();
+        } else {
+            throw new Error(response.error || 'Gagal menghapus transaksi');
+        }
+        
+        UI.hideLoading();
+        
+    } catch (error) {
+        console.error('Error deleting transaction:', error);
+        UI.hideLoading();
+        UI.showAlert('❌ Gagal menghapus transaksi: ' + error.message, 'danger');
+    }
 }
 
 // Export to CSV (bonus feature)
@@ -275,5 +338,6 @@ function exportToCSV() {
 window.LogHelper = {
     switchWarehouse: switchWarehouse,
     applyFilters: applyFilters,
-    exportToCSV: exportToCSV
+    exportToCSV: exportToCSV,
+    deleteTransaction: deleteTransaction
 };
