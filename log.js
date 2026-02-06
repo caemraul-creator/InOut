@@ -12,6 +12,40 @@ const GudangMapping = {
     'B': { display: 'Gudang Troso', value: 'Troso' }
 };
 
+// Initialize log page
+document.addEventListener('DOMContentLoaded', function() {
+    console.log('Log page initializing...');
+    
+    // Check authentication
+    if (!AUTH.isLoggedIn()) {
+        window.location.href = 'login.html';
+        return;
+    }
+    
+    // Set default month to EMPTY (show all)
+    document.getElementById('filterMonth').value = '';
+    
+    // Load initial data
+    loadTransactions();
+    
+    // Setup real-time search
+    const searchInput = document.getElementById('searchBarang');
+    let searchTimeout;
+    searchInput.addEventListener('input', function() {
+        clearTimeout(searchTimeout);
+        searchTimeout = setTimeout(() => {
+            applyFilters();
+        }, 200);
+    });
+    
+    // Enter key to search
+    searchInput.addEventListener('keypress', function(e) {
+        if (e.key === 'Enter') {
+            applyFilters();
+        }
+    });
+});
+
 // Switch warehouse tab
 function switchWarehouse(warehouse) {
     console.log('Switching to warehouse:', warehouse);
@@ -19,21 +53,14 @@ function switchWarehouse(warehouse) {
     currentWarehouse = warehouse;
     
     // Update tab UI
-    const tabA = document.getElementById('tabA');
-    const tabB = document.getElementById('tabB');
-    
-    if (tabA) tabA.classList.remove('active');
-    if (tabB) tabB.classList.remove('active');
-    
-    const currentTab = document.getElementById('tab' + warehouse);
-    if (currentTab) currentTab.classList.add('active');
+    document.getElementById('tabA').classList.remove('active');
+    document.getElementById('tabB').classList.remove('active');
+    document.getElementById('tab' + warehouse).classList.add('active');
     
     // Update page title dengan nama gudang yang benar
     const gudangInfo = GudangMapping[warehouse];
-    const pageTitle = document.querySelector('.page-title');
-    if (pageTitle) {
-        pageTitle.innerHTML = `<i class="fas fa-clipboard-list"></i> Log - ${gudangInfo.display}`;
-    }
+    document.querySelector('.page-title').innerHTML = 
+        `<i class="fas fa-clipboard-list"></i> Log - ${gudangInfo.display}`;
     
     // Reload transactions
     loadTransactions();
@@ -46,12 +73,23 @@ async function loadTransactions() {
         
         console.log('Loading transactions for Gudang', currentWarehouse);
         
+        // Get transactions from the specific warehouse sheet
+        const sheetName = 'T_GUDANG_' + currentWarehouse;
+        console.log('Sheet name:', sheetName);
+        
         // Call API to get transaction data
         const response = await API.get('getTransactions', {
             gudang: currentWarehouse
         });
         
         console.log('Transactions loaded:', response);
+        
+        // DEBUG: Show first few transactions for inspection
+        if (response && response.length > 0) {
+            console.log('Sample transaction:', response[0]);
+            console.log('Date field type:', typeof response[0].tanggal);
+            console.log('Date value:', response[0].tanggal);
+        }
         
         allTransactions = response || [];
         
@@ -75,18 +113,9 @@ async function loadTransactions() {
 function applyFilters() {
     console.log('Applying filters...');
     
-    const searchInput = document.getElementById('searchBarang');
-    const monthInput = document.getElementById('filterMonth');
-    const jenisInput = document.getElementById('filterJenis');
-    
-    if (!searchInput || !monthInput || !jenisInput) {
-        console.error('Filter elements not found');
-        return;
-    }
-    
-    const searchTerm = searchInput.value.toLowerCase().trim();
-    const filterMonth = monthInput.value; // Format: YYYY-MM
-    const filterJenis = jenisInput.value;
+    const searchTerm = document.getElementById('searchBarang').value.toLowerCase().trim();
+    const filterMonth = document.getElementById('filterMonth').value; // Format: YYYY-MM
+    const filterJenis = document.getElementById('filterJenis').value;
     
     console.log('Filters:', { searchTerm, filterMonth, filterJenis });
     
@@ -119,22 +148,28 @@ function applyFilters() {
                 }
             }
             
-            // Transaction type filter - Handle both 'In/Out' and 'Masuk/Keluar'
+            // Transaction type filter
             if (filterJenis) {
-                let transactionJenis = transaction.jenis;
+                let transactionJenis = transaction.jenis || '';
                 
-                // Normalize transaction jenis
-                if (transactionJenis === 'Masuk') transactionJenis = 'In';
-                if (transactionJenis === 'Keluar') transactionJenis = 'Out';
+                // Normalize for comparison
+                const normalizedTransactionJenis = transactionJenis.toLowerCase();
+                const normalizedFilterJenis = filterJenis.toLowerCase();
                 
-                // Normalize filter value
-                let filterJenisValue = filterJenis;
-                if (filterJenis === 'Masuk') filterJenisValue = 'In';
-                if (filterJenis === 'Keluar') filterJenisValue = 'Out';
+                // Map different jenis formats
+                const jenisMapping = {
+                    'masuk': ['in', 'masuk'],
+                    'keluar': ['out', 'keluar']
+                };
                 
-                if (transactionJenis !== filterJenisValue) {
-                    return false;
+                let match = false;
+                if (jenisMapping[normalizedFilterJenis]) {
+                    match = jenisMapping[normalizedFilterJenis].includes(normalizedTransactionJenis);
+                } else {
+                    match = normalizedTransactionJenis === normalizedFilterJenis;
                 }
+                
+                if (!match) return false;
             }
             
             return true;
@@ -150,72 +185,98 @@ function applyFilters() {
     renderTable(filteredTransactions);
 }
 
-// Parse Indonesian date format (dd/MM/yyyy HH:mm:ss)
+// Parse date from various formats
 function parseIndonesianDate(dateStr) {
     if (!dateStr || dateStr === '-' || dateStr.trim() === '') {
         console.warn('Empty or invalid date string:', dateStr);
-        return new Date(0); // Return epoch time for invalid dates
+        return new Date(0);
     }
     
     try {
-        // Format: "31/12/2024 23:59:59" or "31/12/2024"
-        const parts = String(dateStr).trim().split(' ');
-        const dateParts = parts[0].split('/');
-        
-        // Validate date parts
-        if (dateParts.length < 3) {
-            console.warn('Invalid date format (missing parts):', dateStr);
-            return new Date(0);
+        // CASE 1: Jika sudah berupa Date object atau string Date JavaScript
+        if (typeof dateStr === 'object' || dateStr.includes('GMT') || dateStr.includes('T')) {
+            // Coba langsung parse sebagai Date
+            const date = new Date(dateStr);
+            if (!isNaN(date.getTime())) {
+                return date;
+            }
         }
         
-        const day = parseInt(dateParts[0]);
-        const month = parseInt(dateParts[1]) - 1; // Month is 0-indexed
-        const year = parseInt(dateParts[2]);
-        
-        // Validate numeric values
-        if (isNaN(day) || isNaN(month) || isNaN(year)) {
-            console.warn('Invalid date values:', { day, month, year, dateStr });
-            return new Date(0);
+        // CASE 2: Format Indonesia dd/MM/yyyy HH:mm:ss
+        if (dateStr.includes('/')) {
+            const parts = String(dateStr).trim().split(' ');
+            const dateParts = parts[0].split('/');
+            
+            if (dateParts.length >= 3) {
+                const day = parseInt(dateParts[0]);
+                const month = parseInt(dateParts[1]) - 1;
+                const year = parseInt(dateParts[2]);
+                
+                let hours = 0, minutes = 0, seconds = 0;
+                
+                if (parts[1]) {
+                    const timeParts = parts[1].split(':');
+                    hours = parseInt(timeParts[0]) || 0;
+                    minutes = parseInt(timeParts[1]) || 0;
+                    seconds = parseInt(timeParts[2]) || 0;
+                }
+                
+                const date = new Date(year, month, day, hours, minutes, seconds);
+                if (!isNaN(date.getTime())) {
+                    return date;
+                }
+            }
         }
         
-        // Validate ranges
-        if (day < 1 || day > 31 || month < 0 || month > 11 || year < 1900 || year > 2100) {
-            console.warn('Date values out of range:', { day, month, year, dateStr });
-            return new Date(0);
+        // CASE 3: Format ISO (yyyy-MM-ddTHH:mm:ss)
+        if (dateStr.includes('-')) {
+            const date = new Date(dateStr);
+            if (!isNaN(date.getTime())) {
+                return date;
+            }
         }
         
-        let hours = 0, minutes = 0, seconds = 0;
-        
-        if (parts[1]) {
-            const timeParts = parts[1].split(':');
-            hours = parseInt(timeParts[0]) || 0;
-            minutes = parseInt(timeParts[1]) || 0;
-            seconds = parseInt(timeParts[2]) || 0;
+        // CASE 4: Coba parse dengan Date constructor (fallback)
+        const date = new Date(dateStr);
+        if (!isNaN(date.getTime())) {
+            return date;
         }
         
-        const date = new Date(year, month, day, hours, minutes, seconds);
+        // CASE 5: Jika semua gagal, return epoch
+        console.warn('All date parsing failed for:', dateStr);
+        return new Date(0);
         
-        // Check if date is valid
-        if (isNaN(date.getTime())) {
-            console.warn('Constructed date is invalid:', dateStr, date);
-            return new Date(0);
-        }
-        
-        return date;
     } catch (error) {
         console.error('Date parse error:', error, 'for dateStr:', dateStr);
-        return new Date(0); // Return epoch time on error
+        return new Date(0);
+    }
+}
+
+// Format date for display
+function formatDateForDisplay(date) {
+    if (!date || date.getTime() === 0) {
+        return '-';
+    }
+    
+    try {
+        // Format: dd/MM/yyyy HH:mm
+        const day = String(date.getDate()).padStart(2, '0');
+        const month = String(date.getMonth() + 1).padStart(2, '0');
+        const year = date.getFullYear();
+        const hours = String(date.getHours()).padStart(2, '0');
+        const minutes = String(date.getMinutes()).padStart(2, '0');
+        const seconds = String(date.getSeconds()).padStart(2, '0');
+        
+        return `${day}/${month}/${year} ${hours}:${minutes}:${seconds}`;
+    } catch (error) {
+        console.error('Error formatting date:', error, date);
+        return '-';
     }
 }
 
 // Render table
 function renderTable(transactions) {
     const tbody = document.getElementById('logTableBody');
-    
-    if (!tbody) {
-        console.error('Table body not found');
-        return;
-    }
     
     if (transactions.length === 0) {
         tbody.innerHTML = `
@@ -244,8 +305,12 @@ function renderTable(transactions) {
     let html = '';
     
     transactions.forEach((transaction, index) => {
+        // Parse date for display
+        const transDate = parseIndonesianDate(transaction.tanggal);
+        const displayDate = formatDateForDisplay(transDate);
+        
         // Determine jenis display
-        const isIn = transaction.jenis === 'In' || transaction.jenis === 'Masuk';
+        const isIn = ['in', 'masuk'].includes((transaction.jenis || '').toLowerCase());
         const badgeClass = isIn ? 'badge-in' : 'badge-out';
         const badgeText = isIn ? 'Masuk' : 'Keluar';
         const badgeIcon = isIn ? 'fa-arrow-down' : 'fa-arrow-up';
@@ -255,14 +320,14 @@ function renderTable(transactions) {
         // Escape strings for data attributes
         const escapedNama = (transaction.namaBarang || '').replace(/"/g, '&quot;').replace(/'/g, '&#39;');
         const escapedId = (transaction.idBarang || '').replace(/"/g, '&quot;').replace(/'/g, '&#39;');
-        const escapedJenis = isIn ? 'In' : 'Out'; // Store as 'In/Out' for delete API
+        const escapedJenis = isIn ? 'In' : 'Out';
         
         html += `
             <tr style="animation: fadeInUp 0.3s ease ${index * 0.03}s both;" data-row-index="${transaction.rowIndex || 0}">
                 <td data-label="Tanggal & Waktu">
                     <div style="display: flex; align-items: center; gap: 0.5rem;">
                         <i class="far fa-clock" style="color: var(--text-secondary);"></i>
-                        ${transaction.tanggal || '-'}
+                        ${displayDate}
                     </div>
                 </td>
                 <td data-label="Jenis">
@@ -306,8 +371,6 @@ function renderTable(transactions) {
     deleteButtons.forEach(btn => {
         btn.addEventListener('click', function(e) {
             e.preventDefault();
-            e.stopPropagation();
-            
             const rowIndex = parseInt(this.getAttribute('data-row-index'));
             const idBarang = this.getAttribute('data-id-barang');
             const jenis = this.getAttribute('data-jenis');
@@ -334,10 +397,9 @@ async function deleteTransaction(rowIndex, idBarang, jenis, jumlah, namaBarang) 
     }
     
     // Confirm dialog
-    const jenisDisplay = jenis === 'In' ? 'Masuk' : 'Keluar';
     const confirmMsg = `Apakah Anda yakin ingin menghapus transaksi ini?\n\n` +
                       `Barang: ${namaBarang || idBarang}\n` +
-                      `Jenis: ${jenisDisplay}\n` +
+                      `Jenis: ${jenis === 'In' ? 'Masuk' : 'Keluar'}\n` +
                       `Jumlah: ${jumlah}\n\n` +
                       `Stock akan dikembalikan ke kondisi sebelum transaksi.`;
     
@@ -385,7 +447,7 @@ async function deleteTransaction(rowIndex, idBarang, jenis, jumlah, namaBarang) 
     }
 }
 
-// Export to CSV
+// Export to CSV (bonus feature)
 function exportToCSV() {
     if (filteredTransactions.length === 0) {
         UI.showAlert('Tidak ada data untuk di-export', 'warning');
@@ -398,11 +460,13 @@ function exportToCSV() {
     let csv = 'Tanggal & Waktu,Jenis,ID Barang,Nama Barang,Jumlah,Keterangan,User/Petugas\n';
     
     filteredTransactions.forEach(t => {
-        // Determine jenis display
-        const isIn = t.jenis === 'In' || t.jenis === 'Masuk';
+        const transDate = parseIndonesianDate(t.tanggal);
+        const displayDate = formatDateForDisplay(transDate);
+        
+        const isIn = ['in', 'masuk'].includes((t.jenis || '').toLowerCase());
         const jenisDisplay = isIn ? 'Masuk' : 'Keluar';
         
-        csv += `"${t.tanggal}","${jenisDisplay}","${t.idBarang}","${t.namaBarang}","${t.jumlah}","${t.keterangan || ''}","${t.petugas || ''}"\n`;
+        csv += `"${displayDate}","${jenisDisplay}","${t.idBarang}","${t.namaBarang}","${t.jumlah}","${t.keterangan}","${t.petugas}"\n`;
     });
     
     // Download
@@ -411,7 +475,7 @@ function exportToCSV() {
     const url = URL.createObjectURL(blob);
     
     link.setAttribute('href', url);
-    link.setAttribute('download', `log_${gudangDisplay.replace(/\s+/g, '_')}_${new Date().toISOString().split('T')[0]}.csv`);
+    link.setAttribute('download', `log_${gudangDisplay}_${new Date().toISOString().split('T')[0]}.csv`);
     link.style.visibility = 'hidden';
     
     document.body.appendChild(link);
