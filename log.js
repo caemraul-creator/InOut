@@ -203,6 +203,11 @@ function renderTable(transactions) {
         const badgeText = transaction.jenis === 'In' ? 'Masuk' : 'Keluar';
         const badgeIcon = transaction.jenis === 'In' ? 'fa-arrow-down' : 'fa-arrow-up';
         
+        // Escape strings for onclick
+        const escapedNama = (transaction.namaBarang || '').replace(/'/g, "\\'").replace(/"/g, '&quot;');
+        const escapedId = (transaction.idBarang || '').replace(/'/g, "\\'").replace(/"/g, '&quot;');
+        const escapedJenis = (transaction.jenis || '').replace(/'/g, "\\'").replace(/"/g, '&quot;');
+        
         html += `
             <tr style="animation: fadeInUp 0.3s ease ${index * 0.03}s both;" data-row-index="${transaction.rowIndex || 0}">
                 <td data-label="Tanggal & Waktu">
@@ -232,7 +237,11 @@ function renderTable(transactions) {
                 </td>
                 <td data-label="Aksi" style="text-align: center;">
                     <button class="btn-delete-transaction" 
-                            onclick="deleteTransaction(${transaction.rowIndex}, '${transaction.idBarang}', '${transaction.jenis}', ${transaction.jumlah}, '${transaction.namaBarang}')"
+                            data-row-index="${transaction.rowIndex}"
+                            data-id-barang="${escapedId}"
+                            data-jenis="${escapedJenis}"
+                            data-jumlah="${transaction.jumlah}"
+                            data-nama-barang="${escapedNama}"
                             title="Hapus transaksi ini">
                         <i class="fas fa-trash"></i>
                     </button>
@@ -243,6 +252,21 @@ function renderTable(transactions) {
     
     tbody.innerHTML = html;
     
+    // Add event listeners to delete buttons
+    const deleteButtons = document.querySelectorAll('.btn-delete-transaction');
+    deleteButtons.forEach(btn => {
+        btn.addEventListener('click', function(e) {
+            e.preventDefault();
+            const rowIndex = parseInt(this.getAttribute('data-row-index'));
+            const idBarang = this.getAttribute('data-id-barang');
+            const jenis = this.getAttribute('data-jenis');
+            const jumlah = parseInt(this.getAttribute('data-jumlah'));
+            const namaBarang = this.getAttribute('data-nama-barang');
+            
+            deleteTransaction(rowIndex, idBarang, jenis, jumlah, namaBarang);
+        });
+    });
+    
     console.log('Table rendered with', transactions.length, 'rows');
 }
 
@@ -251,9 +275,16 @@ function renderTable(transactions) {
 // ============================================
 
 async function deleteTransaction(rowIndex, idBarang, jenis, jumlah, namaBarang) {
+    // Safety check for parameters
+    if (!rowIndex || !idBarang || !jenis || !jumlah) {
+        console.error('Invalid parameters for deleteTransaction:', {rowIndex, idBarang, jenis, jumlah});
+        UI.showAlert('❌ Parameter tidak lengkap untuk menghapus transaksi', 'danger');
+        return;
+    }
+    
     // Confirm dialog
     const confirmMsg = `Apakah Anda yakin ingin menghapus transaksi ini?\n\n` +
-                      `Barang: ${namaBarang}\n` +
+                      `Barang: ${namaBarang || idBarang}\n` +
                       `Jenis: ${jenis === 'In' ? 'Masuk' : 'Keluar'}\n` +
                       `Jumlah: ${jumlah}\n\n` +
                       `Stock akan dikembalikan ke kondisi sebelum transaksi.`;
@@ -284,13 +315,13 @@ async function deleteTransaction(rowIndex, idBarang, jenis, jumlah, namaBarang) 
         
         console.log('Delete response:', response);
         
-        if (response.success) {
+        if (response && response.success) {
             UI.showAlert('✅ Transaksi berhasil dihapus dan stock dikembalikan', 'success');
             
             // Reload transactions
             await loadTransactions();
         } else {
-            throw new Error(response.error || 'Gagal menghapus transaksi');
+            throw new Error(response?.error || 'Gagal menghapus transaksi');
         }
         
         UI.hideLoading();
@@ -298,7 +329,7 @@ async function deleteTransaction(rowIndex, idBarang, jenis, jumlah, namaBarang) 
     } catch (error) {
         console.error('Error deleting transaction:', error);
         UI.hideLoading();
-        UI.showAlert('❌ Gagal menghapus transaksi: ' + error.message, 'danger');
+        UI.showAlert('❌ Gagal menghapus transaksi: ' + (error.message || 'Unknown error'), 'danger');
     }
 }
 
