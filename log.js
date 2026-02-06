@@ -1,5 +1,5 @@
 // ============================================
-// LOG.JS - Transaction Log Functions (WITH DELETE)
+// LOG.JS - Transaction Log Functions (WITH DELETE) - FIXED VERSION
 // ============================================
 
 let currentWarehouse = 'A';
@@ -12,41 +12,6 @@ const GudangMapping = {
     'B': { display: 'Gudang Troso', value: 'Troso' }
 };
 
-// Initialize log page
-document.addEventListener('DOMContentLoaded', function() {
-    console.log('Log page initializing...');
-    
-    // Check authentication
-    if (!AUTH.isLoggedIn()) {
-        window.location.href = 'login.html';
-        return;
-    }
-    
-    // Set default month to EMPTY (show all)
-    // User can manually select month if needed
-    document.getElementById('filterMonth').value = '';
-    
-    // Load initial data
-    loadTransactions();
-    
-    // Setup real-time search
-    const searchInput = document.getElementById('searchBarang');
-    let searchTimeout;
-    searchInput.addEventListener('input', function() {
-        clearTimeout(searchTimeout);
-        searchTimeout = setTimeout(() => {
-            applyFilters();
-        }, 200);
-    });
-    
-    // Enter key to search
-    searchInput.addEventListener('keypress', function(e) {
-        if (e.key === 'Enter') {
-            applyFilters();
-        }
-    });
-});
-
 // Switch warehouse tab
 function switchWarehouse(warehouse) {
     console.log('Switching to warehouse:', warehouse);
@@ -54,14 +19,21 @@ function switchWarehouse(warehouse) {
     currentWarehouse = warehouse;
     
     // Update tab UI
-    document.getElementById('tabA').classList.remove('active');
-    document.getElementById('tabB').classList.remove('active');
-    document.getElementById('tab' + warehouse).classList.add('active');
+    const tabA = document.getElementById('tabA');
+    const tabB = document.getElementById('tabB');
+    
+    if (tabA) tabA.classList.remove('active');
+    if (tabB) tabB.classList.remove('active');
+    
+    const currentTab = document.getElementById('tab' + warehouse);
+    if (currentTab) currentTab.classList.add('active');
     
     // Update page title dengan nama gudang yang benar
     const gudangInfo = GudangMapping[warehouse];
-    document.querySelector('.page-title').innerHTML = 
-        `<i class="fas fa-clipboard-list"></i> Log - ${gudangInfo.display}`;
+    const pageTitle = document.querySelector('.page-title');
+    if (pageTitle) {
+        pageTitle.innerHTML = `<i class="fas fa-clipboard-list"></i> Log - ${gudangInfo.display}`;
+    }
     
     // Reload transactions
     loadTransactions();
@@ -73,10 +45,6 @@ async function loadTransactions() {
         UI.showLoading();
         
         console.log('Loading transactions for Gudang', currentWarehouse);
-        
-        // Get transactions from the specific warehouse sheet
-        const sheetName = 'T_GUDANG_' + currentWarehouse;
-        console.log('Sheet name:', sheetName);
         
         // Call API to get transaction data
         const response = await API.get('getTransactions', {
@@ -107,9 +75,18 @@ async function loadTransactions() {
 function applyFilters() {
     console.log('Applying filters...');
     
-    const searchTerm = document.getElementById('searchBarang').value.toLowerCase().trim();
-    const filterMonth = document.getElementById('filterMonth').value; // Format: YYYY-MM
-    const filterJenis = document.getElementById('filterJenis').value;
+    const searchInput = document.getElementById('searchBarang');
+    const monthInput = document.getElementById('filterMonth');
+    const jenisInput = document.getElementById('filterJenis');
+    
+    if (!searchInput || !monthInput || !jenisInput) {
+        console.error('Filter elements not found');
+        return;
+    }
+    
+    const searchTerm = searchInput.value.toLowerCase().trim();
+    const filterMonth = monthInput.value; // Format: YYYY-MM
+    const filterJenis = jenisInput.value;
     
     console.log('Filters:', { searchTerm, filterMonth, filterJenis });
     
@@ -142,9 +119,22 @@ function applyFilters() {
                 }
             }
             
-            // Transaction type filter
-            if (filterJenis && transaction.jenis !== filterJenis) {
-                return false;
+            // Transaction type filter - Handle both 'In/Out' and 'Masuk/Keluar'
+            if (filterJenis) {
+                let transactionJenis = transaction.jenis;
+                
+                // Normalize transaction jenis
+                if (transactionJenis === 'Masuk') transactionJenis = 'In';
+                if (transactionJenis === 'Keluar') transactionJenis = 'Out';
+                
+                // Normalize filter value
+                let filterJenisValue = filterJenis;
+                if (filterJenis === 'Masuk') filterJenisValue = 'In';
+                if (filterJenis === 'Keluar') filterJenisValue = 'Out';
+                
+                if (transactionJenis !== filterJenisValue) {
+                    return false;
+                }
             }
             
             return true;
@@ -222,6 +212,11 @@ function parseIndonesianDate(dateStr) {
 function renderTable(transactions) {
     const tbody = document.getElementById('logTableBody');
     
+    if (!tbody) {
+        console.error('Table body not found');
+        return;
+    }
+    
     if (transactions.length === 0) {
         tbody.innerHTML = `
             <tr>
@@ -249,14 +244,18 @@ function renderTable(transactions) {
     let html = '';
     
     transactions.forEach((transaction, index) => {
-        const badgeClass = transaction.jenis === 'In' ? 'badge-in' : 'badge-out';
-        const badgeText = transaction.jenis === 'In' ? 'Masuk' : 'Keluar';
-        const badgeIcon = transaction.jenis === 'In' ? 'fa-arrow-down' : 'fa-arrow-up';
+        // Determine jenis display
+        const isIn = transaction.jenis === 'In' || transaction.jenis === 'Masuk';
+        const badgeClass = isIn ? 'badge-in' : 'badge-out';
+        const badgeText = isIn ? 'Masuk' : 'Keluar';
+        const badgeIcon = isIn ? 'fa-arrow-down' : 'fa-arrow-up';
+        const jumlahColor = isIn ? '#38ef7d' : '#f45c43';
+        const jumlahSign = isIn ? '+' : '-';
         
         // Escape strings for data attributes
         const escapedNama = (transaction.namaBarang || '').replace(/"/g, '&quot;').replace(/'/g, '&#39;');
         const escapedId = (transaction.idBarang || '').replace(/"/g, '&quot;').replace(/'/g, '&#39;');
-        const escapedJenis = (transaction.jenis || '').replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+        const escapedJenis = isIn ? 'In' : 'Out'; // Store as 'In/Out' for delete API
         
         html += `
             <tr style="animation: fadeInUp 0.3s ease ${index * 0.03}s both;" data-row-index="${transaction.rowIndex || 0}">
@@ -278,8 +277,8 @@ function renderTable(transactions) {
                     </div>
                 </td>
                 <td data-label="Jumlah">
-                    <span style="font-weight: 700; font-size: 1.1rem; color: ${transaction.jenis === 'In' ? '#38ef7d' : '#f45c43'};">
-                        ${transaction.jenis === 'In' ? '+' : '-'}${transaction.jumlah || 0}
+                    <span style="font-weight: 700; font-size: 1.1rem; color: ${jumlahColor};">
+                        ${jumlahSign}${transaction.jumlah || 0}
                     </span>
                 </td>
                 <td data-label="Keterangan" style="color: var(--text-secondary);">
@@ -307,6 +306,8 @@ function renderTable(transactions) {
     deleteButtons.forEach(btn => {
         btn.addEventListener('click', function(e) {
             e.preventDefault();
+            e.stopPropagation();
+            
             const rowIndex = parseInt(this.getAttribute('data-row-index'));
             const idBarang = this.getAttribute('data-id-barang');
             const jenis = this.getAttribute('data-jenis');
@@ -333,9 +334,10 @@ async function deleteTransaction(rowIndex, idBarang, jenis, jumlah, namaBarang) 
     }
     
     // Confirm dialog
+    const jenisDisplay = jenis === 'In' ? 'Masuk' : 'Keluar';
     const confirmMsg = `Apakah Anda yakin ingin menghapus transaksi ini?\n\n` +
                       `Barang: ${namaBarang || idBarang}\n` +
-                      `Jenis: ${jenis === 'In' ? 'Masuk' : 'Keluar'}\n` +
+                      `Jenis: ${jenisDisplay}\n` +
                       `Jumlah: ${jumlah}\n\n` +
                       `Stock akan dikembalikan ke kondisi sebelum transaksi.`;
     
@@ -383,7 +385,7 @@ async function deleteTransaction(rowIndex, idBarang, jenis, jumlah, namaBarang) 
     }
 }
 
-// Export to CSV (bonus feature)
+// Export to CSV
 function exportToCSV() {
     if (filteredTransactions.length === 0) {
         UI.showAlert('Tidak ada data untuk di-export', 'warning');
@@ -396,7 +398,11 @@ function exportToCSV() {
     let csv = 'Tanggal & Waktu,Jenis,ID Barang,Nama Barang,Jumlah,Keterangan,User/Petugas\n';
     
     filteredTransactions.forEach(t => {
-        csv += `"${t.tanggal}","${t.jenis === 'In' ? 'Masuk' : 'Keluar'}","${t.idBarang}","${t.namaBarang}","${t.jumlah}","${t.keterangan}","${t.petugas}"\n`;
+        // Determine jenis display
+        const isIn = t.jenis === 'In' || t.jenis === 'Masuk';
+        const jenisDisplay = isIn ? 'Masuk' : 'Keluar';
+        
+        csv += `"${t.tanggal}","${jenisDisplay}","${t.idBarang}","${t.namaBarang}","${t.jumlah}","${t.keterangan || ''}","${t.petugas || ''}"\n`;
     });
     
     // Download
@@ -405,7 +411,7 @@ function exportToCSV() {
     const url = URL.createObjectURL(blob);
     
     link.setAttribute('href', url);
-    link.setAttribute('download', `log_${gudangDisplay}_${new Date().toISOString().split('T')[0]}.csv`);
+    link.setAttribute('download', `log_${gudangDisplay.replace(/\s+/g, '_')}_${new Date().toISOString().split('T')[0]}.csv`);
     link.style.visibility = 'hidden';
     
     document.body.appendChild(link);
