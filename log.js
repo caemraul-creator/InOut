@@ -208,46 +208,39 @@ function parseIndonesianDate(dateStr) {
             const dateParts = parts[0].split('/');
             
             if (dateParts.length >= 3) {
-                const day = parseInt(dateParts[0]);
-                const month = parseInt(dateParts[1]) - 1;
-                const year = parseInt(dateParts[2]);
+                const day = parseInt(dateParts[0], 10);
+                const month = parseInt(dateParts[1], 10) - 1; // Month is 0-indexed
+                const year = parseInt(dateParts[2], 10);
                 
                 let hours = 0, minutes = 0, seconds = 0;
                 
-                if (parts[1]) {
+                if (parts.length > 1 && parts[1].includes(':')) {
                     const timeParts = parts[1].split(':');
-                    hours = parseInt(timeParts[0]) || 0;
-                    minutes = parseInt(timeParts[1]) || 0;
-                    seconds = parseInt(timeParts[2]) || 0;
+                    hours = parseInt(timeParts[0], 10) || 0;
+                    minutes = parseInt(timeParts[1], 10) || 0;
+                    seconds = parseInt(timeParts[2], 10) || 0;
                 }
                 
                 const date = new Date(year, month, day, hours, minutes, seconds);
+                
                 if (!isNaN(date.getTime())) {
                     return date;
                 }
             }
         }
         
-        // CASE 3: Format ISO (yyyy-MM-ddTHH:mm:ss)
-        if (dateStr.includes('-')) {
-            const date = new Date(dateStr);
-            if (!isNaN(date.getTime())) {
-                return date;
-            }
+        // CASE 3: Fallback to standard JavaScript Date parsing
+        const fallbackDate = new Date(dateStr);
+        if (!isNaN(fallbackDate.getTime())) {
+            return fallbackDate;
         }
         
-        // CASE 4: Coba parse dengan Date constructor (fallback)
-        const date = new Date(dateStr);
-        if (!isNaN(date.getTime())) {
-            return date;
-        }
-        
-        // CASE 5: Jika semua gagal, return epoch
-        console.warn('All date parsing failed for:', dateStr);
+        // If all fails, return epoch
+        console.warn('Cannot parse date:', dateStr);
         return new Date(0);
         
     } catch (error) {
-        console.error('Date parse error:', error, 'for dateStr:', dateStr);
+        console.error('Error parsing date:', dateStr, error);
         return new Date(0);
     }
 }
@@ -259,17 +252,19 @@ function formatDateForDisplay(date) {
     }
     
     try {
-        // Format: dd/MM/yyyy HH:mm
+        const days = ['Min', 'Sen', 'Sel', 'Rab', 'Kam', 'Jum', 'Sab'];
+        const months = ['Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun', 'Jul', 'Agu', 'Sep', 'Okt', 'Nov', 'Des'];
+        
+        const dayName = days[date.getDay()];
         const day = String(date.getDate()).padStart(2, '0');
-        const month = String(date.getMonth() + 1).padStart(2, '0');
+        const monthName = months[date.getMonth()];
         const year = date.getFullYear();
         const hours = String(date.getHours()).padStart(2, '0');
         const minutes = String(date.getMinutes()).padStart(2, '0');
-        const seconds = String(date.getSeconds()).padStart(2, '0');
         
-        return `${day}/${month}/${year} ${hours}:${minutes}:${seconds}`;
+        return `${dayName}, ${day} ${monthName} ${year} ${hours}:${minutes}`;
     } catch (error) {
-        console.error('Error formatting date:', error, date);
+        console.error('Error formatting date:', date, error);
         return '-';
     }
 }
@@ -278,10 +273,15 @@ function formatDateForDisplay(date) {
 function renderTable(transactions) {
     const tbody = document.getElementById('logTableBody');
     
-    if (transactions.length === 0) {
+    if (!tbody) {
+        console.error('Table body not found');
+        return;
+    }
+    
+    if (!transactions || transactions.length === 0) {
         tbody.innerHTML = `
             <tr>
-                <td colspan="6" class="no-data">
+                <td colspan="6" style="text-align: center; padding: 3rem; color: var(--text-secondary);">
                     <i class="fas fa-inbox"></i>
                     <p>Tidak ada data transaksi yang sesuai dengan filter</p>
                 </td>
@@ -385,7 +385,7 @@ function renderTable(transactions) {
 }
 
 // ============================================
-// DELETE TRANSACTION FUNCTION
+// DELETE TRANSACTION FUNCTION - FIXED
 // ============================================
 
 async function deleteTransaction(rowIndex, idBarang, jenis, jumlah, namaBarang) {
@@ -418,24 +418,45 @@ async function deleteTransaction(rowIndex, idBarang, jenis, jumlah, namaBarang) 
             gudang: currentWarehouse
         });
         
-        // Call API to delete transaction
-        const response = await API.post('deleteTransaction', {
-            gudang: currentWarehouse,
-            rowIndex: rowIndex,
-            idBarang: idBarang,
-            jenis: jenis,
-            jumlah: jumlah
+        // Call API to delete transaction - USING CUSTOM FETCH to bypass API.post validation
+        const url = new URL(CONFIG.API_URL);
+        url.searchParams.append('action', 'deleteTransaction');
+        url.searchParams.append('gudang', currentWarehouse);
+        url.searchParams.append('rowIndex', rowIndex);
+        url.searchParams.append('idBarang', idBarang);
+        url.searchParams.append('jenis', jenis);
+        url.searchParams.append('jumlah', jumlah);
+        
+        console.log('📤 API DELETE:', url.toString());
+        
+        const fetchResponse = await fetch(url.toString(), {
+            method: 'GET',
+            redirect: 'follow'
         });
         
-        console.log('Delete response:', response);
+        if (!fetchResponse.ok) {
+            throw new Error(`HTTP ${fetchResponse.status}`);
+        }
         
-        if (response && response.success) {
+        const responseText = await fetchResponse.text();
+        console.log('Raw response:', responseText);
+        
+        const response = JSON.parse(responseText);
+        console.log('Parsed response:', response);
+        
+        // ✅ FIXED: Check for success OR presence of expected data
+        if (response && (response.success === true || response.gudang || response.stockReversal)) {
             UI.showAlert('✅ Transaksi berhasil dihapus dan stock dikembalikan', 'success');
+            
+            // Clear cache
+            API.clearCache();
             
             // Reload transactions
             await loadTransactions();
+        } else if (response && response.error) {
+            throw new Error(response.error);
         } else {
-            throw new Error(response?.error || 'Gagal menghapus transaksi');
+            throw new Error('Gagal menghapus transaksi - response tidak valid');
         }
         
         UI.hideLoading();
