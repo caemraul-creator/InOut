@@ -1,5 +1,5 @@
 // ============================================
-// LOG.JS - Transaction Log Functions (WITH DELETE) - FIXED VERSION
+// LOG.JS - Transaction Log Functions (WITH DELETE) - FINAL FIXED VERSION
 // ============================================
 
 let currentWarehouse = 'A';
@@ -82,7 +82,7 @@ async function loadTransactions() {
             gudang: currentWarehouse
         });
         
-        console.log('Transactions loaded:', response);
+        console.log('Transactions loaded:', response?.length || 0);
         
         // DEBUG: Show first few transactions for inspection
         if (response && response.length > 0) {
@@ -385,7 +385,7 @@ function renderTable(transactions) {
 }
 
 // ============================================
-// DELETE TRANSACTION FUNCTION - FIXED
+// DELETE TRANSACTION FUNCTION - FIXED VERSION
 // ============================================
 
 async function deleteTransaction(rowIndex, idBarang, jenis, jumlah, namaBarang) {
@@ -418,34 +418,71 @@ async function deleteTransaction(rowIndex, idBarang, jenis, jumlah, namaBarang) 
             gudang: currentWarehouse
         });
         
-        // Call API to delete transaction - USING CUSTOM FETCH to bypass API.post validation
+        // Call API to delete transaction - USING POST METHOD
         const url = new URL(CONFIG.API_URL);
         url.searchParams.append('action', 'deleteTransaction');
-        url.searchParams.append('gudang', currentWarehouse);
-        url.searchParams.append('rowIndex', rowIndex);
-        url.searchParams.append('idBarang', idBarang);
-        url.searchParams.append('jenis', jenis);
-        url.searchParams.append('jumlah', jumlah);
         
-        console.log('📤 API DELETE:', url.toString());
+        console.log('📤 API DELETE URL:', url.toString());
         
+        // Use POST method instead of GET
         const fetchResponse = await fetch(url.toString(), {
-            method: 'GET',
-            redirect: 'follow'
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded',
+            },
+            body: new URLSearchParams({
+                gudang: currentWarehouse,
+                rowIndex: rowIndex,
+                idBarang: idBarang,
+                jenis: jenis,
+                jumlah: jumlah
+            })
         });
         
+        console.log('Fetch response status:', fetchResponse.status, fetchResponse.statusText);
+        
         if (!fetchResponse.ok) {
-            throw new Error(`HTTP ${fetchResponse.status}`);
+            const errorText = await fetchResponse.text();
+            console.error('Fetch error response:', errorText);
+            throw new Error(`HTTP ${fetchResponse.status}: ${fetchResponse.statusText}`);
         }
         
         const responseText = await fetchResponse.text();
-        console.log('Raw response:', responseText);
+        console.log('Raw response text:', responseText);
         
-        const response = JSON.parse(responseText);
-        console.log('Parsed response:', response);
+        // Try to parse as JSON
+        let response;
+        try {
+            response = JSON.parse(responseText);
+            console.log('Parsed response:', response);
+        } catch (parseError) {
+            console.error('Failed to parse JSON:', parseError);
+            console.log('Response was:', responseText);
+            throw new Error('Invalid response from server');
+        }
         
-        // ✅ FIXED: Check for success OR presence of expected data
-        if (response && (response.success === true || response.gudang || response.stockReversal)) {
+        // FIXED: Improved success checking
+        let isSuccess = false;
+        
+        if (response) {
+            // Check multiple possible success indicators
+            if (response.success === true) {
+                isSuccess = true;
+            } else if (response.message && (response.message.includes('✅') || response.message.includes('berhasil'))) {
+                isSuccess = true;
+            } else if (response.gudang && response.idBarang) {
+                isSuccess = true;
+            } else if (response.stockReversal) {
+                isSuccess = true;
+            }
+            
+            // Special case: if response has data property
+            if (response.data && response.data.success === true) {
+                isSuccess = true;
+            }
+        }
+        
+        if (isSuccess) {
             UI.showAlert('✅ Transaksi berhasil dihapus dan stock dikembalikan', 'success');
             
             // Clear cache
@@ -453,10 +490,17 @@ async function deleteTransaction(rowIndex, idBarang, jenis, jumlah, namaBarang) 
             
             // Reload transactions
             await loadTransactions();
-        } else if (response && response.error) {
-            throw new Error(response.error);
         } else {
-            throw new Error('Gagal menghapus transaksi - response tidak valid');
+            // Check for error message
+            let errorMessage = 'Gagal menghapus transaksi - response tidak valid';
+            if (response && response.error) {
+                errorMessage = response.error;
+            } else if (response && response.message) {
+                errorMessage = response.message;
+            }
+            
+            console.error('Delete failed:', response);
+            throw new Error(errorMessage);
         }
         
         UI.hideLoading();
