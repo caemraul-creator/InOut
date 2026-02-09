@@ -31,8 +31,70 @@ document.addEventListener('DOMContentLoaded', function() {
     
     if (document.getElementById('transaksiForm')) {
         initIndexPage();
+        setupAutoReloadListener();
     }
 });
+
+// ============================================
+// AUTO RELOAD DATA KETIKA ADA PERUBAHAN
+// ============================================
+
+function setupAutoReloadListener() {
+    console.log('🔄 Setting up auto-reload listener...');
+    
+    // Check ketika halaman mendapat focus kembali
+    window.addEventListener('focus', async function() {
+        console.log('👀 Page got focus, checking for data changes...');
+        
+        // Check flag dari localStorage
+        const dataChanged = localStorage.getItem('dataBarangChanged');
+        
+        if (dataChanged === 'true') {
+            console.log('🔄 Data changed detected, reloading data barang...');
+            
+            // Clear flag
+            localStorage.removeItem('dataBarangChanged');
+            
+            // Clear cache
+            if (typeof API !== 'undefined' && API.clearCache) {
+                API.clearCache();
+            }
+            
+            // Reload data barang
+            try {
+                await loadDataBarang();
+                UI.showAlert('✅ Data barang telah diperbarui', 'success', 2000);
+            } catch (error) {
+                console.error('Error reloading data:', error);
+            }
+        }
+    });
+    
+    // Check juga ketika visibility berubah (untuk mobile/tab switching)
+    document.addEventListener('visibilitychange', async function() {
+        if (!document.hidden) {
+            const dataChanged = localStorage.getItem('dataBarangChanged');
+            
+            if (dataChanged === 'true') {
+                console.log('🔄 Data changed detected (visibility), reloading...');
+                localStorage.removeItem('dataBarangChanged');
+                
+                if (typeof API !== 'undefined' && API.clearCache) {
+                    API.clearCache();
+                }
+                
+                try {
+                    await loadDataBarang();
+                    UI.showAlert('✅ Data barang telah diperbarui', 'success', 2000);
+                } catch (error) {
+                    console.error('Error reloading data:', error);
+                }
+            }
+        }
+    });
+    
+    console.log('✅ Auto-reload listener set up');
+}
 
 // ============================================
 // INDEX PAGE

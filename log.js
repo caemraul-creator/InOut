@@ -488,6 +488,10 @@ async function deleteTransaction(rowIndex, idBarang, jenis, jumlah, namaBarang) 
             // Clear cache
             API.clearCache();
             
+            // Set flag untuk auto-reload data barang di halaman index
+            localStorage.setItem('dataBarangChanged', 'true');
+            console.log('✅ Flag dataBarangChanged set to trigger index page reload');
+            
             // Reload transactions
             await loadTransactions();
         } else {
