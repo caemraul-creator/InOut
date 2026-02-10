@@ -691,18 +691,34 @@
                 loader.classList.add('show');
                 
                 const data = await API.get('getBarangList');
-                allItems = data;
-                filteredItems = data;
                 
-                // Calculate totals
-                const totalA = data.reduce((sum, item) => sum + (Number(item.stokA) || 0), 0);
-                const totalB = data.reduce((sum, item) => sum + (Number(item.stokB) || 0), 0);
+                // FILTER: Hanya tampilkan barang yang punya stok di minimal 1 gudang
+                const totalItems = data.length;
+                const filteredData = data.filter(item => {
+                    const stokA = Number(item.stokA) || 0;
+                    const stokB = Number(item.stokB) || 0;
+                    return (stokA > 0 || stokB > 0);
+                });
+                
+                const hiddenCount = totalItems - filteredData.length;
+                
+                allItems = filteredData;
+                filteredItems = filteredData;
+                
+                console.log(`✅ Loaded ${filteredData.length} items (tersedia)`);
+                if (hiddenCount > 0) {
+                    console.log(`ℹ️  ${hiddenCount} items dengan stok 0 disembunyikan`);
+                }
+                
+                // Calculate totals (hanya dari barang yang ditampilkan)
+                const totalA = filteredData.reduce((sum, item) => sum + (Number(item.stokA) || 0), 0);
+                const totalB = filteredData.reduce((sum, item) => sum + (Number(item.stokB) || 0), 0);
                 
                 document.getElementById('totalA').textContent = totalA;
                 document.getElementById('totalB').textContent = totalB;
                 
                 // Render items
-                renderItems(data);
+                renderItems(filteredData);
                 
             } catch (error) {
                 console.error('Error loading data:', error);

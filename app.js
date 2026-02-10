@@ -628,39 +628,6 @@ async function loadDataBarang() {
     }
 }
 
-        dataMaster = filteredData;
-        
-        console.log(`✅ Loaded ${filteredData.length} items (tersedia)`);
-        if (filteredOut > 0) {
-            console.log(`ℹ️  ${filteredOut} items dengan stok 0 disembunyikan`);
-        }
-        
-        UI.hideLoading();
-        
-    } catch (error) {
-        console.error('❌ Error loading data:', error);
-        UI.hideLoading();
-        UI.showAlert('❌ Gagal memuat data barang: ' + error.message, 'danger');
-    }
-}
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-}
-
 async function loadKategori() {
     try {
         console.log('📡 Loading kategori...');
