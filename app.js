@@ -600,9 +600,24 @@ async function loadDataBarang() {
         UI.showLoading();
         
         const data = await API.get('getBarangList');
-        dataMaster = data;
         
-        console.log(`✅ Loaded ${data.length} items`);
+        // BACKUP FILTER: Filter di frontend juga untuk memastikan
+        // hanya tampilkan barang yang punya stok di minimal 1 gudang
+        const totalItems = data.length;
+        const filteredData = data.filter(item => {
+            const stokA = Number(item.stokA) || 0;
+            const stokB = Number(item.stokB) || 0;
+            return (stokA > 0 || stokB > 0);
+        });
+        
+        const filteredOut = totalItems - filteredData.length;
+        
+        dataMaster = filteredData;
+        
+        console.log(`✅ Loaded ${filteredData.length} items (tersedia)`);
+        if (filteredOut > 0) {
+            console.log(`ℹ️  ${filteredOut} items dengan stok 0 disembunyikan`);
+        }
         
         UI.hideLoading();
         
@@ -611,6 +626,39 @@ async function loadDataBarang() {
         UI.hideLoading();
         UI.showAlert('❌ Gagal memuat data barang: ' + error.message, 'danger');
     }
+}
+
+        dataMaster = filteredData;
+        
+        console.log(`✅ Loaded ${filteredData.length} items (tersedia)`);
+        if (filteredOut > 0) {
+            console.log(`ℹ️  ${filteredOut} items dengan stok 0 disembunyikan`);
+        }
+        
+        UI.hideLoading();
+        
+    } catch (error) {
+        console.error('❌ Error loading data:', error);
+        UI.hideLoading();
+        UI.showAlert('❌ Gagal memuat data barang: ' + error.message, 'danger');
+    }
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 }
 
 async function loadKategori() {
