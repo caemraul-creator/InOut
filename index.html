@@ -1042,6 +1042,7 @@
                     Detail Transaksi
                 </div>
                 
+                <!-- 1. JUMLAH UNIT -->
                 <div class="input-group">
                     <label for="jumlah">Jumlah <span id="satuanLabel">Unit</span></label>
                     <input type="number" 
@@ -1053,7 +1054,31 @@
                            required>
                 </div>
                 
+                <!-- 2. PIC (Person In Charge) -->
                 <div class="input-group">
+                    <label for="pic">
+                        <i class="fas fa-user-tie"></i> PIC (Person In Charge)
+                    </label>
+                    <input type="text" 
+                           id="pic" 
+                           class="input-field" 
+                           placeholder="Nama PIC"
+                           required>
+                </div>
+                
+                <!-- 3. TANGGAL TRANSAKSI (Default hari ini, bisa diubah saat diklik) -->
+                <div class="input-group">
+                    <label for="tanggal">
+                        <i class="fas fa-calendar"></i> Tanggal Transaksi
+                    </label>
+                    <input type="date" 
+                           id="tanggal" 
+                           class="input-field" 
+                           required>
+                </div>
+                
+                <!-- FIELD PETUGAS (HIDDEN - Auto-fill dari login) -->
+                <div class="input-group" style="display: none;">
                     <label for="user">Petugas</label>
                     <input type="text" 
                            id="user" 
@@ -1062,6 +1087,7 @@
                            required>
                 </div>
                 
+                <!-- 4. KETERANGAN (Optional) -->
                 <div class="input-group">
                     <label for="keterangan">Keterangan (Opsional)</label>
                     <textarea id="keterangan" 
@@ -1069,6 +1095,7 @@
                               placeholder="Catatan tambahan..."></textarea>
                 </div>
             </div>
+
             
             <!-- Submit Button -->
             <button type="submit" class="btn-submit">
@@ -1282,6 +1309,10 @@
             if (AUTH && typeof AUTH.autoFillForm === 'function') {
                 AUTH.autoFillForm();
             }
+            
+            // Set default date to today
+            const today = new Date().toISOString().split('T')[0];
+            document.getElementById('tanggal').value = today;
             
             // Setup warehouse buttons - WITH COLOR UPDATE
             const warehouseBtns = document.querySelectorAll('.warehouse-btn');

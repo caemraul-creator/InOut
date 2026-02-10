@@ -514,9 +514,23 @@ function validateForm() {
         return false;
     }
     
+    // Validasi Tanggal
+    const tanggal = document.getElementById('tanggal').value;
+    if (!tanggal || tanggal.trim() === '') {
+        UI.showAlert('⚠️ Tanggal transaksi harus diisi!', 'danger');
+        return false;
+    }
+    
     const jumlah = document.getElementById('jumlah').value;
     if (!jumlah || jumlah <= 0) {
         UI.showAlert('⚠️ Jumlah tidak valid!', 'danger');
+        return false;
+    }
+    
+    // Validasi PIC
+    const pic = document.getElementById('pic').value;
+    if (!pic || pic.trim() === '') {
+        UI.showAlert('⚠️ PIC harus diisi!', 'danger');
         return false;
     }
     
@@ -540,8 +554,10 @@ async function submitTransactionDirect() {
         const jenis = document.querySelector('.type-btn.active').dataset.type;
         const barangNama = tempSelectedItem ? tempSelectedItem.nama : '-';
         const barangId = tempSelectedItem ? tempSelectedItem.id : '-';
+        const tanggal = document.getElementById('tanggal').value;
         const jumlah = document.getElementById('jumlah').value;
         const satuan = tempSelectedItem ? tempSelectedItem.satuan : 'Unit';
+        const pic = document.getElementById('pic').value;
         const petugas = document.getElementById('user').value;
         const keterangan = document.getElementById('keterangan').value;
         
@@ -551,10 +567,12 @@ async function submitTransactionDirect() {
         const transactionData = {
             lokasiGudang: gudangApi,
             jenis: jenis,
+            tanggal: tanggal,
             idBarang: barangId,
             namaBarang: barangNama,
             jumlah: jumlah,
             satuan: satuan,
+            pic: pic,
             user: petugas,
             keterangan: keterangan
         };

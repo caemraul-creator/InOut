@@ -4,7 +4,7 @@
 
 const CONFIG = {
     // GANTI INI dengan URL Google Apps Script Anda
-    API_URL: 'https://script.google.com/macros/s/AKfycbz1ahzv0zMSq0C3HEOpM8A1iecoYV2lzXoxRc0GZoz-oaS3ZJErLVLWW2wgYnLNh3wY/exec',
+    API_URL: 'https://script.google.com/macros/s/AKfycbxmCq9TTxXGIfBOZ2aTRuecVqWkfwvLNVYOzYcDQ-_3s0K279I1qj7aq_XGsFAxvdpL/exec',
     
     AUTO_DETECT: {
         minChars: 2,
