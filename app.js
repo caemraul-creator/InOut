@@ -591,7 +591,7 @@ async function submitTransaction() {
 }
 
 // ============================================
-// DATA LOADING
+// DATA LOADING - PERBAIKAN UNTUK INDEX PAGE
 // ============================================
 
 async function loadDataBarang() {
@@ -601,23 +601,10 @@ async function loadDataBarang() {
         
         const data = await API.get('getBarangList');
         
-        // BACKUP FILTER: Filter di frontend juga untuk memastikan
-        // hanya tampilkan barang yang punya stok di minimal 1 gudang
-        const totalItems = data.length;
-        const filteredData = data.filter(item => {
-            const stokA = Number(item.stokA) || 0;
-            const stokB = Number(item.stokB) || 0;
-            return (stokA > 0 || stokB > 0);
-        });
+        // ✅ UNTUK INDEX PAGE: Tampilkan SEMUA barang untuk pencarian (termasuk stok 0)
+        dataMaster = data; // Simpan semua data
         
-        const filteredOut = totalItems - filteredData.length;
-        
-        dataMaster = filteredData;
-        
-        console.log(`✅ Loaded ${filteredData.length} items (tersedia)`);
-        if (filteredOut > 0) {
-            console.log(`ℹ️  ${filteredOut} items dengan stok 0 disembunyikan`);
-        }
+        console.log(`✅ Loaded ${data.length} items (semua barang untuk pencarian)`);
         
         UI.hideLoading();
         
@@ -648,7 +635,7 @@ async function loadKategori() {
 }
 
 // ============================================
-// SEARCH
+// SEARCH - PERBAIKAN: TAMPILKAN SEMUA TERMASUK STOK 0
 // ============================================
 
 function searchBarang(query) {
@@ -656,7 +643,7 @@ function searchBarang(query) {
     
     const queryLower = query.toLowerCase().trim();
     
-    // Filter dengan scoring untuk prioritas
+    // ✅ Cari di SEMUA dataMaster (termasuk barang stok 0)
     const scoredResults = dataMaster
         .map(item => {
             const idLower = item.id.toLowerCase();
@@ -701,6 +688,7 @@ function searchBarang(query) {
         hideItemResult();
         hideSearchResults();
         
+        // Barang tidak ditemukan, tawarkan untuk tambah barang baru
         UI.showAlert('❌ Barang tidak ditemukan. Membuka form tambah barang...', 'warning', 2000);
         
         setTimeout(() => {
@@ -756,16 +744,22 @@ function showSearchResults(results, query) {
     
     let html = '';
     displayResults.forEach((item, index) => {
+        const stokA = Number(item.stokA) || 0;
+        const stokB = Number(item.stokB) || 0;
+        const hasStock = stokA > 0 || stokB > 0;
+        const stockClass = hasStock ? '' : 'zero-stock-search';
+        
         const highlightedName = highlightMatch(item.nama, query);
         const highlightedId = highlightMatch(item.id, query);
         
         html += `
-            <div class="search-result-item" onclick="window.selectItemFromDropdown(${index})" data-index="${index}">
+            <div class="search-result-item ${stockClass}" onclick="window.selectItemFromDropdown(${index})" data-index="${index}">
                 <div class="result-name">${highlightedName}</div>
                 <div class="result-details">
                     <span class="result-id">ID: ${highlightedId}</span>
                     <span class="result-stock">Stok A: ${item.stokA} | B: ${item.stokB}</span>
                 </div>
+                ${!hasStock ? '<div class="result-zero-stock">Stok 0</div>' : ''}
             </div>
         `;
     });

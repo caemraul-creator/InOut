@@ -1761,3 +1761,27 @@ body {
         }
     }
 }
+
+/* Styling untuk stok 0 di search dropdown */
+.search-result-item.zero-stock-search {
+    opacity: 0.8;
+}
+
+.search-result-item.zero-stock-search .result-name {
+    color: rgba(255, 255, 255, 0.7);
+}
+
+.search-result-item.zero-stock-search .result-stock {
+    color: var(--grey-light);
+}
+
+.result-zero-stock {
+    display: inline-block;
+    padding: 0.2rem 0.4rem;
+    background: rgba(107, 114, 128, 0.2);
+    border: 1px solid rgba(107, 114, 128, 0.4);
+    border-radius: 4px;
+    font-size: 0.7rem;
+    color: var(--grey-light);
+    margin-top: 0.25rem;
+}

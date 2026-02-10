@@ -28,6 +28,8 @@
             --light: #F7F7FF;
             --success: #06D6A0;
             --danger: #EF476F;
+            --grey: #6B7280;
+            --grey-light: #9CA3AF;
             --gradient-1: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             --gradient-2: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
             --gradient-3: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
@@ -358,6 +360,23 @@
             color: var(--danger);
         }
         
+        /* Zero Stock Styling */
+        .stock-box.zero-stock {
+            border-color: rgba(255, 255, 255, 0.1) !important;
+            background: rgba(255, 255, 255, 0.03) !important;
+            opacity: 0.7;
+        }
+        
+        .stock-box.zero-stock .stock-number {
+            color: rgba(247, 247, 255, 0.5) !important;
+            font-weight: 600;
+        }
+        
+        .stock-box.zero-stock .stock-label,
+        .stock-box.zero-stock .stock-unit {
+            color: rgba(247, 247, 255, 0.4) !important;
+        }
+        
         /* Loading */
         .loading-overlay {
             position: fixed;
@@ -597,6 +616,29 @@
         let filteredItems = [];
         let sortOrder = 'asc'; // Sort order: 'asc' atau 'desc'
         
+        // Helper function untuk filter default (hide stok 0)
+        function filterItemsWithStock(items) {
+            return items.filter(item => {
+                const stokA = Number(item.stokA) || 0;
+                const stokB = Number(item.stokB) || 0;
+                return (stokA > 0 || stokB > 0);
+            });
+        }
+        
+        // Helper function untuk reset ke default view
+        function resetToDefaultView() {
+            filteredItems = filterItemsWithStock(allItems);
+            
+            // Update totals hanya dari barang yang ditampilkan
+            const totalA = filteredItems.reduce((sum, item) => sum + (Number(item.stokA) || 0), 0);
+            const totalB = filteredItems.reduce((sum, item) => sum + (Number(item.stokB) || 0), 0);
+            
+            document.getElementById('totalA').textContent = totalA;
+            document.getElementById('totalB').textContent = totalB;
+            
+            renderItems(filteredItems);
+        }
+        
         // Initialize on page load
         document.addEventListener('DOMContentLoaded', function() {
             // Check authentication
@@ -631,10 +673,12 @@
                     clearBtn.style.display = 'none';
                 }
                 
-                // Filter items
+                // ✅ PERBAIKAN: Saat search, tampilkan SEMUA barang yang cocok (termasuk stok 0)
                 if (query.length === 0) {
-                    filteredItems = allItems;
+                    // Jika search kosong, kembali ke default (sembunyikan stok 0)
+                    filteredItems = filterItemsWithStock(allItems);
                 } else {
+                    // ✅ Saat ada query search, tampilkan SEMUA yang cocok (termasuk stok 0)
                     filteredItems = allItems.filter(item => {
                         return item.nama.toLowerCase().includes(query) ||
                                item.id.toLowerCase().includes(query) ||
@@ -650,8 +694,9 @@
             clearBtn.addEventListener('click', function() {
                 searchInput.value = '';
                 clearBtn.style.display = 'none';
-                filteredItems = allItems;
-                renderItems(filteredItems);
+                
+                // ✅ Kembali ke default view (sembunyikan stok 0)
+                resetToDefaultView();
                 searchInput.focus();
             });
         });
@@ -692,22 +737,20 @@
                 
                 const data = await API.get('getBarangList');
                 
-                // FILTER: Hanya tampilkan barang yang punya stok di minimal 1 gudang
+                // ✅ FILTER DEFAULT: Sembunyikan barang dengan stok 0 di kedua gudang
                 const totalItems = data.length;
-                const filteredData = data.filter(item => {
-                    const stokA = Number(item.stokA) || 0;
-                    const stokB = Number(item.stokB) || 0;
-                    return (stokA > 0 || stokB > 0);
-                });
+                const filteredData = filterItemsWithStock(data);
                 
                 const hiddenCount = totalItems - filteredData.length;
                 
-                allItems = filteredData;
-                filteredItems = filteredData;
+                // Simpan SEMUA data ke allItems untuk pencarian
+                allItems = data; // ✅ SIMPAN SEMUA DATA untuk pencarian
+                filteredItems = filteredData; // ✅ Tampilkan hanya yang ada stok
                 
                 console.log(`✅ Loaded ${filteredData.length} items (tersedia)`);
+                console.log(`✅ All items: ${data.length} (termasuk stok 0)`);
                 if (hiddenCount > 0) {
-                    console.log(`ℹ️  ${hiddenCount} items dengan stok 0 disembunyikan`);
+                    console.log(`ℹ️  ${hiddenCount} items dengan stok 0 disembunyikan (default view)`);
                 }
                 
                 // Calculate totals (hanya dari barang yang ditampilkan)
@@ -717,7 +760,7 @@
                 document.getElementById('totalA').textContent = totalA;
                 document.getElementById('totalB').textContent = totalB;
                 
-                // Render items
+                // Render items (default: hanya yang ada stok)
                 renderItems(filteredData);
                 
             } catch (error) {
@@ -763,6 +806,12 @@
                 const stokB = Number(item.stokB) || 0;
                 const lowStockA = stokA < 10;
                 const lowStockB = stokB < 10;
+                const zeroStockA = stokA === 0;
+                const zeroStockB = stokB === 0;
+                
+                // ✅ PERBAIKAN: Kelas untuk stok 0
+                const zeroStockClassA = zeroStockA ? 'zero-stock' : '';
+                const zeroStockClassB = zeroStockB ? 'zero-stock' : '';
                 
                 // Generate badge color based on category
                 const badgeColors = {
@@ -794,12 +843,12 @@
                         </div>
                         
                         <div class="stock-row">
-                            <div class="stock-box gudang-a ${lowStockA ? 'low-stock' : ''}">
+                            <div class="stock-box gudang-a ${lowStockA ? 'low-stock' : ''} ${zeroStockClassA}">
                                 <div class="stock-label">Gudang Kalipucang</div>
                                 <div class="stock-number">${stokA}</div>
                                 <div class="stock-unit">${item.satuan}</div>
                             </div>
-                            <div class="stock-box gudang-b ${lowStockB ? 'low-stock' : ''}">
+                            <div class="stock-box gudang-b ${lowStockB ? 'low-stock' : ''} ${zeroStockClassB}">
                                 <div class="stock-label">Gudang Troso</div>
                                 <div class="stock-number">${stokB}</div>
                                 <div class="stock-unit">${item.satuan}</div>
