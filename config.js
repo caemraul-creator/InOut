@@ -1,5 +1,5 @@
 // ============================================
-// CONFIG.JS - OPTIMIZED FOR SPEED
+// CONFIG.JS - ULTRA-FAST VERSION
 // ============================================
 
 const CONFIG = {
@@ -8,7 +8,7 @@ const CONFIG = {
     
     AUTO_DETECT: {
         minChars: 2,
-        debounceTime: 150, // Dipercepat dari 300ms ke 150ms
+        debounceTime: 100, // ⚡ Dipercepat dari 150ms ke 100ms
         maxResults: 5
     },
     
@@ -17,16 +17,17 @@ const CONFIG = {
         qrboxSize: 250
     },
     
-    // Pengaturan loading yang lebih cepat
+    // ⚡ Pengaturan loading ULTRA CEPAT
     LOADING: {
-        minDisplayTime: 200, // Minimal 200ms (dari 500ms)
-        fadeSpeed: 150 // Fade animation 150ms (dari 300ms)
+        minDisplayTime: 0, // ⚡ Hapus delay minimal (dari 200ms ke 0ms)
+        fadeSpeed: 80 // ⚡ Animasi super cepat (dari 150ms ke 80ms)
     }
 };
 
-// API - Optimized dengan timeout dan caching
+// API - Optimized dengan timeout, caching, dan prefetching
 const API = {
     cache: new Map(), // Simple cache
+    prefetchQueue: new Set(), // Queue untuk prefetch
     
     async get(action, params = {}) {
         try {
@@ -34,8 +35,8 @@ const API = {
             const cacheKey = action + JSON.stringify(params);
             if (action.includes('get') && this.cache.has(cacheKey)) {
                 const cached = this.cache.get(cacheKey);
-                if (Date.now() - cached.timestamp < 30000) { // Cache 30 detik
-                    console.log('⚡ Using cached data for:', action);
+                if (Date.now() - cached.timestamp < 60000) { // ⚡ Cache 60 detik (dari 30 detik)
+                    console.log('⚡ Cache hit:', action);
                     return cached.data;
                 }
             }
@@ -49,9 +50,9 @@ const API = {
             
             console.log('📤 API GET:', action);
             
-            // Tambahkan timeout untuk request
+            // ⚡ Timeout dipercepat untuk operasi GET
             const controller = new AbortController();
-            const timeoutId = setTimeout(() => controller.abort(), 10000); // 10 detik timeout
+            const timeoutId = setTimeout(() => controller.abort(), 8000); // 8 detik (dari 10 detik)
             
             const response = await fetch(url.toString(), {
                 method: 'GET',
@@ -102,9 +103,9 @@ const API = {
             
             console.log('📤 API POST:', action);
             
-            // Timeout untuk POST juga
+            // ⚡ Timeout untuk POST tetap 15 detik (operasi write)
             const controller = new AbortController();
-            const timeoutId = setTimeout(() => controller.abort(), 15000); // 15 detik untuk write
+            const timeoutId = setTimeout(() => controller.abort(), 15000);
             
             const response = await fetch(url.toString(), {
                 method: 'GET',
@@ -139,6 +140,21 @@ const API = {
         }
     },
     
+    // ⚡ NEW: Prefetch data untuk mempercepat akses berikutnya
+    async prefetch(action, params = {}) {
+        const cacheKey = action + JSON.stringify(params);
+        if (!this.prefetchQueue.has(cacheKey) && !this.cache.has(cacheKey)) {
+            this.prefetchQueue.add(cacheKey);
+            try {
+                await this.get(action, params);
+                console.log('⚡ Prefetched:', action);
+            } catch (error) {
+                console.warn('Prefetch failed:', action);
+            }
+            this.prefetchQueue.delete(cacheKey);
+        }
+    },
+    
     // Clear cache manual
     clearCache() {
         this.cache.clear();
@@ -146,7 +162,7 @@ const API = {
     }
 };
 
-// UI Helper - OPTIMIZED
+// UI Helper - ULTRA OPTIMIZED
 const UI = {
     loadingStartTime: null,
     
@@ -155,25 +171,25 @@ const UI = {
         if (el) {
             this.loadingStartTime = Date.now();
             el.style.display = 'flex';
-            // Langsung opacity 1 tanpa delay
-            requestAnimationFrame(() => {
-                el.style.opacity = '1';
-            });
+            // ⚡ Langsung opacity 1 tanpa delay
+            el.style.opacity = '1';
         }
     },
     
     async hideLoading(id = 'loader') {
         const el = document.getElementById(id);
         if (el) {
-            // Pastikan loading minimal tampil 200ms (agar tidak flicker)
-            const elapsed = Date.now() - (this.loadingStartTime || 0);
+            // ⚡ TIDAK ADA minimal display time lagi - langsung hide!
             const minTime = CONFIG.LOADING.minDisplayTime;
             
-            if (elapsed < minTime) {
-                await new Promise(resolve => setTimeout(resolve, minTime - elapsed));
+            if (minTime > 0) {
+                const elapsed = Date.now() - (this.loadingStartTime || 0);
+                if (elapsed < minTime) {
+                    await new Promise(resolve => setTimeout(resolve, minTime - elapsed));
+                }
             }
             
-            // Fade out cepat
+            // ⚡ Fade out super cepat
             el.style.transition = `opacity ${CONFIG.LOADING.fadeSpeed}ms ease`;
             el.style.opacity = '0';
             
@@ -183,7 +199,7 @@ const UI = {
         }
     },
     
-    showAlert(msg, type = 'info', duration = 3000) { // Durasi diperpendek ke 3 detik
+    showAlert(msg, type = 'info', duration = 2500) { // ⚡ Durasi diperpendek ke 2.5 detik
         let container = document.getElementById('alert-container');
         if (!container) {
             container = document.createElement('div');
@@ -213,7 +229,7 @@ const UI = {
             border-radius: 8px;
             margin-bottom: 0.5rem;
             box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
-            animation: slideIn 0.2s ease;
+            animation: slideIn 0.15s ease;
         `;
         
         alertDiv.innerHTML = `
@@ -232,9 +248,9 @@ const UI = {
             setTimeout(() => {
                 const el = document.getElementById(alertId);
                 if (el) {
-                    el.style.transition = 'opacity 0.2s ease';
+                    el.style.transition = 'opacity 0.15s ease';
                     el.style.opacity = '0';
-                    setTimeout(() => el.remove(), 200);
+                    setTimeout(() => el.remove(), 150);
                 }
             }, duration);
         }
