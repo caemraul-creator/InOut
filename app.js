@@ -376,22 +376,40 @@ function generateNewItemId() {
         return;
     }
     
-    // Ambil semua ID yang ada dengan prefix kategori ini
+    // Ambil semua ID yang sudah ada untuk kategori ini (sebagai string untuk exact match)
     const existingIds = dataMaster
         .filter(item => item.id.startsWith(inisial + '-'))
-        .map(item => {
-            const parts = item.id.split('-');
-            return parseInt(parts[1]) || 0;
-        });
+        .map(item => item.id);
     
-    // Hitung next number (max + 1)
-    const nextNum = existingIds.length > 0 ? Math.max(...existingIds) + 1 : 1;
+    // Ambil semua number yang sudah ada
+    const existingNumbers = existingIds.map(id => {
+        const parts = id.split('-');
+        return parseInt(parts[1]) || 0;
+    });
     
-    // ✅ PERBAIKAN: padStart(4) untuk 4 digit (bukan 3)
+    // ✅ PERBAIKAN: Cari next available number
+    let nextNum = 1;
+    
+    if (existingNumbers.length > 0) {
+        // Mulai dari max + 1, lalu cek sampai ketemu yang available
+        nextNum = Math.max(...existingNumbers) + 1;
+        
+        // Double check: pastikan ID yang di-generate belum ada
+        let candidateId = `${inisial}-${String(nextNum).padStart(4, '0')}`;
+        let attempts = 0;
+        
+        while (existingIds.includes(candidateId) && attempts < 100) {
+            nextNum++;
+            candidateId = `${inisial}-${String(nextNum).padStart(4, '0')}`;
+            attempts++;
+        }
+    }
+    
+    // Format dengan 4 digit
     const newId = `${inisial}-${String(nextNum).padStart(4, '0')}`;
     
     idInput.value = newId;
-    console.log('Generated new ID:', newId);
+    console.log('✅ Generated new ID:', newId, `(checked ${existingIds.length} existing IDs)`);
 }
 
 async function submitNewItem() {
