@@ -1,7 +1,7 @@
 // ============================================
 // APP.JS - FINAL VERSION (MODIFIED)
 // Support Gudang Kalipucang & Gudang Troso
-// Spreadsheet tetap pakai A/B
+// PERBAIKAN: Menggunakan getAllBarang untuk data lengkap
 // ============================================
 
 let dataMaster = [];
@@ -42,27 +42,22 @@ document.addEventListener('DOMContentLoaded', function() {
 function setupAutoReloadListener() {
     console.log('🔄 Setting up auto-reload listener...');
     
-    // Check ketika halaman mendapat focus kembali
     window.addEventListener('focus', async function() {
         console.log('👀 Page got focus, checking for data changes...');
         
-        // Check flag dari localStorage
         const dataChanged = localStorage.getItem('dataBarangChanged');
         
         if (dataChanged === 'true') {
             console.log('🔄 Data changed detected, reloading data barang...');
             
-            // Clear flag
             localStorage.removeItem('dataBarangChanged');
             
-            // Clear cache
             if (typeof API !== 'undefined' && API.clearCache) {
                 API.clearCache();
             }
             
-            // Reload data barang
             try {
-                await loadDataBarang();
+                await loadAllBarang(); // ✅ PERBAIKAN: Gunakan loadAllBarang
                 UI.showAlert('✅ Data barang telah diperbarui', 'success', 2000);
             } catch (error) {
                 console.error('Error reloading data:', error);
@@ -70,7 +65,6 @@ function setupAutoReloadListener() {
         }
     });
     
-    // Check juga ketika visibility berubah (untuk mobile/tab switching)
     document.addEventListener('visibilitychange', async function() {
         if (!document.hidden) {
             const dataChanged = localStorage.getItem('dataBarangChanged');
@@ -84,7 +78,7 @@ function setupAutoReloadListener() {
                 }
                 
                 try {
-                    await loadDataBarang();
+                    await loadAllBarang(); // ✅ PERBAIKAN: Gunakan loadAllBarang
                     UI.showAlert('✅ Data barang telah diperbarui', 'success', 2000);
                 } catch (error) {
                     console.error('Error reloading data:', error);
@@ -104,7 +98,8 @@ async function initIndexPage() {
     console.log('📄 Initializing index page...');
     
     try {
-        await loadDataBarang();
+        // ✅ PERBAIKAN: Gunakan loadAllBarang untuk ambil SEMUA barang
+        await loadAllBarang();
         await loadKategori();
         
         if (AUTH && typeof AUTH.autoFillForm === 'function') {
@@ -116,9 +111,82 @@ async function initIndexPage() {
         setupAddItemModal();
         
         console.log('✅ Index page initialized successfully');
+        console.log(`📊 Total items loaded: ${dataMaster.length}`);
+        
+        // Debug: cek kategori ELK
+        const elkItems = dataMaster.filter(item => item.id.startsWith('ELK-'));
+        if (elkItems.length > 0) {
+            console.log(`📊 Kategori ELK: ${elkItems.length} items`);
+            console.log('📋 ID ELK yang ada:', elkItems.map(item => item.id).slice(0, 10));
+        }
+        
     } catch (error) {
         console.error('❌ Error initializing index page:', error);
         UI.showAlert('Error initializing app: ' + error.message, 'danger');
+    }
+}
+
+// ============================================
+// DATA LOADING - PERBAIKAN: AMBIL SEMUA BARANG
+// ============================================
+
+// Fungsi untuk load SEMUA barang (untuk index page)
+async function loadAllBarang() {
+    try {
+        console.log('📡 Loading ALL barang (including zero stock)...');
+        UI.showLoading();
+        
+        // ✅ PERBAIKAN: Gunakan getAllBarang untuk ambil SEMUA data
+        const data = await API.get('getAllBarang');
+        
+        // Simpan SEMUA data ke dataMaster
+        dataMaster = data;
+        
+        console.log(`✅ Loaded ALL ${data.length} items (including zero stock)`);
+        
+        // Debug info
+        const withStock = data.filter(item => {
+            const stokA = Number(item.stokA) || 0;
+            const stokB = Number(item.stokB) || 0;
+            return (stokA > 0 || stokB > 0);
+        });
+        
+        console.log(`📊 Items with stock: ${withStock.length}`);
+        console.log(`📊 Items with zero stock: ${data.length - withStock.length}`);
+        
+        UI.hideLoading();
+        return data;
+        
+    } catch (error) {
+        console.error('❌ Error loading all data:', error);
+        UI.hideLoading();
+        UI.showAlert('❌ Gagal memuat data barang: ' + error.message, 'danger');
+        throw error;
+    }
+}
+
+// Fungsi lama (untuk backward compatibility)
+async function loadDataBarang() {
+    return loadAllBarang();
+}
+
+async function loadKategori() {
+    try {
+        console.log('📡 Loading kategori...');
+        
+        const data = await API.get('getKategoriList');
+        dataKategori = data;
+        
+        console.log(`✅ Loaded ${data.length} categories`);
+        
+    } catch (error) {
+        console.error('❌ Error loading kategori:', error);
+        dataKategori = [
+            { nama: 'Umum', inisial: 'UMM' },
+            { nama: 'Elektronik', inisial: 'ELEC' },
+            { nama: 'Elektrik', inisial: 'ELK' },
+            { nama: 'Tools', inisial: 'TOOL' }
+        ];
     }
 }
 
@@ -144,7 +212,7 @@ function setupEventListeners() {
         if (query.length >= 2) {
             searchTimeout = setTimeout(() => {
                 searchBarang(query);
-            }, 150); // Dipercepat dari 300ms ke 150ms
+            }, 150);
         } else {
             hideItemResult();
             hideSearchResults();
@@ -302,7 +370,28 @@ function openAddItemModal(query = '') {
         
         setTimeout(() => {
             if (namaInput) namaInput.focus();
-        }, 150); // Dipercepat dari 300ms ke 150ms
+            
+            // ✅ PERBAIKAN: Pastikan data sudah terload sebelum generate ID
+            if (!dataMaster || dataMaster.length === 0) {
+                console.log('📥 Loading all barang data for ID generation...');
+                loadAllBarang().then(() => {
+                    generateNewItemId();
+                }).catch(error => {
+                    console.error('❌ Failed to load barang data:', error);
+                    // Fallback: generate simple ID
+                    generateSimpleItemId();
+                });
+            } else {
+                generateNewItemId();
+            }
+            
+            // ✅ Boleh edit ID secara manual
+            const idInput = document.getElementById('newItemId');
+            if (idInput) {
+                idInput.removeAttribute('readonly');
+                idInput.title = "Bisa diedit manual jika perlu";
+            }
+        }, 150);
     }
 }
 
@@ -363,6 +452,7 @@ function populateKategoriOptions() {
     console.log('✅ Kategori options populated:', dataKategori.length);
 }
 
+// ✅ PERBAIKAN: Fungsi generate ID yang lebih baik
 function generateNewItemId() {
     const kategoriSelect = document.getElementById('newItemKategori');
     const idInput = document.getElementById('newItemId');
@@ -376,55 +466,155 @@ function generateNewItemId() {
         return;
     }
     
-    // Ambil semua ID yang sudah ada untuk kategori ini (sebagai string untuk exact match)
+    // Pastikan dataMaster sudah terisi
+    if (!dataMaster || dataMaster.length === 0) {
+        console.warn('⚠️ dataMaster kosong, menggunakan ID sederhana');
+        idInput.value = `${inisial}-0001`;
+        return;
+    }
+    
+    // Ambil semua ID untuk kategori ini
     const existingIds = dataMaster
-        .filter(item => item.id.startsWith(inisial + '-'))
+        .filter(item => item.id && item.id.startsWith(inisial + '-'))
         .map(item => item.id);
     
-    // Ambil semua number yang sudah ada
+    console.log(`🔍 Kategori ${inisial}: ${existingIds.length} existing IDs`);
+    
+    if (existingIds.length === 0) {
+        idInput.value = `${inisial}-0001`;
+        console.log(`✅ Generated first ID: ${inisial}-0001`);
+        return;
+    }
+    
+    // Ambil semua numbers dari ID yang ada
     const existingNumbers = existingIds.map(id => {
         const parts = id.split('-');
-        return parseInt(parts[1]) || 0;
-    });
+        if (parts.length < 2) return 0;
+        const num = parseInt(parts[1]);
+        return isNaN(num) ? 0 : num;
+    }).filter(num => !isNaN(num) && num > 0);
     
-    // ✅ PERBAIKAN: Cari next available number
+    if (existingNumbers.length === 0) {
+        idInput.value = `${inisial}-0001`;
+        console.log(`✅ Generated first ID (no valid numbers): ${inisial}-0001`);
+        return;
+    }
+    
+    // Urutkan numbers
+    existingNumbers.sort((a, b) => a - b);
+    
+    console.log(`📊 Existing numbers (first 10): ${existingNumbers.slice(0, 10).join(', ')}`);
+    console.log(`📊 Max number: ${Math.max(...existingNumbers)}`);
+    
+    // Cari gap pertama yang kosong
     let nextNum = 1;
+    let foundGap = false;
     
-    if (existingNumbers.length > 0) {
-        // Mulai dari max + 1, lalu cek sampai ketemu yang available
-        nextNum = Math.max(...existingNumbers) + 1;
-        
-        // Double check: pastikan ID yang di-generate belum ada
-        let candidateId = `${inisial}-${String(nextNum).padStart(4, '0')}`;
-        let attempts = 0;
-        
-        while (existingIds.includes(candidateId) && attempts < 100) {
-            nextNum++;
-            candidateId = `${inisial}-${String(nextNum).padStart(4, '0')}`;
-            attempts++;
+    for (let i = 0; i < existingNumbers.length; i++) {
+        if (existingNumbers[i] !== i + 1) {
+            nextNum = i + 1;
+            foundGap = true;
+            break;
         }
     }
     
+    if (!foundGap) {
+        nextNum = existingNumbers[existingNumbers.length - 1] + 1;
+    }
+    
     // Format dengan 4 digit
-    const newId = `${inisial}-${String(nextNum).padStart(4, '0')}`;
+    let newId = `${inisial}-${String(nextNum).padStart(4, '0')}`;
+    
+    // Double check: pastikan ID belum ada
+    let attempts = 0;
+    while (existingIds.includes(newId) && attempts < 100) {
+        console.warn(`⚠️ ID ${newId} already exists, trying next...`);
+        nextNum++;
+        newId = `${inisial}-${String(nextNum).padStart(4, '0')}`;
+        attempts++;
+    }
+    
+    if (attempts >= 100) {
+        console.error('❌ Cannot find available ID after 100 attempts');
+        // Gunakan timestamp sebagai fallback
+        const timestamp = Date.now().toString().slice(-4);
+        newId = `${inisial}-${timestamp}`;
+    }
     
     idInput.value = newId;
-    console.log('✅ Generated new ID:', newId, `(checked ${existingIds.length} existing IDs)`);
+    console.log(`✅ Generated new ID: ${newId} (nextNum: ${nextNum})`);
+}
+
+// Fallback function untuk generate ID sederhana
+function generateSimpleItemId() {
+    const kategoriSelect = document.getElementById('newItemKategori');
+    const idInput = document.getElementById('newItemId');
+    
+    if (!kategoriSelect || !idInput) return;
+    
+    const inisial = kategoriSelect.value;
+    
+    if (!inisial) {
+        idInput.value = '';
+        return;
+    }
+    
+    // Gunakan timestamp untuk ID unik
+    const timestamp = Date.now().toString().slice(-4);
+    const newId = `${inisial}-${timestamp}`;
+    
+    idInput.value = newId;
+    console.log(`✅ Generated simple ID: ${newId}`);
 }
 
 async function submitNewItem() {
-    const idBarang = document.getElementById('newItemId').value;
-    const nama = document.getElementById('newItemNama').value;
+    const idBarang = document.getElementById('newItemId').value.trim();
+    const nama = document.getElementById('newItemNama').value.trim();
     const kategoriSelect = document.getElementById('newItemKategori');
     const kategori = kategoriSelect.selectedOptions[0]?.text || 'Umum';
     const satuan = document.getElementById('newItemSatuan').value;
     const stokAwal = document.getElementById('newItemStok').value;
     const gudang = document.getElementById('newItemGudang').value;
     
-    // ✅ GET CURRENT USER
     const user = AUTH.getUserName() || 'System';
     
     console.log('📦 Submitting new item:', { idBarang, nama, kategori, satuan, stokAwal, gudang, user });
+    
+    // ✅ PERBAIKAN: Validasi input
+    if (!idBarang) {
+        UI.showAlert('❌ ID Barang tidak boleh kosong!', 'danger');
+        document.getElementById('newItemId').focus();
+        return;
+    }
+    
+    if (!nama) {
+        UI.showAlert('❌ Nama Barang tidak boleh kosong!', 'danger');
+        document.getElementById('newItemNama').focus();
+        return;
+    }
+    
+    // ✅ PERBAIKAN: Cek apakah ID sudah ada di dataMaster
+    const idExists = dataMaster.some(item => item.id === idBarang);
+    if (idExists) {
+        UI.showAlert(`❌ ID ${idBarang} sudah ada di sistem!`, 'danger');
+        
+        // Tampilkan barang yang sudah ada
+        const existingItem = dataMaster.find(item => item.id === idBarang);
+        if (existingItem) {
+            UI.showAlert(`📋 Barang dengan ID ${idBarang} sudah ada: ${existingItem.nama}`, 'info', 4000);
+        }
+        
+        // Tawarkan untuk edit ID
+        setTimeout(() => {
+            const editId = confirm(`ID ${idBarang} sudah ada.\n\nApakah ingin mengedit ID sekarang?`);
+            if (editId) {
+                document.getElementById('newItemId').focus();
+                document.getElementById('newItemId').select();
+            }
+        }, 500);
+        
+        return;
+    }
     
     try {
         UI.showLoading();
@@ -435,41 +625,79 @@ async function submitNewItem() {
             kategori: kategori,
             satuan: satuan,
             stokAwal: stokAwal,
-            gudang: gudang, // Kirim A/B
+            gudang: gudang,
             user: user
         });
         
         console.log('✅ New item added:', result);
         
-        // ✅ PERBAIKAN: Clear cache dan reload data SEBELUM hide loading
+        // Clear cache dan reload data
         if (typeof API !== 'undefined' && API.clearCache) {
             API.clearCache();
         }
         
-        await loadDataBarang();
+        // ✅ PERBAIKAN: Reload SEMUA data barang
+        await loadAllBarang();
         
         UI.hideLoading();
         UI.showAlert('✅ Barang baru berhasil ditambahkan!', 'success');
         
         closeAddItemModal();
         
+        // Coba pilih barang yang baru ditambahkan
         const newItem = dataMaster.find(item => item.id === idBarang);
         if (newItem) {
             selectItem(newItem);
+        } else {
+            // Jika tidak ditemukan, coba search dengan nama
+            document.getElementById('manualIdInput').value = nama;
+            searchBarang(nama);
         }
         
     } catch (error) {
         console.error('❌ Error adding item:', error);
         UI.hideLoading();
-        UI.showAlert('❌ Gagal menambah barang: ' + error.message, 'danger');
+        
+        // ✅ PERBAIKAN: Tampilkan error yang lebih informatif
+        let errorMessage = '❌ Gagal menambah barang';
+        if (error.message.includes('ID Barang sudah ada')) {
+            errorMessage = `❌ ID ${idBarang} sudah ada di sistem!`;
+            
+            // Update dataMaster dan cek lagi
+            await loadAllBarang();
+            
+            // Tawarkan solusi
+            setTimeout(() => {
+                const editId = confirm(`${errorMessage}\n\nApakah ingin mengedit ID sekarang?`);
+                if (editId) {
+                    document.getElementById('newItemId').focus();
+                    document.getElementById('newItemId').select();
+                }
+            }, 500);
+        } else {
+            errorMessage += ': ' + error.message;
+        }
+        
+        UI.showAlert(errorMessage, 'danger');
     }
 }
 
 async function submitNewKategori() {
-    const nama = document.getElementById('newKategoriNama').value;
-    const inisial = document.getElementById('newKategoriInisial').value.toUpperCase();
+    const nama = document.getElementById('newKategoriNama').value.trim();
+    const inisial = document.getElementById('newKategoriInisial').value.toUpperCase().trim();
     
     console.log('🏷️ Submitting new kategori:', { nama, inisial });
+    
+    // Validasi
+    if (!nama || !inisial) {
+        UI.showAlert('❌ Nama dan Inisial harus diisi!', 'danger');
+        return;
+    }
+    
+    if (inisial.length > 4) {
+        UI.showAlert('❌ Inisial maksimal 4 karakter!', 'danger');
+        return;
+    }
     
     try {
         UI.showLoading();
@@ -510,8 +738,6 @@ async function submitNewKategori() {
 // ============================================
 
 function setupConfirmationModal() {
-    // Modal konfirmasi sudah tidak digunakan
-    // Function ini tetap ada untuk backward compatibility
     console.log('⚠️ Confirmation modal is deprecated, transactions are now direct');
 }
 
@@ -523,13 +749,10 @@ function showConfirmation() {
         return;
     }
     
-    // Langsung submit tanpa modal konfirmasi
     submitTransactionDirect();
 }
 
 function hideConfirmation() {
-    // Function ini tetap ada untuk backward compatibility
-    // Tapi tidak digunakan lagi
     console.log('Hiding confirmation modal (deprecated)');
 }
 
@@ -541,7 +764,6 @@ function validateForm() {
         return false;
     }
     
-    // Validasi Tanggal
     const tanggal = document.getElementById('tanggal').value;
     if (!tanggal || tanggal.trim() === '') {
         UI.showAlert('⚠️ Tanggal transaksi harus diisi!', 'danger');
@@ -554,7 +776,6 @@ function validateForm() {
         return false;
     }
     
-    // Validasi PIC
     const pic = document.getElementById('pic').value;
     if (!pic || pic.trim() === '') {
         UI.showAlert('⚠️ PIC harus diisi!', 'danger');
@@ -576,7 +797,7 @@ async function submitTransactionDirect() {
         console.log('💾 Submitting transaction directly...');
         
         const gudangBtn = document.querySelector('.warehouse-btn.active');
-        const gudangValue = gudangBtn.dataset.warehouse; // "Kalipucang" atau "Troso"
+        const gudangValue = gudangBtn.dataset.warehouse;
         
         const jenis = document.querySelector('.type-btn.active').dataset.type;
         const barangNama = tempSelectedItem ? tempSelectedItem.nama : '-';
@@ -588,7 +809,6 @@ async function submitTransactionDirect() {
         const petugas = document.getElementById('user').value;
         const keterangan = document.getElementById('keterangan').value;
         
-        // Kirim A/B ke API
         const gudangApi = gudangValue === 'Kalipucang' ? 'A' : 'B';
         
         const transactionData = {
@@ -606,7 +826,6 @@ async function submitTransactionDirect() {
         
         console.log('Transaction data:', transactionData);
         
-        // Show loading
         UI.showLoading();
         
         const result = await API.post('submitTransaksi', transactionData);
@@ -615,11 +834,9 @@ async function submitTransactionDirect() {
         
         UI.hideLoading();
         
-        // Show success message
         const jenisText = jenis === 'Masuk' ? 'masuk' : 'keluar';
         UI.showAlert(`✅ Transaksi ${jenisText} berhasil! ${barangNama} (${jumlah} ${satuan})`, 'success', 2000);
         
-        // Reset form langsung tanpa delay
         resetForm();
         
     } catch (error) {
@@ -629,54 +846,8 @@ async function submitTransactionDirect() {
     }
 }
 
-// Keep old submitTransaction for backward compatibility
 async function submitTransaction() {
-    // Redirect to direct submit
     await submitTransactionDirect();
-}
-
-// ============================================
-// DATA LOADING - PERBAIKAN UNTUK INDEX PAGE
-// ============================================
-
-async function loadDataBarang() {
-    try {
-        console.log('📡 Loading data barang...');
-        UI.showLoading();
-        
-        const data = await API.get('getBarangList');
-        
-        // ✅ UNTUK INDEX PAGE: Tampilkan SEMUA barang untuk pencarian (termasuk stok 0)
-        dataMaster = data; // Simpan semua data
-        
-        console.log(`✅ Loaded ${data.length} items (semua barang untuk pencarian)`);
-        
-        UI.hideLoading();
-        
-    } catch (error) {
-        console.error('❌ Error loading data:', error);
-        UI.hideLoading();
-        UI.showAlert('❌ Gagal memuat data barang: ' + error.message, 'danger');
-    }
-}
-
-async function loadKategori() {
-    try {
-        console.log('📡 Loading kategori...');
-        
-        const data = await API.get('getKategoriList');
-        dataKategori = data;
-        
-        console.log(`✅ Loaded ${data.length} categories`);
-        
-    } catch (error) {
-        console.error('❌ Error loading kategori:', error);
-        dataKategori = [
-            { nama: 'Umum', inisial: 'UMM' },
-            { nama: 'Elektronik', inisial: 'ELEC' },
-            { nama: 'Tools', inisial: 'TOOL' }
-        ];
-    }
 }
 
 // ============================================
@@ -695,19 +866,15 @@ function searchBarang(query) {
             const namaLower = item.nama.toLowerCase();
             let score = 0;
             
-            // EXACT MATCH (highest priority) - Score: 1000
             if (idLower === queryLower || namaLower === queryLower) {
                 score = 1000;
             }
-            // STARTS WITH (high priority) - Score: 500
             else if (idLower.startsWith(queryLower) || namaLower.startsWith(queryLower)) {
                 score = 500;
             }
-            // CONTAINS (medium priority) - Score: 100
             else if (idLower.includes(queryLower) || namaLower.includes(queryLower)) {
                 score = 100;
             }
-            // FUZZY MATCH (low priority) - Score: 10
             else if (fuzzyMatch(queryLower, namaLower) || fuzzyMatch(queryLower, idLower)) {
                 score = 10;
             }
@@ -722,11 +889,9 @@ function searchBarang(query) {
     console.log(`Found ${results.length} results (top score: ${scoredResults[0]?.score || 0})`);
     
     if (results.length > 0) {
-        // Jika hanya 1 hasil atau hasil pertama exact match, langsung pilih
         if (results.length === 1 || scoredResults[0].score === 1000) {
             selectItem(results[0]);
         } else {
-            // Tampilkan dropdown dengan multiple results
             showSearchResults(results, query);
         }
     } else {
@@ -742,13 +907,10 @@ function searchBarang(query) {
     }
 }
 
-// Fuzzy matching untuk toleransi typo
 function fuzzyMatch(query, target) {
-    // Hapus spasi dan karakter khusus
     const cleanQuery = query.replace(/[\s-_]/g, '');
     const cleanTarget = target.replace(/[\s-_]/g, '');
     
-    // Cek apakah semua karakter query ada di target (dengan urutan)
     let queryIndex = 0;
     for (let i = 0; i < cleanTarget.length && queryIndex < cleanQuery.length; i++) {
         if (cleanTarget[i] === cleanQuery[queryIndex]) {
@@ -759,31 +921,25 @@ function fuzzyMatch(query, target) {
     return queryIndex === cleanQuery.length;
 }
 
-// Tampilkan dropdown hasil pencarian
 function showSearchResults(results, query) {
     console.log('📋 Showing search results dropdown');
     
     const searchInput = document.getElementById('manualIdInput');
     const inputRect = searchInput.getBoundingClientRect();
     
-    // Buat atau ambil dropdown container
     let dropdown = document.getElementById('searchResultsDropdown');
     if (!dropdown) {
         dropdown = document.createElement('div');
         dropdown.id = 'searchResultsDropdown';
         dropdown.className = 'search-results-dropdown';
-        
-        // Append ke body, bukan ke parent input
         document.body.appendChild(dropdown);
     }
     
-    // Position dropdown di bawah input dengan fixed positioning
     dropdown.style.position = 'fixed';
     dropdown.style.top = (inputRect.bottom + 8) + 'px';
     dropdown.style.left = inputRect.left + 'px';
     dropdown.style.width = inputRect.width + 'px';
     
-    // Batasi hasil maksimal 5
     const maxResults = 5;
     const displayResults = results.slice(0, maxResults);
     
@@ -820,10 +976,8 @@ function showSearchResults(results, query) {
     dropdown.innerHTML = html;
     dropdown.style.display = 'block';
     
-    // Store results untuk dipilih
     window.searchResultsCache = displayResults;
     
-    // Update posisi saat scroll atau resize
     const updatePosition = () => {
         const newRect = searchInput.getBoundingClientRect();
         dropdown.style.top = (newRect.bottom + 8) + 'px';
@@ -831,22 +985,18 @@ function showSearchResults(results, query) {
         dropdown.style.width = newRect.width + 'px';
     };
     
-    // Add scroll listener
     window.removeEventListener('scroll', updatePosition);
     window.addEventListener('scroll', updatePosition);
     
-    // Add resize listener
     window.removeEventListener('resize', updatePosition);
     window.addEventListener('resize', updatePosition);
 }
 
-// Highlight matching text
 function highlightMatch(text, query) {
     const regex = new RegExp(`(${query})`, 'gi');
     return text.replace(regex, '<mark>$1</mark>');
 }
 
-// Pilih item dari dropdown
 window.selectItemFromDropdown = function(index) {
     if (window.searchResultsCache && window.searchResultsCache[index]) {
         selectItem(window.searchResultsCache[index]);
@@ -854,7 +1004,6 @@ window.selectItemFromDropdown = function(index) {
     }
 };
 
-// Sembunyikan dropdown hasil pencarian
 function hideSearchResults() {
     const dropdown = document.getElementById('searchResultsDropdown');
     if (dropdown) {
@@ -878,7 +1027,6 @@ function selectItem(item) {
     document.getElementById('itemResult').classList.remove('hidden');
     document.getElementById('manualIdInput').value = item.nama;
     
-    // ✅ TAMBAHKAN INI - Update gudang colors
     updateGudangColors();
 }
 
@@ -888,7 +1036,6 @@ function updateStockDisplay() {
     const activeWarehouse = document.querySelector('.warehouse-btn.active');
     const gudang = activeWarehouse ? activeWarehouse.dataset.warehouse : 'Kalipucang';
     
-    // Mapping: Kalipucang = A, Troso = B
     const gudangKey = gudang === 'Kalipucang' ? 'A' : 'B';
     const stok = gudangKey === 'A' ? tempSelectedItem.stokA : tempSelectedItem.stokB;
     
@@ -916,7 +1063,7 @@ function resetForm() {
     resetItem();
     document.getElementById('jumlah').value = '';
     document.getElementById('keterangan').value = '';
-    loadDataBarang();
+    loadAllBarang(); // ✅ PERBAIKAN: Gunakan loadAllBarang
 }
 
 // ============================================
@@ -993,179 +1140,65 @@ function onScanFailure(error) {
 // HELPER FUNCTIONS - GUDANG MAPPING
 // ============================================
 
-// Konversi nilai gudang ke nama display
 function getGudangDisplayNameFromValue(gudangValue) {
     return gudangValue === 'Kalipucang' ? 'Gudang Kalipucang' : 'Gudang Troso';
 }
 
-// Konversi nilai gudang ke kode API
 function getGudangApiCode(gudangValue) {
     return gudangValue === 'Kalipucang' ? 'A' : 'B';
 }
 
-// Konversi kode API ke nilai gudang
 function getGudangValueFromApiCode(apiCode) {
     return apiCode === 'A' ? 'Kalipucang' : 'Troso';
 }
 
-// Konversi kode API ke nama display
 function getGudangDisplayNameFromApiCode(apiCode) {
     return apiCode === 'A' ? 'Gudang Kalipucang' : 'Gudang Troso';
 }
 
 // ============================================
-// GUDANG COLOR HELPER - Auto add color classes
+// GUDANG COLOR HELPER
 // ============================================
 
-// Function untuk update warna berdasarkan gudang aktif
 function updateGudangColors() {
     const activeWarehouse = document.querySelector('.warehouse-btn.active');
     if (!activeWarehouse) return;
     
-    const gudang = activeWarehouse.dataset.warehouse; // "Kalipucang" atau "Troso"
+    const gudang = activeWarehouse.dataset.warehouse;
     const gudangClass = gudang === 'Kalipucang' ? 'gudang-a' : 'gudang-b';
     
     console.log('🎨 Updating colors for:', gudang);
     
-    // Update item card
     const itemCard = document.querySelector('.item-card');
     if (itemCard) {
         itemCard.classList.remove('gudang-a', 'gudang-b');
         itemCard.classList.add(gudangClass);
     }
     
-    // Update stock info
     const stockInfo = document.querySelector('.stock-info');
     if (stockInfo) {
         stockInfo.classList.remove('gudang-a', 'gudang-b');
         stockInfo.classList.add(gudangClass);
     }
     
-    // Update submit button
     const submitBtn = document.querySelector('.submit-btn');
     if (submitBtn) {
         submitBtn.classList.remove('gudang-a', 'gudang-b');
         submitBtn.classList.add(gudangClass);
     }
     
-    // Update atau create gudang indicator
     updateGudangIndicator(gudang);
 }
 
-// Function untuk show/update gudang indicator
 function updateGudangIndicator(gudang) {
-    let indicator = document.getElementById('gudangIndicator');
-    
-    if (!indicator) {
-        // Create indicator
-        indicator = document.createElement('div');
-        indicator.id = 'gudangIndicator';
-        indicator.className = 'gudang-indicator';
-        document.body.appendChild(indicator);
-    }
-    
-    // Update class dan text
-    const gudangClass = gudang === 'Kalipucang' ? 'gudang-a' : 'gudang-b';
-    const displayName = getGudangDisplayNameFromValue(gudang);
-    
-    indicator.className = 'gudang-indicator active ' + gudangClass;
-    indicator.innerHTML = `<i class="fas fa-warehouse"></i> ${displayName}`;
-}
-
-// ============================================
-// EVENT LISTENERS - Auto update colors
-// ============================================
-
-// Tambahkan di setupEventListeners() yang sudah ada
-function setupGudangColorListeners() {
-    const warehouseBtns = document.querySelectorAll('.warehouse-btn');
-    
-    warehouseBtns.forEach(btn => {
-        btn.addEventListener('click', function() {
-            // Update active state
-            warehouseBtns.forEach(b => b.classList.remove('active'));
-            this.classList.add('active');
-            
-            // Update colors
-            updateGudangColors();
-            
-            // Update stock display (function yang sudah ada)
-            if (typeof updateStockDisplay === 'function') {
-                updateStockDisplay();
-            }
-        });
-    });
-    
-    // Initial color update
-    updateGudangColors();
-}
-
-// ============================================
-// INITIALIZE - Panggil saat page load
-// ============================================
-
-// Tambahkan di DOMContentLoaded atau initIndexPage()
-document.addEventListener('DOMContentLoaded', function() {
-    // ... kode yang sudah ada ...
-    
-    // Setup gudang color listeners
-    if (document.getElementById('transaksiForm')) {
-        setupGudangColorListeners();
-    }
-});
-
-// ============================================
-// OPTIONAL: Data Page Color Helper
-// Untuk halaman data.html
-// ============================================
-
-function setupDataPageColors() {
-    // Add color to stat cards based on gudang
-    const statCards = document.querySelectorAll('.stat-card');
-    
-    statCards.forEach(card => {
-        const label = card.querySelector('.stat-label')?.textContent || '';
-        
-        if (label.includes('Kalipucang') || label.includes('Stok A')) {
-            card.classList.add('gudang-a');
-        } else if (label.includes('Troso') || label.includes('Stok B')) {
-            card.classList.add('gudang-b');
-        }
-    });
-    
-    // Add color to table rows based on stock
-    const tableRows = document.querySelectorAll('table tbody tr');
-    
-    tableRows.forEach(row => {
-        const stokACell = row.querySelector('.stok-a');
-        const stokBCell = row.querySelector('.stok-b');
-        
-        if (stokACell) {
-            const badge = stokACell.querySelector('.stock-badge');
-            if (badge) {
-                badge.classList.add('badge-gudang-a');
-            }
-        }
-        
-        if (stokBCell) {
-            const badge = stokBCell.querySelector('.stock-badge');
-            if (badge) {
-                badge.classList.add('badge-gudang-b');
-            }
-        }
-    });
-}
-
-// Call on data page load
-if (window.location.pathname.includes('data.html')) {
-    document.addEventListener('DOMContentLoaded', setupDataPageColors);
+    // Disabled - indicator removed from UI
+    return;
 }
 
 // ============================================
 // MOBILE RESPONSIVE FUNCTIONS
 // ============================================
 
-// Function untuk update warehouse buttons di mobile
 function updateWarehouseButtonsForMobile() {
     const warehouseBtns = document.querySelectorAll('.warehouse-btn');
     const isMobile = window.innerWidth <= 768;
@@ -1185,67 +1218,53 @@ function updateWarehouseButtonsForMobile() {
     }
 }
 
-// Listen for window resize
 window.addEventListener('resize', updateWarehouseButtonsForMobile);
-
-// Initial call
 document.addEventListener('DOMContentLoaded', updateWarehouseButtonsForMobile);
-
-// ============================================
-// EXPORT FUNCTIONS (untuk file lain)
-// ============================================
-
-// Export fungsi helper gudang untuk digunakan di file lain
-window.GudangHelper = {
-    getDisplayName: function(gudangValue) {
-        return getGudangDisplayNameFromValue(gudangValue);
-    },
-    
-    getApiCode: function(gudangValue) {
-        return getGudangApiCode(gudangValue);
-    },
-    
-    getValueFromApiCode: function(apiCode) {
-        return getGudangValueFromApiCode(apiCode);
-    },
-    
-    getDisplayNameFromApiCode: function(apiCode) {
-        return getGudangDisplayNameFromApiCode(apiCode);
-    }
-};
 
 // ============================================
 // DEBUG FUNCTIONS
 // ============================================
 
-// Fungsi untuk debugging mapping gudang
-function debugGudangMapping() {
-    console.log('=== DEBUG GUDANG MAPPING ===');
-    console.log('Kalipucang -> API Code:', getGudangApiCode('Kalipucang'), '(should be A)');
-    console.log('Troso -> API Code:', getGudangApiCode('Troso'), '(should be B)');
-    console.log('A -> Display:', getGudangDisplayNameFromApiCode('A'), '(should be Gudang Kalipucang)');
-    console.log('B -> Display:', getGudangDisplayNameFromApiCode('B'), '(should be Gudang Troso)');
-    console.log('===========================');
+// Fungsi untuk debugging
+function debugDataMaster() {
+    console.log('=== DEBUG DATA MASTER ===');
+    console.log(`Total items: ${dataMaster.length}`);
+    
+    // Group by kategori
+    const byKategori = {};
+    dataMaster.forEach(item => {
+        const kat = item.kategori || 'Unknown';
+        if (!byKategori[kat]) byKategori[kat] = [];
+        byKategori[kat].push(item.id);
+    });
+    
+    Object.keys(byKategori).forEach(kat => {
+        console.log(`Kategori ${kat}: ${byKategori[kat].length} items`);
+        console.log(`  IDs: ${byKategori[kat].slice(0, 5).join(', ')}${byKategori[kat].length > 5 ? '...' : ''}`);
+    });
+    
+    // Cek ELK khusus
+    const elkItems = dataMaster.filter(item => item.id.startsWith('ELK-'));
+    console.log(`\nELK items: ${elkItems.length}`);
+    if (elkItems.length > 0) {
+        console.log('ELK IDs:', elkItems.map(item => item.id));
+    }
+    
+    console.log('========================');
 }
-
-// Panggil debug jika diperlukan
-// debugGudangMapping();
 
 // ============================================
 // GLOBAL FUNCTIONS
 // ============================================
 
-// Fungsi global untuk dipanggil dari HTML inline
 window.updateGudangColors = updateGudangColors;
 window.updateGudangIndicator = updateGudangIndicator;
 
-// Fungsi untuk mendapatkan gudang aktif saat ini
 window.getActiveGudang = function() {
     const activeBtn = document.querySelector('.warehouse-btn.active');
     return activeBtn ? activeBtn.dataset.warehouse : 'Kalipucang';
 };
 
-// Fungsi untuk mendapatkan display name gudang aktif
 window.getActiveGudangDisplayName = function() {
     const activeGudang = getActiveGudang();
     return getGudangDisplayNameFromValue(activeGudang);
@@ -1255,9 +1274,7 @@ window.getActiveGudangDisplayName = function() {
 // AUTO-RUN FUNCTIONS
 // ============================================
 
-// Auto-setup untuk halaman index
 if (document.getElementById('transaksiForm')) {
-    // Setup initial colors
     document.addEventListener('DOMContentLoaded', function() {
         setTimeout(() => {
             updateGudangColors();
@@ -1271,7 +1288,7 @@ if (document.getElementById('transaksiForm')) {
 // ============================================ 
 
 function setupMobileKeyboardHandler() {
-    if (!('ontouchstart' in window)) return; // Hanya untuk touch devices
+    if (!('ontouchstart' in window)) return;
     
     console.log('📱 Setting up mobile keyboard handler');
     
@@ -1279,17 +1296,14 @@ function setupMobileKeyboardHandler() {
     let activeInput = null;
     let keyboardHeight = 0;
     
-    // Detect keyboard show/hide
     function checkKeyboard() {
         const viewportHeight = window.innerHeight;
         const documentHeight = document.documentElement.clientHeight;
         
-        // Jika keyboard muncul, height berubah
         if (documentHeight > viewportHeight) {
             keyboardHeight = documentHeight - viewportHeight;
             document.body.classList.add('keyboard-open');
             
-            // Scroll ke input yang aktif
             if (activeInput) {
                 setTimeout(() => {
                     activeInput.scrollIntoView({
@@ -1304,39 +1318,67 @@ function setupMobileKeyboardHandler() {
         }
     }
     
-    // Track active input
     inputs.forEach(input => {
         input.addEventListener('focus', function() {
             activeInput = this;
             document.body.classList.add('input-focused');
-            
-            // Untuk Android, beri delay
             setTimeout(checkKeyboard, 300);
         });
         
         input.addEventListener('blur', function() {
             activeInput = null;
             document.body.classList.remove('input-focused');
-            
-            // Delay untuk memastikan keyboard benar-benar tertutup
             setTimeout(checkKeyboard, 500);
         });
     });
     
-    // Listen untuk resize (keyboard show/hide memicu resize di mobile)
     let resizeTimeout;
     window.addEventListener('resize', function() {
         clearTimeout(resizeTimeout);
         resizeTimeout = setTimeout(checkKeyboard, 100);
     });
     
-    // Initial check
     setTimeout(checkKeyboard, 1000);
 }
 
-// Panggil saat page load
 if (document.getElementById('transaksiForm')) {
     document.addEventListener('DOMContentLoaded', function() {
         setTimeout(setupMobileKeyboardHandler, 500);
     });
 }
+
+// ============================================
+// MANUAL DEBUG COMMANDS
+// ============================================
+
+// Untuk debug di console browser
+window.debugApp = {
+    reloadData: async function() {
+        console.log('🔄 Manual reload data...');
+        await loadAllBarang();
+        console.log('✅ Data reloaded');
+    },
+    
+    checkELK: function() {
+        const elkItems = dataMaster.filter(item => item.id.startsWith('ELK-'));
+        console.log(`ELK items: ${elkItems.length}`);
+        console.log('ELK IDs:', elkItems.map(item => item.id));
+        return elkItems;
+    },
+    
+    findID: function(id) {
+        const item = dataMaster.find(item => item.id === id);
+        console.log(`Searching for ID: ${id}`);
+        console.log('Found:', item);
+        return item;
+    },
+    
+    clearCache: function() {
+        if (typeof API !== 'undefined' && API.clearCache) {
+            API.clearCache();
+            console.log('✅ Cache cleared');
+        } else {
+            console.log('❌ API.clearCache not available');
+        }
+    }
+};
