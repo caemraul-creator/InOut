@@ -376,6 +376,7 @@ function generateNewItemId() {
         return;
     }
     
+    // Ambil semua ID yang ada dengan prefix kategori ini
     const existingIds = dataMaster
         .filter(item => item.id.startsWith(inisial + '-'))
         .map(item => {
@@ -383,8 +384,11 @@ function generateNewItemId() {
             return parseInt(parts[1]) || 0;
         });
     
+    // Hitung next number (max + 1)
     const nextNum = existingIds.length > 0 ? Math.max(...existingIds) + 1 : 1;
-    const newId = `${inisial}-${String(nextNum).padStart(3, '0')}`;
+    
+    // ✅ PERBAIKAN: padStart(4) untuk 4 digit (bukan 3)
+    const newId = `${inisial}-${String(nextNum).padStart(4, '0')}`;
     
     idInput.value = newId;
     console.log('Generated new ID:', newId);
@@ -419,10 +423,15 @@ async function submitNewItem() {
         
         console.log('✅ New item added:', result);
         
-        UI.hideLoading();
-        UI.showAlert('✅ Barang baru berhasil ditambahkan!', 'success');
+        // ✅ PERBAIKAN: Clear cache dan reload data SEBELUM hide loading
+        if (typeof API !== 'undefined' && API.clearCache) {
+            API.clearCache();
+        }
         
         await loadDataBarang();
+        
+        UI.hideLoading();
+        UI.showAlert('✅ Barang baru berhasil ditambahkan!', 'success');
         
         closeAddItemModal();
         
