@@ -1,5 +1,5 @@
 // ============================================
-// LOG.JS - Transaction Log Functions (WITH DELETE) - FINAL FIXED VERSION
+// LOG.JS - Transaction Log Functions + EXPORT SO BULANAN
 // ============================================
 
 let currentWarehouse = 'A';
@@ -16,19 +16,14 @@ const GudangMapping = {
 document.addEventListener('DOMContentLoaded', function() {
     console.log('Log page initializing...');
     
-    // Check authentication
     if (!AUTH.isLoggedIn()) {
         window.location.href = 'login.html';
         return;
     }
     
-    // Set default month to EMPTY (show all)
     document.getElementById('filterMonth').value = '';
-    
-    // Load initial data
     loadTransactions();
     
-    // Setup real-time search
     const searchInput = document.getElementById('searchBarang');
     let searchTimeout;
     searchInput.addEventListener('input', function() {
@@ -38,7 +33,6 @@ document.addEventListener('DOMContentLoaded', function() {
         }, 200);
     });
     
-    // Enter key to search
     searchInput.addEventListener('keypress', function(e) {
         if (e.key === 'Enter') {
             applyFilters();
@@ -52,17 +46,14 @@ function switchWarehouse(warehouse) {
     
     currentWarehouse = warehouse;
     
-    // Update tab UI
     document.getElementById('tabA').classList.remove('active');
     document.getElementById('tabB').classList.remove('active');
     document.getElementById('tab' + warehouse).classList.add('active');
     
-    // Update page title dengan nama gudang yang benar
     const gudangInfo = GudangMapping[warehouse];
     document.querySelector('.page-title').innerHTML = 
         `<i class="fas fa-clipboard-list"></i> Log - ${gudangInfo.display}`;
     
-    // Reload transactions
     loadTransactions();
 }
 
@@ -73,27 +64,20 @@ async function loadTransactions() {
         
         console.log('Loading transactions for Gudang', currentWarehouse);
         
-        // Get transactions from the specific warehouse sheet
         const sheetName = 'T_GUDANG_' + currentWarehouse;
         console.log('Sheet name:', sheetName);
         
-        // Call API to get transaction data
         const response = await API.get('getTransactions', {
             gudang: currentWarehouse
         });
         
         console.log('Transactions loaded:', response?.length || 0);
         
-        // DEBUG: Show first few transactions for inspection
         if (response && response.length > 0) {
             console.log('Sample transaction:', response[0]);
-            console.log('Date field type:', typeof response[0].tanggal);
-            console.log('Date value:', response[0].tanggal);
         }
         
         allTransactions = response || [];
-        
-        // Apply filters
         applyFilters();
         
         UI.hideLoading();
@@ -103,7 +87,6 @@ async function loadTransactions() {
         UI.hideLoading();
         UI.showAlert('Gagal memuat data transaksi: ' + error.message, 'danger');
         
-        // Show empty state
         allTransactions = [];
         renderTable([]);
     }
@@ -114,49 +97,37 @@ function applyFilters() {
     console.log('Applying filters...');
     
     const searchTerm = document.getElementById('searchBarang').value.toLowerCase().trim();
-    const filterMonth = document.getElementById('filterMonth').value; // Format: YYYY-MM
+    const filterMonth = document.getElementById('filterMonth').value;
     const filterJenis = document.getElementById('filterJenis').value;
     
     console.log('Filters:', { searchTerm, filterMonth, filterJenis });
     
-    // Filter transactions
     filteredTransactions = allTransactions.filter(transaction => {
         try {
-            // Search filter (ID or Name)
             if (searchTerm) {
                 const matchId = (transaction.idBarang || '').toLowerCase().includes(searchTerm);
                 const matchName = (transaction.namaBarang || '').toLowerCase().includes(searchTerm);
                 if (!matchId && !matchName) return false;
             }
             
-            // Month filter
             if (filterMonth) {
                 const transDate = parseIndonesianDate(transaction.tanggal);
-                
-                // Skip invalid dates
                 if (!transDate || transDate.getTime() === 0) {
-                    console.warn('Skipping transaction with invalid date:', transaction.tanggal);
                     return false;
                 }
-                
                 try {
-                    const transMonth = transDate.toISOString().slice(0, 7); // Format: YYYY-MM
+                    const transMonth = transDate.toISOString().slice(0, 7);
                     if (transMonth !== filterMonth) return false;
                 } catch (isoError) {
-                    console.warn('Cannot convert date to ISO:', transaction.tanggal, isoError);
                     return false;
                 }
             }
             
-            // Transaction type filter
             if (filterJenis) {
                 let transactionJenis = transaction.jenis || '';
-                
-                // Normalize for comparison
                 const normalizedTransactionJenis = transactionJenis.toLowerCase();
                 const normalizedFilterJenis = filterJenis.toLowerCase();
                 
-                // Map different jenis formats
                 const jenisMapping = {
                     'masuk': ['in', 'masuk'],
                     'keluar': ['out', 'keluar']
@@ -181,35 +152,30 @@ function applyFilters() {
     
     console.log('Filtered transactions:', filteredTransactions.length, 'of', allTransactions.length);
     
-    // Render table (show all filtered data, no limit)
     renderTable(filteredTransactions);
 }
 
 // Parse date from various formats
 function parseIndonesianDate(dateStr) {
     if (!dateStr || dateStr === '-' || dateStr.trim() === '') {
-        console.warn('Empty or invalid date string:', dateStr);
         return new Date(0);
     }
     
     try {
-        // CASE 1: Jika sudah berupa Date object atau string Date JavaScript
         if (typeof dateStr === 'object' || dateStr.includes('GMT') || dateStr.includes('T')) {
-            // Coba langsung parse sebagai Date
             const date = new Date(dateStr);
             if (!isNaN(date.getTime())) {
                 return date;
             }
         }
         
-        // CASE 2: Format Indonesia dd/MM/yyyy HH:mm:ss
         if (dateStr.includes('/')) {
             const parts = String(dateStr).trim().split(' ');
             const dateParts = parts[0].split('/');
             
             if (dateParts.length >= 3) {
                 const day = parseInt(dateParts[0], 10);
-                const month = parseInt(dateParts[1], 10) - 1; // Month is 0-indexed
+                const month = parseInt(dateParts[1], 10) - 1;
                 const year = parseInt(dateParts[2], 10);
                 
                 let hours = 0, minutes = 0, seconds = 0;
@@ -229,14 +195,11 @@ function parseIndonesianDate(dateStr) {
             }
         }
         
-        // CASE 3: Fallback to standard JavaScript Date parsing
         const fallbackDate = new Date(dateStr);
         if (!isNaN(fallbackDate.getTime())) {
             return fallbackDate;
         }
         
-        // If all fails, return epoch
-        console.warn('Cannot parse date:', dateStr);
         return new Date(0);
         
     } catch (error) {
@@ -264,7 +227,6 @@ function formatDateForDisplay(date) {
         
         return `${dayName}, ${day} ${monthName} ${year} ${hours}:${minutes}`;
     } catch (error) {
-        console.error('Error formatting date:', date, error);
         return '-';
     }
 }
@@ -282,7 +244,7 @@ function renderTable(transactions) {
         tbody.innerHTML = `
             <tr>
                 <td colspan="6" style="text-align: center; padding: 3rem; color: var(--text-secondary);">
-                    <i class="fas fa-inbox"></i>
+                    <i class="fas fa-inbox" style="font-size: 2rem; margin-bottom: 0.5rem; opacity: 0.5;"></i>
                     <p>Tidak ada data transaksi yang sesuai dengan filter</p>
                 </td>
             </tr>
@@ -290,14 +252,12 @@ function renderTable(transactions) {
         return;
     }
     
-    // Sort by date (newest first) - with safe date parsing
     transactions.sort((a, b) => {
         try {
             const dateA = parseIndonesianDate(a.tanggal);
             const dateB = parseIndonesianDate(b.tanggal);
             return dateB.getTime() - dateA.getTime();
         } catch (error) {
-            console.warn('Error sorting transactions:', error);
             return 0;
         }
     });
@@ -305,11 +265,9 @@ function renderTable(transactions) {
     let html = '';
     
     transactions.forEach((transaction, index) => {
-        // Parse date for display
         const transDate = parseIndonesianDate(transaction.tanggal);
         const displayDate = formatDateForDisplay(transDate);
         
-        // Determine jenis display
         const isIn = ['in', 'masuk'].includes((transaction.jenis || '').toLowerCase());
         const badgeClass = isIn ? 'badge-in' : 'badge-out';
         const badgeText = isIn ? 'Masuk' : 'Keluar';
@@ -317,7 +275,6 @@ function renderTable(transactions) {
         const jumlahColor = isIn ? '#38ef7d' : '#f45c43';
         const jumlahSign = isIn ? '+' : '-';
         
-        // Escape strings for data attributes
         const escapedNama = (transaction.namaBarang || '').replace(/"/g, '&quot;').replace(/'/g, '&#39;');
         const escapedId = (transaction.idBarang || '').replace(/"/g, '&quot;').replace(/'/g, '&#39;');
         const escapedJenis = isIn ? 'In' : 'Out';
@@ -357,7 +314,7 @@ function renderTable(transactions) {
                             data-jumlah="${transaction.jumlah}"
                             data-nama-barang="${escapedNama}"
                             title="Hapus transaksi ini">
-                        <i class="fas fa-trash"></i>
+                        <i class="fas fa-trash"></i> Hapus
                     </button>
                 </td>
             </tr>
@@ -366,7 +323,6 @@ function renderTable(transactions) {
     
     tbody.innerHTML = html;
     
-    // Add event listeners to delete buttons
     const deleteButtons = document.querySelectorAll('.btn-delete-transaction');
     deleteButtons.forEach(btn => {
         btn.addEventListener('click', function(e) {
@@ -385,18 +341,16 @@ function renderTable(transactions) {
 }
 
 // ============================================
-// DELETE TRANSACTION FUNCTION - FIXED VERSION
+// DELETE TRANSACTION FUNCTION
 // ============================================
 
 async function deleteTransaction(rowIndex, idBarang, jenis, jumlah, namaBarang) {
-    // Safety check for parameters
     if (!rowIndex || !idBarang || !jenis || !jumlah) {
         console.error('Invalid parameters for deleteTransaction:', {rowIndex, idBarang, jenis, jumlah});
         UI.showAlert('❌ Parameter tidak lengkap untuk menghapus transaksi', 'danger');
         return;
     }
     
-    // Confirm dialog
     const confirmMsg = `Apakah Anda yakin ingin menghapus transaksi ini?\n\n` +
                       `Barang: ${namaBarang || idBarang}\n` +
                       `Jenis: ${jenis === 'In' ? 'Masuk' : 'Keluar'}\n` +
@@ -418,13 +372,9 @@ async function deleteTransaction(rowIndex, idBarang, jenis, jumlah, namaBarang) 
             gudang: currentWarehouse
         });
         
-        // Call API to delete transaction - USING POST METHOD
         const url = new URL(CONFIG.API_URL);
         url.searchParams.append('action', 'deleteTransaction');
         
-        console.log('📤 API DELETE URL:', url.toString());
-        
-        // Use POST method instead of GET
         const fetchResponse = await fetch(url.toString(), {
             method: 'POST',
             headers: {
@@ -439,8 +389,6 @@ async function deleteTransaction(rowIndex, idBarang, jenis, jumlah, namaBarang) 
             })
         });
         
-        console.log('Fetch response status:', fetchResponse.status, fetchResponse.statusText);
-        
         if (!fetchResponse.ok) {
             const errorText = await fetchResponse.text();
             console.error('Fetch error response:', errorText);
@@ -450,22 +398,18 @@ async function deleteTransaction(rowIndex, idBarang, jenis, jumlah, namaBarang) 
         const responseText = await fetchResponse.text();
         console.log('Raw response text:', responseText);
         
-        // Try to parse as JSON
         let response;
         try {
             response = JSON.parse(responseText);
             console.log('Parsed response:', response);
         } catch (parseError) {
             console.error('Failed to parse JSON:', parseError);
-            console.log('Response was:', responseText);
             throw new Error('Invalid response from server');
         }
         
-        // FIXED: Improved success checking
         let isSuccess = false;
         
         if (response) {
-            // Check multiple possible success indicators
             if (response.success === true) {
                 isSuccess = true;
             } else if (response.message && (response.message.includes('✅') || response.message.includes('berhasil'))) {
@@ -476,7 +420,6 @@ async function deleteTransaction(rowIndex, idBarang, jenis, jumlah, namaBarang) 
                 isSuccess = true;
             }
             
-            // Special case: if response has data property
             if (response.data && response.data.success === true) {
                 isSuccess = true;
             }
@@ -485,17 +428,12 @@ async function deleteTransaction(rowIndex, idBarang, jenis, jumlah, namaBarang) 
         if (isSuccess) {
             UI.showAlert('✅ Transaksi berhasil dihapus dan stock dikembalikan', 'success');
             
-            // Clear cache
             API.clearCache();
-            
-            // Set flag untuk auto-reload data barang di halaman index
             localStorage.setItem('dataBarangChanged', 'true');
             console.log('✅ Flag dataBarangChanged set to trigger index page reload');
             
-            // Reload transactions
             await loadTransactions();
         } else {
-            // Check for error message
             let errorMessage = 'Gagal menghapus transaksi - response tidak valid';
             if (response && response.error) {
                 errorMessage = response.error;
@@ -516,14 +454,263 @@ async function deleteTransaction(rowIndex, idBarang, jenis, jumlah, namaBarang) 
     }
 }
 
-// Export to CSV (bonus feature)
+// ============================================
+// EXPORT MONTHLY SO REPORT (STOCK OPNAME) - LENGKAP
+// ============================================
+
+async function exportMonthlySO() {
+    const filterMonth = document.getElementById('filterMonth').value;
+    
+    // VALIDASI: Harus pilih bulan
+    if (!filterMonth) {
+        UI.showAlert('❌ Pilih bulan terlebih dahulu!', 'warning', 4000);
+        document.getElementById('filterMonth').focus();
+        document.getElementById('filterMonth').scrollIntoView({ behavior: 'smooth', block: 'center' });
+        return;
+    }
+    
+    // Parse tahun dan bulan
+    const [year, month] = filterMonth.split('-');
+    const monthNames = ['Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni', 
+                        'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'];
+    const monthName = monthNames[parseInt(month) - 1];
+    
+    // Konfirmasi
+    const gudangDisplay = GudangMapping[currentWarehouse].display;
+    const confirmMsg = `📊 DOWNLOAD LAPORAN STOCK OPNAME (SO) BULANAN\n\n` +
+                      `🏭 Gudang: ${gudangDisplay}\n` +
+                      `📅 Periode: ${monthName} ${year}\n\n` +
+                      `Laporan akan berisi:\n` +
+                      `• Saldo awal bulan\n` +
+                      `• Total barang masuk\n` +
+                      `• Total barang keluar\n` +
+                      `• Saldo akhir bulan\n` +
+                      `• Nilai persediaan\n\n` +
+                      `Lanjutkan download?`;
+    
+    if (!confirm(confirmMsg)) {
+        return;
+    }
+    
+    try {
+        UI.showLoading();
+        
+        console.log(`📊 Generating SO Report for ${gudangDisplay} - ${monthName} ${year}`);
+        
+        // ============================================
+        // STEP 1: Dapatkan semua transaksi di bulan ini
+        // ============================================
+        
+        const monthTransactions = allTransactions.filter(transaction => {
+            const transDate = parseIndonesianDate(transaction.tanggal);
+            if (!transDate || transDate.getTime() === 0) return false;
+            
+            const transMonth = transDate.toISOString().slice(0, 7);
+            return transMonth === filterMonth;
+        });
+        
+        console.log(`📦 Transaksi di bulan ${filterMonth}: ${monthTransactions.length} records`);
+        
+        if (monthTransactions.length === 0) {
+            UI.hideLoading();
+            UI.showAlert(`⚠️ Tidak ada transaksi untuk ${monthName} ${year}`, 'warning', 5000);
+            return;
+        }
+        
+        // ============================================
+        // STEP 2: Dapatkan data stok dari master barang
+        // ============================================
+        
+        const masterBarang = await API.get('getAllBarang');
+        
+        // ============================================
+        // STEP 3: Hitung saldo awal & pergerakan
+        // ============================================
+        
+        const sortedTransactions = [...monthTransactions].sort((a, b) => {
+            const dateA = parseIndonesianDate(a.tanggal);
+            const dateB = parseIndonesianDate(b.tanggal);
+            return dateA.getTime() - dateB.getTime();
+        });
+        
+        const soMap = new Map();
+        
+        // Inisialisasi dengan semua barang
+        masterBarang.forEach(item => {
+            const stokField = currentWarehouse === 'A' ? 'stokA' : 'stokB';
+            const stokAkhir = Number(item[stokField]) || 0;
+            
+            soMap.set(item.id, {
+                id: item.id,
+                nama: item.nama,
+                kategori: item.kategori,
+                satuan: item.satuan,
+                saldoAwal: 0,
+                totalMasuk: 0,
+                totalKeluar: 0,
+                stokAkhir: stokAkhir,
+                hargaSatuan: item.harga || 0,
+                totalNilai: 0
+            });
+        });
+        
+        // Hitung total masuk/keluar
+        sortedTransactions.forEach(transaction => {
+            const id = transaction.idBarang;
+            if (!id || !soMap.has(id)) return;
+            
+            const item = soMap.get(id);
+            const jumlah = Number(transaction.jumlah) || 0;
+            const jenis = (transaction.jenis || '').toLowerCase();
+            
+            if (jenis === 'in' || jenis === 'masuk') {
+                item.totalMasuk += jumlah;
+            } else if (jenis === 'out' || jenis === 'keluar') {
+                item.totalKeluar += jumlah;
+            }
+        });
+        
+        // Hitung saldo awal
+        soMap.forEach(item => {
+            item.saldoAwal = item.stokAkhir + item.totalKeluar - item.totalMasuk;
+            item.totalNilai = item.stokAkhir * (item.hargaSatuan || 0);
+        });
+        
+        // ============================================
+        // STEP 4: Filter hanya barang yang aktif
+        // ============================================
+        
+        const activeItems = Array.from(soMap.values()).filter(item => {
+            return item.totalMasuk > 0 || 
+                   item.totalKeluar > 0 || 
+                   item.stokAkhir > 0 || 
+                   item.saldoAwal > 0;
+        });
+        
+        activeItems.sort((a, b) => a.nama.localeCompare(b.nama));
+        
+        // ============================================
+        // STEP 5: Generate CSV
+        // ============================================
+        
+        const gudangCode = currentWarehouse === 'A' ? 'Kalipucang' : 'Troso';
+        const dateGenerated = new Date().toLocaleString('id-ID', {
+            day: '2-digit',
+            month: '2-digit',
+            year: 'numeric',
+            hour: '2-digit',
+            minute: '2-digit',
+            second: '2-digit'
+        });
+        
+        let csv = '';
+        
+        // HEADER LAPORAN
+        csv += `"LAPORAN STOCK OPNAME (SO) BULANAN - WAREHOUSE PRO"\n`;
+        csv += `"${gudangDisplay}"\n`;
+        csv += `"PERIODE: ${monthName} ${year}"\n`;
+        csv += `"TANGGAL GENERATE: ${dateGenerated}"\n`;
+        csv += `"USER: ${AUTH.getUserName() || 'System'}"\n`;
+        csv += `"STATUS: FINAL - Stok per ${new Date().toLocaleDateString('id-ID')}"\n`;
+        csv += `\n`;
+        
+        // HEADER TABEL
+        csv += `"NO","ID BARANG","NAMA BARANG","KATEGORI","SATUAN","SALDO AWAL","MASUK","KELUAR","SALDO AKHIR","HARGA SATUAN","TOTAL NILAI"\n`;
+        
+        // DATA
+        activeItems.forEach((item, index) => {
+            const no = index + 1;
+            const id = item.id;
+            const nama = item.nama.replace(/"/g, '""');
+            const kategori = item.kategori.replace(/"/g, '""');
+            const satuan = item.satuan;
+            const saldoAwal = item.saldoAwal;
+            const masuk = item.totalMasuk;
+            const keluar = item.totalKeluar;
+            const stokAkhir = item.stokAkhir;
+            const harga = item.hargaSatuan;
+            const totalNilai = stokAkhir * harga;
+            
+            csv += `"${no}","${id}","${nama}","${kategori}","${satuan}",${saldoAwal},${masuk},${keluar},${stokAkhir},${harga},${totalNilai}\n`;
+        });
+        
+        // RINGKASAN
+        const totalBarang = activeItems.length;
+        const totalStokAwal = activeItems.reduce((sum, item) => sum + item.saldoAwal, 0);
+        const totalMasuk = activeItems.reduce((sum, item) => sum + item.totalMasuk, 0);
+        const totalKeluar = activeItems.reduce((sum, item) => sum + item.totalKeluar, 0);
+        const totalStokAkhir = activeItems.reduce((sum, item) => sum + item.stokAkhir, 0);
+        const totalNilaiAkhir = activeItems.reduce((sum, item) => sum + (item.stokAkhir * (item.hargaSatuan || 0)), 0);
+        
+        csv += `\n`;
+        csv += `"═══════════════════════════════════════════════════════════════════════════════"\n`;
+        csv += `"RINGKASAN LAPORAN"\n`;
+        csv += `"═══════════════════════════════════════════════════════════════════════════════"\n`;
+        csv += `"Total Item Aktif",${totalBarang}\n`;
+        csv += `"Total Stok Awal (Unit)",${totalStokAwal}\n`;
+        csv += `"Total Barang Masuk",${totalMasuk}\n`;
+        csv += `"Total Barang Keluar",${totalKeluar}\n`;
+        csv += `"Total Stok Akhir (Unit)",${totalStokAkhir}\n`;
+        csv += `"Total Nilai Persediaan (Rp)",${totalNilaiAkhir}\n`;
+        csv += `\n`;
+        csv += `"═══════════════════════════════════════════════════════════════════════════════"\n`;
+        csv += `"Gudang",${gudangCode}\n`;
+        csv += `"Periode",${monthName} ${year}\n`;
+        csv += `"Dibuat oleh",${AUTH.getUserName() || 'System'}\n`;
+        csv += `"Tanggal Generate",${dateGenerated}\n`;
+        csv += `"═══════════════════════════════════════════════════════════════════════════════"\n`;
+        
+        // ============================================
+        // STEP 6: Download file
+        // ============================================
+        
+        const fileName = `SO_${gudangDisplay.replace(/ /g, '')}_${monthName}${year}.csv`;
+        
+        const blob = new Blob(["\ufeff" + csv], { type: 'text/csv;charset=utf-8;' });
+        const link = document.createElement('a');
+        const url = URL.createObjectURL(blob);
+        
+        link.setAttribute('href', url);
+        link.setAttribute('download', fileName);
+        link.style.visibility = 'hidden';
+        
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        
+        UI.hideLoading();
+        
+        // ============================================
+        // STEP 7: Tampilkan ringkasan
+        // ============================================
+        
+        UI.showAlert(
+            `✅ Laporan SO ${gudangDisplay} - ${monthName} ${year} berhasil di-download!\n` +
+            `📦 ${totalBarang} item aktif | 📦 Total stok: ${totalStokAkhir} unit | 💰 Rp ${totalNilaiAkhir.toLocaleString('id-ID')}`,
+            'success', 
+            7000
+        );
+        
+        console.log(`✅ SO Report generated: ${fileName} (${totalBarang} items)`);
+        console.log(`📊 Summary: Awal=${totalStokAwal}, Masuk=${totalMasuk}, Keluar=${totalKeluar}, Akhir=${totalStokAkhir}, Nilai=Rp ${totalNilaiAkhir}`);
+        
+    } catch (error) {
+        console.error('❌ Error generating SO report:', error);
+        UI.hideLoading();
+        UI.showAlert('❌ Gagal membuat laporan: ' + error.message, 'danger', 5000);
+    }
+}
+
+// ============================================
+// EXPORT TO CSV (Bonus Feature)
+// ============================================
+
 function exportToCSV() {
     if (filteredTransactions.length === 0) {
         UI.showAlert('Tidak ada data untuk di-export', 'warning');
         return;
     }
     
-    // Get gudang display name for filename
     const gudangDisplay = GudangMapping[currentWarehouse].display;
     
     let csv = 'Tanggal & Waktu,Jenis,ID Barang,Nama Barang,Jumlah,Keterangan,User/Petugas\n';
@@ -538,7 +725,6 @@ function exportToCSV() {
         csv += `"${displayDate}","${jenisDisplay}","${t.idBarang}","${t.namaBarang}","${t.jumlah}","${t.keterangan}","${t.petugas}"\n`;
     });
     
-    // Download
     const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
     const link = document.createElement('a');
     const url = URL.createObjectURL(blob);
@@ -551,7 +737,7 @@ function exportToCSV() {
     link.click();
     document.body.removeChild(link);
     
-    UI.showAlert(`Data ${gudangDisplay} berhasil di-export ke CSV`, 'success');
+    UI.showAlert(`✅ Data ${gudangDisplay} berhasil di-export ke CSV`, 'success');
 }
 
 // Export functions untuk digunakan di file lain
@@ -559,5 +745,6 @@ window.LogHelper = {
     switchWarehouse: switchWarehouse,
     applyFilters: applyFilters,
     exportToCSV: exportToCSV,
-    deleteTransaction: deleteTransaction
+    deleteTransaction: deleteTransaction,
+    exportMonthlySO: exportMonthlySO // TAMBAHKAN INI
 };

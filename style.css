@@ -1877,3 +1877,131 @@ body {
 #pic {
     text-transform: uppercase;
 }
+
+/* ============================================
+   EXPORT SO BUTTON STYLES - TAMBAHKAN DI BOTTOM
+   ============================================ */
+
+.btn-export-so {
+    background: linear-gradient(135deg, #4facfe, #00f2fe);
+    border: none;
+    border-radius: 14px;
+    padding: 0.9rem 2rem;
+    color: white;
+    font-weight: 700;
+    font-size: 1rem;
+    cursor: pointer;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    box-shadow: 0 6px 16px rgba(79, 172, 254, 0.4);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    letter-spacing: 0.3px;
+    position: relative;
+    overflow: hidden;
+}
+
+.btn-export-so::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+    transition: left 0.5s ease;
+}
+
+.btn-export-so:hover::before {
+    left: 100%;
+}
+
+.btn-export-so:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 12px 28px rgba(79, 172, 254, 0.6);
+    background: linear-gradient(135deg, #3d9ef0, #00d8fe);
+}
+
+.btn-export-so:active {
+    transform: translateY(-2px);
+}
+
+.btn-export-so i {
+    font-size: 1.2rem;
+}
+
+.btn-export-so span {
+    font-size: 1rem;
+}
+
+/* Loading state untuk tombol export */
+.btn-export-so.loading {
+    opacity: 0.8;
+    pointer-events: none;
+}
+
+.btn-export-so.loading i {
+    animation: spin 1s linear infinite;
+}
+
+/* Responsive mobile */
+@media (max-width: 768px) {
+    .btn-export-so {
+        width: 100%;
+        justify-content: center;
+        padding: 0.8rem 1rem;
+        font-size: 0.9rem;
+    }
+    
+    .btn-export-so span {
+        font-size: 0.9rem;
+    }
+    
+    .btn-export-so i {
+        font-size: 1rem;
+    }
+}
+
+@media (max-width: 480px) {
+    .btn-export-so {
+        padding: 0.75rem;
+        font-size: 0.85rem;
+    }
+    
+    .btn-export-so span {
+        font-size: 0.85rem;
+    }
+}
+
+/* Export section divider */
+.export-section {
+    display: flex;
+    justify-content: flex-end;
+    margin-top: 1.5rem;
+    padding-top: 1rem;
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+/* Alert styles untuk pesan SO */
+.alert-so-success {
+    background: linear-gradient(135deg, #11998e, #38ef7d);
+    color: white;
+    border-left: 4px solid #0f766e;
+}
+
+.alert-so-warning {
+    background: linear-gradient(135deg, #f39c12, #f1c40f);
+    color: white;
+    border-left: 4px solid #b45309;
+}
+
+/* Animasi untuk tabel SO */
+@keyframes pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.7; }
+}
+
+.so-highlight {
+    animation: pulse 2s ease-in-out;
+}
