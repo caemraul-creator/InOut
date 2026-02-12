@@ -1249,3 +1249,60 @@ textarea.input-field {
     margin-bottom: 10px;
     opacity: 0.5;
 }
+
+/* ============================================
+   SEARCH RESULTS DROPDOWN - FORCE FRONT
+   ============================================ */
+
+.search-results-dropdown {
+    position: fixed !important;  /* GUNAKAN FIXED, BUKAN ABSOLUTE */
+    top: auto !important;
+    left: 5% !important;
+    right: 5% !important;
+    width: 90% !important;
+    max-width: 560px !important;  /* Sesuai container */
+    background: rgba(10, 10, 20, 0.98) !important;
+    backdrop-filter: blur(20px) !important;
+    border: 1px solid rgba(255, 255, 255, 0.2) !important;
+    border-radius: 16px !important;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.8), 0 0 0 1px rgba(255, 255, 255, 0.05) !important;
+    z-index: 2147483647 !important;  /* MAX POSSIBLE */
+    max-height: 400px !important;
+    overflow-y: auto !important;
+    display: none;
+}
+
+/* Posisikan di bawah search input */
+.search-wrapper {
+    position: relative !important;
+    z-index: 2147483646 !important;
+}
+
+.search-results-dropdown {
+    margin-top: 10px !important;
+}
+
+/* Pastikan tidak ada yang bisa menutupi */
+.modal-overlay,
+#confirmModal,
+#addItemModal,
+#scannerModal,
+.alert-container,
+.fab,
+.app-header {
+    z-index: auto;  /* Reset */
+}
+
+/* Force dropdown di atas modal manapun */
+.modal-overlay {
+    z-index: 10000 !important;  /* Turunkan dari sebelumnya */
+}
+
+.search-results-dropdown {
+    z-index: 10001 !important;  /* Lebih tinggi dari modal */
+}
+
+/* Pastikan dropdown tampil di atas loading overlay */
+#loader {
+    z-index: 9999 !important;
+}
