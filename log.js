@@ -748,3 +748,10 @@ window.LogHelper = {
     deleteTransaction: deleteTransaction,
     exportMonthlySO: exportMonthlySO // TAMBAHKAN INI
 };
+
+// Make functions globally accessible untuk onclick
+window.switchWarehouse = switchWarehouse;
+window.applyFilters = applyFilters;
+window.exportToCSV = exportToCSV;
+window.deleteTransaction = deleteTransaction;
+window.exportMonthlySO = exportMonthlySO; // Make available globally

@@ -2,7 +2,7 @@
 <html lang="id">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Log Transaksi - Warehouse Pro</title>
     <link rel="stylesheet" href="style.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
@@ -71,6 +71,7 @@
             gap: 1rem;
         }
 
+        /* Tombol kembali ke Input Transaksi */
         .back-home-btn {
             padding: 0.5rem 0.75rem;
             background: rgba(255, 255, 255, 0.1);
@@ -106,6 +107,7 @@
             gap: 0.75rem;
         }
 
+        /* Tombol Input Transaksi Baru */
         .input-transaction-btn {
             padding: 0.5rem 0.875rem;
             background: var(--gradient-2);
@@ -128,6 +130,7 @@
             box-shadow: 0 4px 12px rgba(245, 87, 108, 0.4);
         }
 
+        /* User Badge Log */
         .user-badge-log {
             background: rgba(255, 255, 255, 0.1);
             padding: 0.5rem 0.75rem;
@@ -247,45 +250,46 @@
             transform: translateY(0);
         }
 
-        /* ============ EXPORT SO BULANAN BUTTON ============ */
-        .export-section {
-            display: flex;
-            justify-content: flex-end;
-            margin-top: 1.5rem;
-            padding-top: 1rem;
-            border-top: 1px solid rgba(255, 255, 255, 0.1);
-        }
-
+        /* Tombol Export SO Bulanan */
         .btn-export-so {
-            background: linear-gradient(135deg, #4facfe, #00f2fe);
+            padding: 0.875rem 1.75rem;
+            background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
             border: none;
-            border-radius: 14px;
-            padding: 0.9rem 2rem;
+            border-radius: 12px;
             color: white;
             font-weight: 700;
-            font-size: 1rem;
+            font-size: 0.9rem;
             cursor: pointer;
             transition: all 0.3s ease;
-            display: flex;
+            display: inline-flex;
             align-items: center;
-            gap: 0.75rem;
-            box-shadow: 0 6px 16px rgba(79, 172, 254, 0.4);
-            border: 1px solid rgba(255, 255, 255, 0.2);
-            letter-spacing: 0.3px;
+            gap: 0.5rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            box-shadow: 0 4px 15px rgba(17, 153, 142, 0.3);
         }
 
         .btn-export-so:hover {
-            transform: translateY(-4px);
-            box-shadow: 0 12px 28px rgba(79, 172, 254, 0.6);
-            background: linear-gradient(135deg, #3d9ef0, #00d8fe);
+            transform: translateY(-3px);
+            box-shadow: 0 8px 25px rgba(17, 153, 142, 0.5);
+        }
+
+        .btn-export-so:active {
+            transform: translateY(0);
         }
 
         .btn-export-so i {
-            font-size: 1.2rem;
+            font-size: 1.1rem;
         }
 
-        .btn-export-so span {
-            font-size: 1rem;
+        /* Responsive untuk tombol export */
+        @media (max-width: 768px) {
+            .btn-export-so span {
+                display: none;
+            }
+            .btn-export-so {
+                padding: 0.875rem 1rem;
+            }
         }
 
         /* Warehouse Tabs */
@@ -385,6 +389,7 @@
             font-size: 0.875rem;
         }
 
+        /* Badge for transaction type */
         .badge {
             display: inline-flex;
             align-items: center;
@@ -409,34 +414,7 @@
             border: 1px solid rgba(244, 92, 67, 0.3);
         }
 
-        .btn-delete-transaction {
-            padding: 0.5rem 0.75rem;
-            background: rgba(244, 92, 67, 0.1);
-            border: 1px solid rgba(244, 92, 67, 0.3);
-            border-radius: 8px;
-            color: #f45c43;
-            font-size: 0.875rem;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            display: inline-flex;
-            align-items: center;
-            gap: 0.5rem;
-        }
-
-        .btn-delete-transaction:hover {
-            background: rgba(244, 92, 67, 0.2);
-            border-color: #f45c43;
-            transform: scale(1.05);
-        }
-
-        .btn-delete-transaction:active {
-            transform: scale(0.95);
-        }
-
-        .btn-delete-transaction i {
-            font-size: 0.875rem;
-        }
-
+        /* No data state */
         .no-data {
             text-align: center;
             padding: 3rem 1rem;
@@ -454,6 +432,7 @@
             font-weight: 600;
         }
 
+        /* Floating Action Button */
         .fab-log {
             position: fixed;
             bottom: 2rem;
@@ -482,6 +461,154 @@
             font-size: 1.5rem;
         }
 
+        /* DELETE BUTTON STYLES */
+        .btn-delete-transaction {
+            padding: 0.5rem 0.75rem;
+            background: rgba(244, 92, 67, 0.1);
+            border: 1px solid rgba(244, 92, 67, 0.3);
+            border-radius: 8px;
+            color: #f45c43;
+            font-size: 0.875rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .btn-delete-transaction:hover {
+            background: rgba(244, 92, 67, 0.2);
+            border-color: #f45c43;
+            transform: scale(1.05);
+        }
+
+        .btn-delete-transaction:active {
+            transform: scale(0.95);
+        }
+
+        .btn-delete-transaction i {
+            font-size: 0.875rem;
+        }
+
+        /* Responsive */
+        @media (max-width: 1024px) {
+            .search-row,
+            .filter-row {
+                grid-template-columns: 1fr;
+            }
+
+            .warehouse-tabs {
+                flex-direction: column;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .log-container {
+                padding: 0.75rem;
+            }
+
+            .page-title {
+                font-size: 1.5rem;
+            }
+
+            .search-filter-section {
+                padding: 1rem;
+            }
+
+            /* Mobile: ubah search-row jadi vertical */
+            .search-row {
+                grid-template-columns: 1fr;
+            }
+
+            /* Tombol Input untuk mobile */
+            .input-transaction-btn .btn-text {
+                display: none;
+            }
+            
+            .input-transaction-btn {
+                width: 40px;
+                height: 40px;
+                justify-content: center;
+                padding: 0;
+            }
+            
+            .back-home-btn {
+                padding: 0.4rem 0.5rem;
+            }
+            
+            .user-badge-log .user-name-log {
+                display: none;
+            }
+            
+            .user-badge-log {
+                padding: 0.4rem;
+            }
+
+            /* Mobile: Tabel jadi card layout */
+            .log-table thead {
+                display: none;
+            }
+
+            .log-table tbody tr {
+                display: block;
+                background: var(--card-bg);
+                border: 1px solid var(--card-border);
+                border-radius: 12px;
+                margin-bottom: 1rem;
+                padding: 1rem;
+            }
+
+            .log-table tbody td {
+                display: block;
+                border: none;
+                padding: 0.5rem 0;
+                text-align: left !important;
+            }
+
+            .log-table tbody td:before {
+                content: attr(data-label);
+                font-weight: 700;
+                color: var(--text-secondary);
+                display: block;
+                margin-bottom: 0.25rem;
+                font-size: 0.75rem;
+                text-transform: uppercase;
+                letter-spacing: 0.05em;
+            }
+
+            /* No data di mobile */
+            .no-data {
+                display: flex !important;
+                flex-direction: column;
+                align-items: center;
+                padding: 2rem 1rem !important;
+            }
+
+            .no-data:before {
+                display: none;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .header-actions-log {
+                gap: 0.5rem;
+            }
+            
+            .input-transaction-btn,
+            .back-home-btn {
+                width: 36px;
+                height: 36px;
+            }
+            
+            .fab-log {
+                width: 50px;
+                height: 50px;
+                bottom: 15px;
+                right: 15px;
+            }
+        }
+
+        /* LOADER STYLES */
         #loader {
             position: fixed;
             top: 0;
@@ -514,104 +641,6 @@
         @keyframes spin {
             to { transform: rotate(360deg); }
         }
-
-        /* Responsive */
-        @media (max-width: 1024px) {
-            .search-row {
-                grid-template-columns: 1fr;
-            }
-            .warehouse-tabs {
-                flex-direction: column;
-            }
-        }
-
-        @media (max-width: 768px) {
-            .log-container {
-                padding: 0.75rem;
-            }
-            .page-title {
-                font-size: 1.5rem;
-            }
-            .search-filter-section {
-                padding: 1rem;
-            }
-            .input-transaction-btn .btn-text {
-                display: none;
-            }
-            .input-transaction-btn {
-                width: 40px;
-                height: 40px;
-                justify-content: center;
-                padding: 0;
-            }
-            .back-home-btn {
-                padding: 0.4rem 0.5rem;
-            }
-            .user-badge-log .user-name-log {
-                display: none;
-            }
-            .user-badge-log {
-                padding: 0.4rem;
-            }
-            .btn-export-so {
-                width: 100%;
-                justify-content: center;
-                padding: 0.8rem 1rem;
-            }
-            .log-table thead {
-                display: none;
-            }
-            .log-table tbody tr {
-                display: block;
-                background: var(--card-bg);
-                border: 1px solid var(--card-border);
-                border-radius: 12px;
-                margin-bottom: 1rem;
-                padding: 1rem;
-            }
-            .log-table tbody td {
-                display: block;
-                border: none;
-                padding: 0.5rem 0;
-                text-align: left !important;
-            }
-            .log-table tbody td:before {
-                content: attr(data-label);
-                font-weight: 700;
-                color: var(--text-secondary);
-                display: block;
-                margin-bottom: 0.25rem;
-                font-size: 0.75rem;
-                text-transform: uppercase;
-                letter-spacing: 0.05em;
-            }
-            .no-data {
-                display: flex !important;
-                flex-direction: column;
-                align-items: center;
-                padding: 2rem 1rem !important;
-            }
-            .no-data:before {
-                display: none;
-            }
-        }
-
-        @media (max-width: 480px) {
-            .header-actions-log {
-                gap: 0.5rem;
-            }
-            .input-transaction-btn,
-            .back-home-btn {
-                width: 36px;
-                height: 36px;
-            }
-            .fab-log {
-                width: 50px;
-                height: 50px;
-                bottom: 15px;
-                right: 15px;
-            }
-        }
     </style>
 </head>
 <body class="log-page">
@@ -636,11 +665,13 @@
             </div>
             
             <div class="header-actions-log">
+                <!-- Tombol Input Transaksi Baru -->
                 <a href="index.html" class="input-transaction-btn" title="Input Transaksi Baru">
                     <i class="fas fa-plus-circle"></i>
                     <span class="btn-text">Input Baru</span>
                 </a>
                 
+                <!-- User Badge -->
                 <div class="user-badge-log">
                     <i class="fas fa-user-circle"></i>
                     <span class="user-name-log" id="userNameLog">User</span>
@@ -650,7 +681,7 @@
     </div>
 
     <div class="log-container">
-        <!-- Search & Filter Section -->
+        <!-- Search & Filter -->
         <div class="search-filter-section">
             <div class="search-row">
                 <div class="input-group">
@@ -670,30 +701,27 @@
                         <option value="Out">Keluar</option>
                     </select>
                 </div>
-                <button class="btn-filter" onclick="LogHelper.applyFilters()">
+                <button class="btn-filter" onclick="applyFilters()">
                     <i class="fas fa-filter"></i> Filter
                 </button>
             </div>
             
-            <!-- ============ EXPORT SO BULANAN BUTTON ============ -->
-            <div class="export-section">
-                <button class="btn-export-so" onclick="LogHelper.exportMonthlySO()">
-                    <i class="fas fa-file-invoice"></i>
-                    <span>📊 DOWNLOAD LAPORAN SO BULANAN</span>
-                    <i class="fas fa-download"></i>
+            <!-- Tombol Aksi - Export SO Bulanan -->
+            <div style="margin-top: 1rem; display: flex; gap: 0.75rem; justify-content: flex-end;">
+                <button class="btn-export-so" onclick="exportMonthlySO()" title="Export Laporan Stock Opname Bulanan">
+                    <i class="fas fa-file-excel"></i>
+                    <span>Export SO Bulanan</span>
                 </button>
             </div>
-            <!-- ============ END EXPORT BUTTON ============ -->
-            
         </div>
 
         <!-- Warehouse Tabs -->
         <div class="warehouse-tabs">
-            <button class="tab-btn active" onclick="LogHelper.switchWarehouse('A')" id="tabA">
+            <button class="tab-btn active" onclick="switchWarehouse('A')" id="tabA">
                 <i class="fas fa-warehouse"></i>
                 <span>Gudang Kalipucang</span>
             </button>
-            <button class="tab-btn" onclick="LogHelper.switchWarehouse('B')" id="tabB">
+            <button class="tab-btn" onclick="switchWarehouse('B')" id="tabB">
                 <i class="fas fa-warehouse"></i>
                 <span>Gudang Troso</span>
             </button>
@@ -726,7 +754,7 @@
         </div>
     </div>
 
-    <!-- Floating Action Button -->
+    <!-- Floating Action Button untuk kembali ke Input -->
     <a href="index.html" class="fab-log" title="Input Transaksi Baru">
         <i class="fas fa-plus"></i>
     </a>
@@ -738,25 +766,16 @@
     <script>
         // Initialize log page
         document.addEventListener('DOMContentLoaded', function() {
+            // Check authentication
             if (!AUTH || !AUTH.isLoggedIn()) {
                 window.location.href = 'login.html';
                 return;
             }
             
+            // Display user name
             const userName = AUTH.getUserName();
             if (userName) {
                 document.getElementById('userNameLog').textContent = userName;
-            }
-            
-            // Set default filter month to current month
-            const today = new Date();
-            const year = today.getFullYear();
-            const month = String(today.getMonth() + 1).padStart(2, '0');
-            document.getElementById('filterMonth').value = `${year}-${month}`;
-            
-            // Load transactions
-            if (typeof LogHelper !== 'undefined' && LogHelper.loadTransactions) {
-                LogHelper.loadTransactions();
             }
         });
     </script>
