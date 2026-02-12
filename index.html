@@ -1285,130 +1285,49 @@
         </div>
     </div>
     
-    <!-- Scripts -->
+        <!-- Scripts -->
     <script src="config.js"></script>
     <script src="login.js"></script>
     <script src="app.js"></script>
     
     <script>
-        // Initialize on page load
+        // ============================================
+        // INDEX.HTML - FINAL CLEAN SCRIPT
+        // ============================================
+        
         document.addEventListener('DOMContentLoaded', function() {
-            // Check authentication
-            if (!AUTH.isLoggedIn()) {
-                window.location.href = 'login.html';
+            // 1. Cek Autentikasi
+            if (typeof AUTH === 'undefined' || !AUTH.isLoggedIn()) {
+                // Jika tidak ada auth, biarkan login.js handle redirect
+                // window.location.href = 'login.html'; 
                 return;
             }
             
-            // Display user name
+            // 2. Tampilkan Nama User di Header
             const userName = AUTH.getUserName();
             if (userName) {
-                document.getElementById('userName').textContent = userName;
+                const userNameEl = document.getElementById('userName');
+                if (userNameEl) userNameEl.textContent = userName;
             }
             
-            // Auto-fill user field and warehouse
+            // 3. Auto-fill form (Petugas & Gudang) via login.js
             if (AUTH && typeof AUTH.autoFillForm === 'function') {
                 AUTH.autoFillForm();
             }
             
-            // Set default date to today
-            const today = new Date().toISOString().split('T')[0];
-            document.getElementById('tanggal').value = today;
-            
-            // Setup warehouse buttons - WITH COLOR UPDATE
-            const warehouseBtns = document.querySelectorAll('.warehouse-btn');
-            warehouseBtns.forEach(btn => {
-                btn.addEventListener('click', function() {
-                    // Remove active from all
-                    warehouseBtns.forEach(b => b.classList.remove('active'));
-                    
-                    // Add active to clicked
-                    this.classList.add('active');
-                    
-                    // Update stock display gudang
-                    const gudang = this.dataset.warehouse;
-                    const displayName = gudang === 'Kalipucang' ? 'Gudang Kalipucang' : 'Gudang Troso';
-                    document.getElementById('stockGudang').textContent = displayName;
-                    
-                    // Update stock display if item is selected
-                    if (typeof updateStockDisplay === 'function') {
-                        updateStockDisplay();
-                    }
-                    
-                    // Update colors
-                    updateGudangColors();
-                });
-            });
-            
-            // Setup transaction type buttons
-            const typeBtns = document.querySelectorAll('.type-btn');
-            typeBtns.forEach(btn => {
-                btn.addEventListener('click', function() {
-                    typeBtns.forEach(b => b.classList.remove('active'));
-                    this.classList.add('active');
-                });
-            });
-            
-            // Initial color update
-            updateGudangColors();
+            // 4. Set Default Tanggal Hari Ini
+            const tanggalInput = document.getElementById('tanggal');
+            if (tanggalInput) {
+                const today = new Date().toISOString().split('T')[0];
+                tanggalInput.value = today;
+            }
+
+            // 5. Inisialisasi Warna Gudang (Panggil fungsi dari app.js)
+            // Fungsi updateGudangColors sudah didefinisikan di app.js dan di-expose secara global
+            if (typeof updateGudangColors === 'function') {
+                updateGudangColors();
+            }
         });
-        
-        // Function to update gudang colors throughout the page
-        function updateGudangColors() {
-            const activeWarehouse = document.querySelector('.warehouse-btn.active');
-            if (!activeWarehouse) return;
-            
-            const gudang = activeWarehouse.dataset.warehouse; // "Kalipucang" atau "Troso"
-            const gudangClass = gudang === 'Kalipucang' ? 'gudang-a' : 'gudang-b';
-            
-            // Update item card
-            const itemCard = document.querySelector('.item-card');
-            if (itemCard) {
-                itemCard.classList.remove('gudang-a', 'gudang-b');
-                itemCard.classList.add(gudangClass);
-            }
-            
-            // Update stock info
-            const stockInfo = document.querySelector('.stock-info');
-            if (stockInfo) {
-                stockInfo.classList.remove('gudang-a', 'gudang-b');
-                stockInfo.classList.add(gudangClass);
-            }
-            
-            // Update submit button
-            const submitBtn = document.querySelector('.submit-btn');
-            if (submitBtn) {
-                submitBtn.classList.remove('gudang-a', 'gudang-b');
-                submitBtn.classList.add(gudangClass);
-            }
-            
-            // Update gudang indicator
-            updateGudangIndicator(gudang);
-        }
-        
-        // Function to show/update gudang indicator
-        function updateGudangIndicator(gudang) {
-            // Disabled - indicator removed from UI
-            return;
-            
-            /*
-            let indicator = document.getElementById('gudangIndicator');
-            
-            if (!indicator) {
-                // Create indicator
-                indicator = document.createElement('div');
-                indicator.id = 'gudangIndicator';
-                indicator.className = 'gudang-indicator';
-                document.body.appendChild(indicator);
-            }
-            
-            // Update class dan text
-            const gudangClass = gudang === 'Kalipucang' ? 'gudang-a' : 'gudang-b';
-            const displayName = gudang === 'Kalipucang' ? 'Gudang Kalipucang' : 'Gudang Troso';
-            
-            indicator.className = 'gudang-indicator active ' + gudangClass;
-            indicator.innerHTML = `<i class="fas fa-warehouse"></i> ${displayName}`;
-            */
-        }
     </script>
 </body>
 </html>
