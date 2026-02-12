@@ -325,8 +325,25 @@ function searchBarang(query) {
 }
 
 function displaySearchResults(results) {
-    const dropdown = document.getElementById('searchResultsDropdown');
-    if (!dropdown) return;
+    let dropdown = document.getElementById('searchResultsDropdown');
+    
+    // ✅ AUTO-CREATE dropdown element if not exists
+    if (!dropdown) {
+        console.warn('⚠️ Dropdown element not found, creating it...');
+        dropdown = document.createElement('div');
+        dropdown.id = 'searchResultsDropdown';
+        dropdown.className = 'search-results-dropdown';
+        
+        // Insert after search wrapper
+        const searchWrapper = document.querySelector('.search-wrapper');
+        if (searchWrapper) {
+            searchWrapper.parentNode.insertBefore(dropdown, searchWrapper.nextSibling);
+            console.log('✅ Dropdown element created successfully');
+        } else {
+            console.error('❌ Cannot find search-wrapper to insert dropdown');
+            return;
+        }
+    }
     
     // ⚡ Use innerHTML for faster rendering
     const html = results.map(item => {
@@ -358,8 +375,24 @@ function displaySearchResults(results) {
 }
 
 function showNoResults(query) {
-    const dropdown = document.getElementById('searchResultsDropdown');
-    if (!dropdown) return;
+    let dropdown = document.getElementById('searchResultsDropdown');
+    
+    // ✅ AUTO-CREATE dropdown element if not exists
+    if (!dropdown) {
+        console.warn('⚠️ Dropdown element not found, creating it...');
+        dropdown = document.createElement('div');
+        dropdown.id = 'searchResultsDropdown';
+        dropdown.className = 'search-results-dropdown';
+        
+        const searchWrapper = document.querySelector('.search-wrapper');
+        if (searchWrapper) {
+            searchWrapper.parentNode.insertBefore(dropdown, searchWrapper.nextSibling);
+            console.log('✅ Dropdown element created successfully');
+        } else {
+            console.error('❌ Cannot find search-wrapper to insert dropdown');
+            return;
+        }
+    }
     
     dropdown.innerHTML = `
         <div class="search-no-results">
