@@ -1306,3 +1306,80 @@ textarea.input-field {
 #loader {
     z-index: 9999 !important;
 }
+
+/* ============================================
+   ULTIMATE DROPDOWN FIX - PASTI DI DEPAN
+   ============================================ */
+
+/* Dropdown langsung di body - PASTI paling depan */
+body > #searchResultsDropdown {
+    position: fixed !important;
+    z-index: 2147483647 !important; /* MAX 32-bit integer */
+    background: rgba(10, 10, 20, 0.98) !important;
+    backdrop-filter: blur(20px) !important;
+    border: 1px solid rgba(255, 255, 255, 0.2) !important;
+    border-radius: 12px !important;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.9) !important;
+    color: white !important;
+}
+
+/* Force semua modal turun */
+.modal-overlay,
+#confirmModal,
+#addItemModal,
+#scannerModal {
+    z-index: 10000 !important; /* Lebih rendah dari dropdown */
+}
+
+/* Loading overlay juga turun */
+#loader {
+    z-index: 9999 !important;
+}
+
+/* Pastikan dropdown tidak terpotong */
+.search-results-dropdown {
+    overflow-y: auto !important;
+    max-height: 400px !important;
+}
+
+/* Item styling */
+.search-result-item {
+    padding: 12px 16px !important;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.08) !important;
+    cursor: pointer !important;
+    transition: all 0.2s ease !important;
+}
+
+.search-result-item:hover {
+    background: rgba(79, 172, 254, 0.2) !important;
+    border-left: 4px solid #FF6B35 !important;
+}
+
+.search-item-id {
+    font-family: 'JetBrains Mono', monospace !important;
+    font-size: 0.8rem !important;
+    color: rgba(255, 255, 255, 0.7) !important;
+}
+
+.search-item-name {
+    font-weight: 600 !important;
+    color: white !important;
+}
+
+.search-item-stock {
+    font-size: 0.8rem !important;
+    font-weight: 600 !important;
+}
+
+/* No results styling */
+.search-no-results {
+    padding: 30px !important;
+    text-align: center !important;
+    color: rgba(255, 255, 255, 0.6) !important;
+}
+
+.search-no-results i {
+    font-size: 2.5rem !important;
+    margin-bottom: 10px !important;
+    opacity: 0.5 !important;
+}

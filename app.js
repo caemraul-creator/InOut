@@ -1121,3 +1121,166 @@ window.debugApp = {
         return elements;
     }
 };
+
+// ============================================
+// ULTIMATE DROPDOWN FIX - PASTI DI DEPAN
+// ============================================
+
+(function forceDropdownToTop() {
+    console.log('🚀 Applying ultimate dropdown fix...');
+    
+    // 1. HAPUS dropdown lama jika ada
+    const oldDropdown = document.getElementById('searchResultsDropdown');
+    if (oldDropdown) {
+        oldDropdown.remove();
+    }
+    
+    // 2. BUAT dropdown BARU di root body
+    const dropdown = document.createElement('div');
+    dropdown.id = 'searchResultsDropdown';
+    dropdown.className = 'search-results-dropdown';
+    
+    // 3. SET STYLE LANGSUNG - PAKSA position fixed
+    dropdown.style.cssText = `
+        position: fixed !important;
+        top: 0 !important;
+        left: 0 !important;
+        width: 90% !important;
+        max-width: 560px !important;
+        max-height: 300px !important;
+        overflow-y: auto !important;
+        background: rgba(10, 10, 20, 0.98) !important;
+        backdrop-filter: blur(20px) !important;
+        border: 1px solid rgba(255, 255, 255, 0.2) !important;
+        border-radius: 12px !important;
+        box-shadow: 0 20px 60px rgba(0, 0, 0, 0.9) !important;
+        z-index: 999999999999 !important;
+        display: none;
+        margin: 0 !important;
+        padding: 0 !important;
+    `;
+    
+    // 4. APPEND ke body, BUKAN ke container
+    document.body.appendChild(dropdown);
+    console.log('✅ New dropdown created and appended to body');
+    
+    // 5. OVERRIDE fungsi displaySearchResults
+    const originalDisplaySearchResults = window.displaySearchResults || function() {};
+    
+    window.displaySearchResults = function(results) {
+        const dropdown = document.getElementById('searchResultsDropdown');
+        if (!dropdown) return;
+        
+        // Hitung posisi berdasarkan search input
+        const searchInput = document.getElementById('manualIdInput');
+        if (searchInput) {
+            const rect = searchInput.getBoundingClientRect();
+            dropdown.style.top = (rect.bottom + window.scrollY + 8) + 'px';
+            dropdown.style.left = rect.left + 'px';
+            dropdown.style.width = rect.width + 'px';
+            dropdown.style.maxWidth = rect.width + 'px';
+        }
+        
+        // Render HTML
+        const html = results.map(item => {
+            const activeGudang = getActiveGudang();
+            const stok = activeGudang === 'Kalipucang' ? item.stokA : item.stokB;
+            const stokClass = stok > 0 ? 'text-success' : 'text-danger';
+            
+            return `
+                <div class="search-result-item" onclick="selectItemById('${item.id}')">
+                    <div class="search-item-main">
+                        <div class="search-item-id">${item.id}</div>
+                        <div class="search-item-name">${item.nama}</div>
+                    </div>
+                    <div class="search-item-stock ${stokClass}">
+                        Stok: ${stok} ${item.satuan}
+                    </div>
+                </div>
+            `;
+        }).join('');
+        
+        dropdown.innerHTML = html;
+        dropdown.style.display = 'block';
+        
+        // Auto-select first item
+        const firstItem = dropdown.querySelector('.search-result-item');
+        if (firstItem) firstItem.classList.add('active');
+    };
+    
+    // 6. OVERRIDE fungsi showNoResults
+    window.showNoResults = function(query) {
+        const dropdown = document.getElementById('searchResultsDropdown');
+        if (!dropdown) return;
+        
+        const searchInput = document.getElementById('manualIdInput');
+        if (searchInput) {
+            const rect = searchInput.getBoundingClientRect();
+            dropdown.style.top = (rect.bottom + window.scrollY + 8) + 'px';
+            dropdown.style.left = rect.left + 'px';
+            dropdown.style.width = rect.width + 'px';
+        }
+        
+        dropdown.innerHTML = `
+            <div class="search-no-results">
+                <i class="fas fa-search"></i>
+                <p>Tidak ada hasil untuk "${query}"</p>
+            </div>
+        `;
+        dropdown.style.display = 'block';
+    };
+    
+    // 7. OVERRIDE fungsi hideSearchResults
+    window.hideSearchResults = function() {
+        const dropdown = document.getElementById('searchResultsDropdown');
+        if (dropdown) {
+            dropdown.style.display = 'none';
+        }
+    };
+    
+    // 8. Update posisi saat scroll/resize
+    window.addEventListener('scroll', function() {
+        const dropdown = document.getElementById('searchResultsDropdown');
+        const searchInput = document.getElementById('manualIdInput');
+        
+        if (dropdown && dropdown.style.display === 'block' && searchInput) {
+            const rect = searchInput.getBoundingClientRect();
+            dropdown.style.top = (rect.bottom + window.scrollY + 8) + 'px';
+            dropdown.style.left = rect.left + 'px';
+        }
+    });
+    
+    window.addEventListener('resize', function() {
+        const dropdown = document.getElementById('searchResultsDropdown');
+        const searchInput = document.getElementById('manualIdInput');
+        
+        if (dropdown && dropdown.style.display === 'block' && searchInput) {
+            const rect = searchInput.getBoundingClientRect();
+            dropdown.style.top = (rect.bottom + window.scrollY + 8) + 'px';
+            dropdown.style.left = rect.left + 'px';
+            dropdown.style.width = rect.width + 'px';
+        }
+    });
+    
+    // 9. Observer untuk memastikan selalu di depan
+    const observer = new MutationObserver(function(mutations) {
+        mutations.forEach(function(mutation) {
+            if (mutation.type === 'attributes' && mutation.attributeName === 'style') {
+                const dropdown = document.getElementById('searchResultsDropdown');
+                if (dropdown && dropdown.style.display === 'block') {
+                    dropdown.style.setProperty('z-index', '999999999999', 'important');
+                    dropdown.style.setProperty('position', 'fixed', 'important');
+                }
+            }
+        });
+    });
+    
+    // Observe dropdown
+    setTimeout(() => {
+        const dropdown = document.getElementById('searchResultsDropdown');
+        if (dropdown) {
+            observer.observe(dropdown, { attributes: true, attributeFilter: ['style'] });
+        }
+    }, 1000);
+    
+})();
