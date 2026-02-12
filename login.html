@@ -247,7 +247,7 @@
             transform: translateY(0);
         }
 
-        /* ============ BUTTON EXPORT SO BULANAN ============ */
+        /* ============ EXPORT SO BULANAN BUTTON ============ */
         .export-section {
             display: flex;
             justify-content: flex-end;
@@ -278,10 +278,6 @@
             transform: translateY(-4px);
             box-shadow: 0 12px 28px rgba(79, 172, 254, 0.6);
             background: linear-gradient(135deg, #3d9ef0, #00d8fe);
-        }
-
-        .btn-export-so:active {
-            transform: translateY(-2px);
         }
 
         .btn-export-so i {
@@ -437,6 +433,10 @@
             transform: scale(0.95);
         }
 
+        .btn-delete-transaction i {
+            font-size: 0.875rem;
+        }
+
         .no-data {
             text-align: center;
             padding: 3rem 1rem;
@@ -557,10 +557,6 @@
                 width: 100%;
                 justify-content: center;
                 padding: 0.8rem 1rem;
-                font-size: 0.9rem;
-            }
-            .btn-export-so span {
-                font-size: 0.9rem;
             }
             .log-table thead {
                 display: none;
@@ -674,17 +670,17 @@
                         <option value="Out">Keluar</option>
                     </select>
                 </div>
-                <button class="btn-filter" onclick="applyFilters()">
+                <button class="btn-filter" onclick="LogHelper.applyFilters()">
                     <i class="fas fa-filter"></i> Filter
                 </button>
             </div>
             
             <!-- ============ EXPORT SO BULANAN BUTTON ============ -->
             <div class="export-section">
-                <button class="btn-export-so" onclick="LogHelper.exportMonthlySO()" id="btnExportSO">
+                <button class="btn-export-so" onclick="LogHelper.exportMonthlySO()">
                     <i class="fas fa-file-invoice"></i>
                     <span>📊 DOWNLOAD LAPORAN SO BULANAN</span>
-                    <i class="fas fa-download" style="margin-left: 0.25rem;"></i>
+                    <i class="fas fa-download"></i>
                 </button>
             </div>
             <!-- ============ END EXPORT BUTTON ============ -->
@@ -757,6 +753,11 @@
             const year = today.getFullYear();
             const month = String(today.getMonth() + 1).padStart(2, '0');
             document.getElementById('filterMonth').value = `${year}-${month}`;
+            
+            // Load transactions
+            if (typeof LogHelper !== 'undefined' && LogHelper.loadTransactions) {
+                LogHelper.loadTransactions();
+            }
         });
     </script>
 </body>
