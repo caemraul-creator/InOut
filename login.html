@@ -2,166 +2,90 @@
 <html lang="id">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Log Transaksi - Warehouse Pro</title>
-    <link rel="stylesheet" href="style.css">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Login - Warehouse Pro</title>
+    
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+    
+    <!-- Font Awesome -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    
     <style>
-        :root {
-            --primary-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            --success-gradient: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
-            --danger-gradient: linear-gradient(135deg, #eb3349 0%, #f45c43 100%);
-            --dark: #0f0f23;
-            --card-bg: rgba(255, 255, 255, 0.03);
-            --card-border: rgba(255, 255, 255, 0.1);
-            --text-primary: #e2e8f0;
-            --text-secondary: #94a3b8;
-            --accent-purple: #a78bfa;
-            --accent-cyan: #22d3ee;
-            --gradient-2: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
-            --gradient-3: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
-        }
-
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
         }
-
+        
+        :root {
+            --primary: #FF6B35;
+            --secondary: #004E89;
+            --accent: #F7B801;
+            --dark: #1A1423;
+            --light: #F7F7FF;
+            --success: #06D6A0;
+            --danger: #EF476F;
+            --gradient-1: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            --gradient-2: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            --gradient-3: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+        }
+        
         body {
             font-family: 'Outfit', sans-serif;
             background: var(--dark);
-            color: var(--text-primary);
             min-height: 100vh;
-            background-image: 
-                radial-gradient(circle at 20% 50%, rgba(120, 119, 198, 0.1) 0%, transparent 50%),
-                radial-gradient(circle at 80% 80%, rgba(56, 189, 248, 0.1) 0%, transparent 50%);
-        }
-
-        .log-container {
-            max-width: 1400px;
-            margin: 0 auto;
-            padding: 1rem;
-        }
-
-        /* Header Log */
-        .app-header-log {
-            background: rgba(0, 0, 0, 0.4);
-            backdrop-filter: blur(20px);
-            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-            padding: 1rem;
-            position: sticky;
-            top: 0;
-            z-index: 100;
-            margin-bottom: 2rem;
-        }
-
-        .header-content-log {
-            max-width: 1400px;
-            margin: 0 auto;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-
-        .header-title-left {
-            display: flex;
-            align-items: center;
-            gap: 1rem;
-        }
-
-        /* Tombol kembali ke Input Transaksi */
-        .back-home-btn {
-            padding: 0.5rem 0.75rem;
-            background: rgba(255, 255, 255, 0.1);
-            border: 1px solid rgba(255, 255, 255, 0.2);
-            border-radius: 8px;
-            color: var(--text-primary);
-            text-decoration: none;
             display: flex;
             align-items: center;
             justify-content: center;
-            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
         }
-
-        .back-home-btn:hover {
-            background: rgba(255, 255, 255, 0.15);
-            border-color: var(--accent-purple);
-            transform: translateX(-3px);
+        
+        /* Animated Background */
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: 
+                radial-gradient(circle at 20% 50%, rgba(102, 126, 234, 0.2) 0%, transparent 50%),
+                radial-gradient(circle at 80% 80%, rgba(245, 87, 108, 0.2) 0%, transparent 50%),
+                radial-gradient(circle at 40% 20%, rgba(79, 172, 254, 0.15) 0%, transparent 50%);
+            z-index: -1;
+            animation: gradientShift 15s ease infinite;
         }
-
-        .page-title {
-            font-size: 1.8rem;
-            font-weight: 800;
-            background: linear-gradient(135deg, var(--accent-purple), var(--accent-cyan));
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-            letter-spacing: -0.02em;
+        
+        @keyframes gradientShift {
+            0%, 100% {
+                opacity: 1;
+            }
+            50% {
+                opacity: 0.8;
+            }
         }
-
-        .header-actions-log {
-            display: flex;
-            align-items: center;
-            gap: 0.75rem;
+        
+        .login-container {
+            width: 100%;
+            max-width: 420px;
+            padding: 2rem;
         }
-
-        /* Tombol Input Transaksi Baru */
-        .input-transaction-btn {
-            padding: 0.5rem 0.875rem;
-            background: var(--gradient-2);
-            border: none;
-            border-radius: 8px;
-            color: white;
-            text-decoration: none;
-            font-family: 'Outfit', sans-serif;
-            font-size: 0.8rem;
-            font-weight: 600;
-            display: flex;
-            align-items: center;
-            gap: 0.375rem;
-            transition: all 0.3s ease;
-            box-shadow: 0 2px 8px rgba(245, 87, 108, 0.3);
+        
+        .login-card {
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(20px);
+            border-radius: 24px;
+            padding: 2.5rem;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            animation: slideUp 0.6s ease;
         }
-
-        .input-transaction-btn:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 4px 12px rgba(245, 87, 108, 0.4);
-        }
-
-        /* User Badge Log */
-        .user-badge-log {
-            background: rgba(255, 255, 255, 0.1);
-            padding: 0.5rem 0.75rem;
-            border-radius: 8px;
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-        }
-
-        .user-badge-log i {
-            color: var(--accent-cyan);
-        }
-
-        .user-name-log {
-            color: var(--text-primary);
-            font-size: 0.875rem;
-            font-weight: 600;
-        }
-
-        /* Search & Filter Section */
-        .search-filter-section {
-            background: var(--card-bg);
-            border: 1px solid var(--card-border);
-            border-radius: 20px;
-            padding: 1.5rem;
-            backdrop-filter: blur(10px);
-            margin-bottom: 2rem;
-            animation: fadeInUp 0.6s ease 0.1s both;
-        }
-
-        @keyframes fadeInUp {
+        
+        @keyframes slideUp {
             from {
                 opacity: 0;
                 transform: translateY(30px);
@@ -171,444 +95,153 @@
                 transform: translateY(0);
             }
         }
-
-        .search-row {
-            display: grid;
-            grid-template-columns: 2fr 1fr 1fr auto;
-            gap: 1rem;
-            align-items: end;
+        
+        .login-header {
+            text-align: center;
+            margin-bottom: 2rem;
         }
-
-        .input-group {
-            position: relative;
-        }
-
-        .input-group label {
-            display: block;
-            margin-bottom: 0.5rem;
-            font-weight: 600;
-            font-size: 0.875rem;
-            color: var(--text-secondary);
-            text-transform: uppercase;
-            letter-spacing: 0.05em;
-        }
-
-        .input-group input,
-        .input-group select {
-            width: 100%;
-            padding: 0.875rem 1rem;
-            background: rgba(0, 0, 0, 0.3);
-            border: 1px solid var(--card-border);
-            border-radius: 12px;
-            color: var(--text-primary);
-            font-family: 'JetBrains Mono', monospace;
-            font-size: 0.9rem;
-            transition: all 0.3s ease;
-        }
-
-        .input-group input:focus,
-        .input-group select:focus {
-            outline: none;
-            border-color: var(--accent-purple);
-            box-shadow: 0 0 0 3px rgba(167, 139, 250, 0.1);
-        }
-
-        .input-group input::placeholder {
-            color: var(--text-secondary);
-            opacity: 0.5;
-        }
-
-        .search-icon {
-            position: absolute;
-            right: 1rem;
-            top: 2.5rem;
-            color: var(--text-secondary);
-            pointer-events: none;
-        }
-
-        .btn-filter {
-            padding: 0.875rem 2rem;
-            background: var(--primary-gradient);
-            border: none;
-            border-radius: 12px;
-            color: white;
-            font-weight: 700;
-            font-size: 0.9rem;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            text-transform: uppercase;
-            letter-spacing: 0.05em;
-            margin-top: 1.7rem;
-        }
-
-        .btn-filter:hover {
-            transform: translateY(-2px);
+        
+        .logo {
+            width: 80px;
+            height: 80px;
+            margin: 0 auto 1.5rem;
+            background: var(--gradient-1);
+            border-radius: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
             box-shadow: 0 10px 30px rgba(102, 126, 234, 0.4);
         }
-
-        .btn-filter:active {
-            transform: translateY(0);
+        
+        .logo i {
+            font-size: 2.5rem;
+            color: white;
         }
-
-        /* Tombol Export SO Bulanan */
-        .btn-export-so {
-            padding: 0.875rem 1.75rem;
-            background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
+        
+        .login-title {
+            color: var(--light);
+            font-size: 1.75rem;
+            font-weight: 800;
+            margin-bottom: 0.5rem;
+            letter-spacing: -0.02em;
+        }
+        
+        .login-subtitle {
+            color: rgba(247, 247, 255, 0.6);
+            font-size: 0.9rem;
+            font-weight: 400;
+        }
+        
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+        
+        .form-group label {
+            display: block;
+            color: rgba(247, 247, 255, 0.8);
+            font-size: 0.875rem;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+        
+        .input-wrapper {
+            position: relative;
+        }
+        
+        .input-wrapper i {
+            position: absolute;
+            left: 1rem;
+            top: 50%;
+            transform: translateY(-50%);
+            color: rgba(247, 247, 255, 0.4);
+            font-size: 1rem;
+        }
+        
+        .form-control {
+            width: 100%;
+            padding: 0.875rem 1rem 0.875rem 2.75rem;
+            background: rgba(255, 255, 255, 0.08);
+            border: 2px solid rgba(255, 255, 255, 0.1);
+            border-radius: 12px;
+            color: var(--light);
+            font-family: 'Outfit', sans-serif;
+            font-size: 0.95rem;
+            transition: all 0.3s ease;
+        }
+        
+        .form-control:focus {
+            outline: none;
+            background: rgba(255, 255, 255, 0.12);
+            border-color: rgba(102, 126, 234, 0.6);
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+        
+        .form-control::placeholder {
+            color: rgba(247, 247, 255, 0.3);
+        }
+        
+        .btn-login {
+            width: 100%;
+            padding: 1rem;
+            background: var(--gradient-1);
             border: none;
             border-radius: 12px;
             color: white;
-            font-weight: 700;
-            font-size: 0.9rem;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            display: inline-flex;
-            align-items: center;
-            gap: 0.5rem;
-            text-transform: uppercase;
-            letter-spacing: 0.05em;
-            box-shadow: 0 4px 15px rgba(17, 153, 142, 0.3);
-        }
-
-        .btn-export-so:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 8px 25px rgba(17, 153, 142, 0.5);
-        }
-
-        .btn-export-so:active {
-            transform: translateY(0);
-        }
-
-        .btn-export-so i {
-            font-size: 1.1rem;
-        }
-
-        /* Responsive untuk tombol export */
-        @media (max-width: 768px) {
-            .btn-export-so span {
-                display: none;
-            }
-            .btn-export-so {
-                padding: 0.875rem 1rem;
-            }
-        }
-
-        /* Warehouse Tabs */
-        .warehouse-tabs {
-            display: flex;
-            gap: 1rem;
-            margin-bottom: 2rem;
-            animation: fadeInUp 0.6s ease 0.2s both;
-        }
-
-        .tab-btn {
-            flex: 1;
-            padding: 1rem 1.5rem;
-            background: var(--card-bg);
-            border: 2px solid var(--card-border);
-            border-radius: 16px;
-            color: var(--text-secondary);
             font-family: 'Outfit', sans-serif;
             font-size: 1rem;
             font-weight: 700;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 0.75rem;
             text-transform: uppercase;
             letter-spacing: 0.05em;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 8px 20px rgba(102, 126, 234, 0.4);
+            margin-top: 1rem;
         }
-
-        .tab-btn:hover {
-            background: rgba(255, 255, 255, 0.08);
-            border-color: var(--accent-purple);
+        
+        .btn-login:hover {
             transform: translateY(-2px);
+            box-shadow: 0 12px 30px rgba(102, 126, 234, 0.5);
         }
-
-        .tab-btn.active {
-            background: var(--primary-gradient);
-            border-color: transparent;
-            color: white;
-            box-shadow: 0 8px 20px rgba(102, 126, 234, 0.3);
+        
+        .btn-login:active {
+            transform: translateY(0);
         }
-
-        .tab-btn i {
-            font-size: 1.2rem;
+        
+        .btn-login:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
         }
-
-        /* Table Container */
-        .log-table-container {
-            background: var(--card-bg);
-            border: 1px solid var(--card-border);
-            border-radius: 20px;
-            padding: 1.5rem;
-            backdrop-filter: blur(10px);
-            animation: fadeInUp 0.6s ease 0.3s both;
-            overflow: hidden;
-        }
-
-        .table-wrapper {
-            overflow-x: auto;
-            border-radius: 12px;
-        }
-
-        .log-table {
-            width: 100%;
-            border-collapse: collapse;
-            font-family: 'JetBrains Mono', monospace;
-        }
-
-        .log-table thead {
-            background: rgba(0, 0, 0, 0.3);
-            border-bottom: 2px solid var(--card-border);
-        }
-
-        .log-table th {
-            padding: 1rem;
-            text-align: left;
-            font-size: 0.75rem;
-            font-weight: 800;
-            text-transform: uppercase;
-            letter-spacing: 0.1em;
-            color: var(--accent-purple);
-        }
-
-        .log-table tbody tr {
-            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
-            transition: all 0.3s ease;
-        }
-
-        .log-table tbody tr:hover {
-            background: rgba(255, 255, 255, 0.03);
-        }
-
-        .log-table td {
-            padding: 1rem;
-            color: var(--text-primary);
+        
+        .error-message {
+            background: rgba(239, 71, 111, 0.1);
+            border: 1px solid rgba(239, 71, 111, 0.3);
+            border-radius: 10px;
+            padding: 0.875rem;
+            margin-bottom: 1.5rem;
+            color: #EF476F;
             font-size: 0.875rem;
+            display: none;
+            animation: shake 0.5s ease;
         }
-
-        /* Badge for transaction type */
-        .badge {
-            display: inline-flex;
-            align-items: center;
-            gap: 0.375rem;
-            padding: 0.375rem 0.75rem;
-            border-radius: 20px;
-            font-size: 0.75rem;
-            font-weight: 700;
-            text-transform: uppercase;
-            letter-spacing: 0.05em;
+        
+        .error-message.show {
+            display: block;
         }
-
-        .badge-in {
-            background: linear-gradient(135deg, rgba(17, 153, 142, 0.2), rgba(56, 239, 125, 0.2));
-            color: #38ef7d;
-            border: 1px solid rgba(56, 239, 125, 0.3);
+        
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-10px); }
+            75% { transform: translateX(10px); }
         }
-
-        .badge-out {
-            background: linear-gradient(135deg, rgba(235, 51, 73, 0.2), rgba(244, 92, 67, 0.2));
-            color: #f45c43;
-            border: 1px solid rgba(244, 92, 67, 0.3);
+        
+        .error-message i {
+            margin-right: 0.5rem;
         }
-
-        /* No data state */
-        .no-data {
-            text-align: center;
-            padding: 3rem 1rem;
-            color: var(--text-secondary);
-        }
-
-        .no-data i {
-            font-size: 3rem;
-            margin-bottom: 1rem;
-            opacity: 0.3;
-        }
-
-        .no-data p {
-            font-size: 1rem;
-            font-weight: 600;
-        }
-
-        /* Floating Action Button */
-        .fab-log {
-            position: fixed;
-            bottom: 2rem;
-            right: 2rem;
-            width: 60px;
-            height: 60px;
-            background: var(--gradient-2);
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            box-shadow: 0 8px 20px rgba(245, 87, 108, 0.4);
-            cursor: pointer;
-            transition: all 0.3s ease;
-            z-index: 999;
-            text-decoration: none;
-            color: white;
-        }
-
-        .fab-log:hover {
-            transform: translateY(-5px) rotate(90deg);
-            box-shadow: 0 12px 30px rgba(245, 87, 108, 0.5);
-        }
-
-        .fab-log i {
-            font-size: 1.5rem;
-        }
-
-        /* DELETE BUTTON STYLES */
-        .btn-delete-transaction {
-            padding: 0.5rem 0.75rem;
-            background: rgba(244, 92, 67, 0.1);
-            border: 1px solid rgba(244, 92, 67, 0.3);
-            border-radius: 8px;
-            color: #f45c43;
-            font-size: 0.875rem;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            display: inline-flex;
-            align-items: center;
-            gap: 0.5rem;
-        }
-
-        .btn-delete-transaction:hover {
-            background: rgba(244, 92, 67, 0.2);
-            border-color: #f45c43;
-            transform: scale(1.05);
-        }
-
-        .btn-delete-transaction:active {
-            transform: scale(0.95);
-        }
-
-        .btn-delete-transaction i {
-            font-size: 0.875rem;
-        }
-
-        /* Responsive */
-        @media (max-width: 1024px) {
-            .search-row,
-            .filter-row {
-                grid-template-columns: 1fr;
-            }
-
-            .warehouse-tabs {
-                flex-direction: column;
-            }
-        }
-
-        @media (max-width: 768px) {
-            .log-container {
-                padding: 0.75rem;
-            }
-
-            .page-title {
-                font-size: 1.5rem;
-            }
-
-            .search-filter-section {
-                padding: 1rem;
-            }
-
-            /* Mobile: ubah search-row jadi vertical */
-            .search-row {
-                grid-template-columns: 1fr;
-            }
-
-            /* Tombol Input untuk mobile */
-            .input-transaction-btn .btn-text {
-                display: none;
-            }
-            
-            .input-transaction-btn {
-                width: 40px;
-                height: 40px;
-                justify-content: center;
-                padding: 0;
-            }
-            
-            .back-home-btn {
-                padding: 0.4rem 0.5rem;
-            }
-            
-            .user-badge-log .user-name-log {
-                display: none;
-            }
-            
-            .user-badge-log {
-                padding: 0.4rem;
-            }
-
-            /* Mobile: Tabel jadi card layout */
-            .log-table thead {
-                display: none;
-            }
-
-            .log-table tbody tr {
-                display: block;
-                background: var(--card-bg);
-                border: 1px solid var(--card-border);
-                border-radius: 12px;
-                margin-bottom: 1rem;
-                padding: 1rem;
-            }
-
-            .log-table tbody td {
-                display: block;
-                border: none;
-                padding: 0.5rem 0;
-                text-align: left !important;
-            }
-
-            .log-table tbody td:before {
-                content: attr(data-label);
-                font-weight: 700;
-                color: var(--text-secondary);
-                display: block;
-                margin-bottom: 0.25rem;
-                font-size: 0.75rem;
-                text-transform: uppercase;
-                letter-spacing: 0.05em;
-            }
-
-            /* No data di mobile */
-            .no-data {
-                display: flex !important;
-                flex-direction: column;
-                align-items: center;
-                padding: 2rem 1rem !important;
-            }
-
-            .no-data:before {
-                display: none;
-            }
-        }
-
-        @media (max-width: 480px) {
-            .header-actions-log {
-                gap: 0.5rem;
-            }
-            
-            .input-transaction-btn,
-            .back-home-btn {
-                width: 36px;
-                height: 36px;
-            }
-            
-            .fab-log {
-                width: 50px;
-                height: 50px;
-                bottom: 15px;
-                right: 15px;
-            }
-        }
-
-        /* LOADER STYLES */
+        
+        /* Loader */
         #loader {
             position: fixed;
             top: 0;
@@ -623,159 +256,212 @@
             opacity: 0;
             transition: opacity 0.3s ease;
         }
-
+        
         .loader-content {
             text-align: center;
         }
-
+        
         .spinner {
             width: 50px;
             height: 50px;
-            border: 4px solid rgba(167, 139, 250, 0.2);
-            border-top-color: var(--accent-purple);
+            border: 4px solid rgba(102, 126, 234, 0.2);
+            border-top-color: rgba(102, 126, 234, 1);
             border-radius: 50%;
             animation: spin 0.8s linear infinite;
             margin: 0 auto 1rem auto;
         }
-
+        
         @keyframes spin {
             to { transform: rotate(360deg); }
         }
+        
+        .loader-text {
+            color: var(--light);
+            font-weight: 600;
+            font-size: 0.95rem;
+        }
+        
+        /* Footer */
+        .login-footer {
+            text-align: center;
+            margin-top: 2rem;
+            color: rgba(247, 247, 255, 0.5);
+            font-size: 0.8rem;
+        }
+        
+        /* Responsive */
+        @media (max-width: 480px) {
+            .login-container {
+                padding: 1rem;
+            }
+            
+            .login-card {
+                padding: 2rem 1.5rem;
+            }
+            
+            .login-title {
+                font-size: 1.5rem;
+            }
+            
+            .logo {
+                width: 70px;
+                height: 70px;
+            }
+            
+            .logo i {
+                font-size: 2rem;
+            }
+        }
     </style>
 </head>
-<body class="log-page">
+<body>
     <!-- Loader -->
     <div id="loader">
         <div class="loader-content">
             <div class="spinner"></div>
-            <p style="color: var(--text-primary); font-weight: 600;">Memuat data...</p>
+            <p class="loader-text">Memproses login...</p>
         </div>
     </div>
 
-    <!-- Header -->
-    <div class="app-header-log">
-        <div class="header-content-log">
-            <div class="header-title-left">
-                <a href="index.html" class="back-home-btn" title="Kembali ke Input Transaksi">
-                    <i class="fas fa-arrow-left"></i>
-                </a>
-                <h1 class="page-title">
-                    <i class="fas fa-clipboard-list"></i> Log Transaksi
-                </h1>
+    <div class="login-container">
+        <div class="login-card">
+            <div class="login-header">
+                <div class="logo">
+                    <i class="fas fa-warehouse"></i>
+                </div>
+                <h1 class="login-title">Warehouse Pro</h1>
+                <p class="login-subtitle">Sistem Manajemen Gudang</p>
             </div>
             
-            <div class="header-actions-log">
-                <!-- Tombol Input Transaksi Baru -->
-                <a href="index.html" class="input-transaction-btn" title="Input Transaksi Baru">
-                    <i class="fas fa-plus-circle"></i>
-                    <span class="btn-text">Input Baru</span>
-                </a>
+            <div id="errorMessage" class="error-message">
+                <i class="fas fa-exclamation-circle"></i>
+                <span id="errorText"></span>
+            </div>
+            
+            <form id="loginForm">
+                <div class="form-group">
+                    <label for="username">Username</label>
+                    <div class="input-wrapper">
+                        <i class="fas fa-user"></i>
+                        <input 
+                            type="text" 
+                            id="username" 
+                            name="username"
+                            class="form-control" 
+                            placeholder="Masukkan username"
+                            required
+                            autocomplete="username"
+                        >
+                    </div>
+                </div>
                 
-                <!-- User Badge -->
-                <div class="user-badge-log">
-                    <i class="fas fa-user-circle"></i>
-                    <span class="user-name-log" id="userNameLog">User</span>
+                <div class="form-group">
+                    <label for="password">Password</label>
+                    <div class="input-wrapper">
+                        <i class="fas fa-lock"></i>
+                        <input 
+                            type="password" 
+                            id="password" 
+                            name="password"
+                            class="form-control" 
+                            placeholder="Masukkan password"
+                            required
+                            autocomplete="current-password"
+                        >
+                    </div>
                 </div>
-            </div>
-        </div>
-    </div>
-
-    <div class="log-container">
-        <!-- Search & Filter -->
-        <div class="search-filter-section">
-            <div class="search-row">
-                <div class="input-group">
-                    <label>Cari Barang</label>
-                    <input type="text" id="searchBarang" placeholder="Masukkan nama atau ID barang...">
-                    <i class="fas fa-search search-icon"></i>
-                </div>
-                <div class="input-group">
-                    <label>Filter Bulan</label>
-                    <input type="month" id="filterMonth">
-                </div>
-                <div class="input-group">
-                    <label>Jenis Transaksi</label>
-                    <select id="filterJenis">
-                        <option value="">Semua</option>
-                        <option value="In">Masuk</option>
-                        <option value="Out">Keluar</option>
-                    </select>
-                </div>
-                <button class="btn-filter" onclick="applyFilters()">
-                    <i class="fas fa-filter"></i> Filter
+                
+                <button type="submit" class="btn-login" id="btnLogin">
+                    <i class="fas fa-sign-in-alt"></i> Login
                 </button>
-            </div>
+            </form>
             
-            <!-- Tombol Aksi - Export SO Bulanan -->
-            <div style="margin-top: 1rem; display: flex; gap: 0.75rem; justify-content: flex-end;">
-                <button class="btn-export-so" onclick="exportMonthlySO()" title="Export Laporan Stock Opname Bulanan">
-                    <i class="fas fa-file-excel"></i>
-                    <span>Export SO Bulanan</span>
-                </button>
-            </div>
-        </div>
-
-        <!-- Warehouse Tabs -->
-        <div class="warehouse-tabs">
-            <button class="tab-btn active" onclick="switchWarehouse('A')" id="tabA">
-                <i class="fas fa-warehouse"></i>
-                <span>Gudang Kalipucang</span>
-            </button>
-            <button class="tab-btn" onclick="switchWarehouse('B')" id="tabB">
-                <i class="fas fa-warehouse"></i>
-                <span>Gudang Troso</span>
-            </button>
-        </div>
-
-        <!-- Log Table -->
-        <div class="log-table-container">
-            <div class="table-wrapper">
-                <table class="log-table">
-                    <thead>
-                        <tr>
-                            <th>Tanggal & Waktu</th>
-                            <th>Jenis</th>
-                            <th>Nama Barang</th>
-                            <th>Jumlah</th>
-                            <th>Keterangan</th>
-                            <th style="text-align: center;">Aksi</th>
-                        </tr>
-                    </thead>
-                    <tbody id="logTableBody">
-                        <tr>
-                            <td colspan="6" class="no-data">
-                                <i class="fas fa-inbox"></i>
-                                <p>Memuat data transaksi...</p>
-                            </td>
-                        </tr>
-                    </tbody>
-                </table>
+            <div class="login-footer">
+                <p>&copy; 2024 Warehouse Pro. All rights reserved.</p>
             </div>
         </div>
     </div>
 
-    <!-- Floating Action Button untuk kembali ke Input -->
-    <a href="index.html" class="fab-log" title="Input Transaksi Baru">
-        <i class="fas fa-plus"></i>
-    </a>
-
+    <!-- Scripts -->
     <script src="config.js"></script>
     <script src="login.js"></script>
-    <script src="log.js"></script>
     
     <script>
-        // Initialize log page
-        document.addEventListener('DOMContentLoaded', function() {
-            // Check authentication
-            if (!AUTH || !AUTH.isLoggedIn()) {
-                window.location.href = 'login.html';
+        // Login form handler
+        document.getElementById('loginForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const username = document.getElementById('username').value.trim();
+            const password = document.getElementById('password').value;
+            
+            // Validasi input
+            if (!username || !password) {
+                showError('Username dan password harus diisi');
                 return;
             }
             
-            // Display user name
-            const userName = AUTH.getUserName();
-            if (userName) {
-                document.getElementById('userNameLog').textContent = userName;
+            // Clear previous error
+            hideError();
+            
+            // Disable button
+            const btnLogin = document.getElementById('btnLogin');
+            btnLogin.disabled = true;
+            btnLogin.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Memproses...';
+            
+            try {
+                // Call login function from login.js
+                const result = await AUTH.login(username, password);
+                
+                if (result.success) {
+                    // Show success and redirect
+                    showSuccess('Login berhasil! Mengalihkan...');
+                    
+                    setTimeout(() => {
+                        window.location.href = 'index.html';
+                    }, 1000);
+                } else {
+                    // Show error
+                    showError(result.error || 'Username atau password salah');
+                    btnLogin.disabled = false;
+                    btnLogin.innerHTML = '<i class="fas fa-sign-in-alt"></i> Login';
+                }
+            } catch (error) {
+                console.error('Login error:', error);
+                showError('Terjadi kesalahan. Silakan coba lagi.');
+                btnLogin.disabled = false;
+                btnLogin.innerHTML = '<i class="fas fa-sign-in-alt"></i> Login';
+            }
+        });
+        
+        function showError(message) {
+            const errorDiv = document.getElementById('errorMessage');
+            const errorText = document.getElementById('errorText');
+            errorText.textContent = message;
+            errorDiv.classList.add('show');
+        }
+        
+        function hideError() {
+            const errorDiv = document.getElementById('errorMessage');
+            errorDiv.classList.remove('show');
+        }
+        
+        function showSuccess(message) {
+            const errorDiv = document.getElementById('errorMessage');
+            const errorText = document.getElementById('errorText');
+            errorDiv.style.background = 'rgba(6, 214, 160, 0.1)';
+            errorDiv.style.borderColor = 'rgba(6, 214, 160, 0.3)';
+            errorDiv.style.color = '#06D6A0';
+            errorText.innerHTML = '<i class="fas fa-check-circle"></i> ' + message;
+            errorDiv.classList.add('show');
+        }
+        
+        // Auto-focus username field
+        document.getElementById('username').focus();
+        
+        // Enter key handler
+        document.getElementById('password').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                document.getElementById('loginForm').dispatchEvent(new Event('submit'));
             }
         });
     </script>
