@@ -1164,3 +1164,88 @@ textarea.input-field {
 ::-webkit-scrollbar-thumb:hover {
     background: rgba(255, 255, 255, 0.3);
 }
+
+/* ============================================
+   SEARCH RESULTS DROPDOWN - FIXED POSITIONING
+   ============================================ */
+
+.search-results-dropdown {
+    position: absolute !important;
+    background: rgba(20, 20, 30, 0.98) !important;
+    border: 1px solid rgba(255, 255, 255, 0.15) !important;
+    border-radius: 8px !important;
+    max-height: 300px !important;
+    overflow-y: auto !important;
+    z-index: 999999 !important;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.9) !important;
+    backdrop-filter: blur(20px) !important;
+    width: 100%;
+    margin-top: 5px;
+    display: none;
+}
+
+/* Untuk container search */
+.search-wrapper {
+    position: relative;
+}
+
+/* Item styling */
+.search-result-item {
+    padding: 12px 16px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+    cursor: pointer;
+    transition: all 0.2s ease;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.search-result-item:hover,
+.search-result-item.active {
+    background: rgba(79, 172, 254, 0.15);
+    border-left: 4px solid var(--primary);
+}
+
+.search-item-main {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    width: 100%;
+}
+
+.search-item-id {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.8rem;
+    color: rgba(255, 255, 255, 0.7);
+}
+
+.search-item-name {
+    font-weight: 600;
+    color: white;
+    font-size: 0.9rem;
+}
+
+.search-item-stock {
+    font-size: 0.8rem;
+    font-weight: 600;
+}
+
+.text-success {
+    color: #38ef7d !important;
+}
+
+.text-danger {
+    color: #f45c43 !important;
+}
+
+.search-no-results {
+    padding: 20px;
+    text-align: center;
+    color: rgba(255, 255, 255, 0.6);
+}
+
+.search-no-results i {
+    font-size: 2rem;
+    margin-bottom: 10px;
+    opacity: 0.5;
+}
