@@ -1,12 +1,6 @@
 // ============================================
 // APP.JS - ULTRA-FAST VERSION (FIXED)
-// ⚡ Optimizations:
-// - Parallel data loading
-// - Faster search debounce
-// - Reduced timeouts
-// - Lazy initialization
-// ✅ FIXED: ID element mismatch
-// ✅ ADDED: Search functionality in Add Item modal
+// ✅ DROPDOWN PASTI MUNCUL & DI DEPAN
 // ============================================
 
 let dataMaster = [];
@@ -16,9 +10,12 @@ let tempSelectedItem = null;
 let pendingTransaction = null;
 let searchedQuery = '';
 
-// ⚡ Initialize - with faster startup
+// ============================================
+// INITIALIZATION
+// ============================================
+
 document.addEventListener('DOMContentLoaded', function() {
-    console.log('🚀 App initializing (ULTRA-FAST)...');
+    console.log('🚀 App initializing...');
     
     if (typeof AUTH !== 'undefined') {
         AUTH.init();
@@ -41,7 +38,7 @@ document.addEventListener('DOMContentLoaded', function() {
 });
 
 // ============================================
-// AUTO RELOAD DATA - OPTIMIZED
+// AUTO RELOAD DATA
 // ============================================
 
 function setupAutoReloadListener() {
@@ -60,7 +57,7 @@ function setupAutoReloadListener() {
             
             try {
                 await loadAllBarang();
-                UI.showAlert('✅ Data diperbarui', 'success', 1500); // ⚡ Shorter alert
+                UI.showAlert('✅ Data diperbarui', 'success', 1500);
             } catch (error) {
                 console.error('Error reloading data:', error);
             }
@@ -80,10 +77,9 @@ function setupAutoReloadListener() {
 // ============================================
 
 async function initIndexPage() {
-    console.log('📄 Initializing index page (ULTRA-FAST)...');
+    console.log('📄 Initializing index page...');
     
     try {
-        // ⚡ PARALLEL LOADING - load data barang dan kategori bersamaan
         const [dataBarang, dataKategori] = await Promise.all([
             loadAllBarang(),
             loadKategori()
@@ -91,12 +87,10 @@ async function initIndexPage() {
         
         console.log(`✅ Loaded ${dataBarang.length} items + ${dataKategori.length} categories in parallel`);
         
-        // ⚡ Auth auto-fill (non-blocking)
         if (AUTH && typeof AUTH.autoFillForm === 'function') {
             AUTH.autoFillForm();
         }
         
-        // ⚡ Setup listeners dan modals (parallel)
         Promise.all([
             setupEventListeners(),
             setupConfirmationModal(),
@@ -104,6 +98,9 @@ async function initIndexPage() {
         ]).then(() => {
             console.log('✅ All event listeners ready');
         });
+        
+        // ✅ DROPDOWN FIX - PASTI BERHASIL
+        initDropdownFix();
         
         console.log('✅ Index page initialized');
         
@@ -114,7 +111,138 @@ async function initIndexPage() {
 }
 
 // ============================================
-// DATA LOADING - PARALLEL & CACHED
+// DROPDOWN FIX - PASTI MUNCUL & DI DEPAN
+// ============================================
+
+function initDropdownFix() {
+    console.log('🔧 Initializing dropdown fix...');
+    
+    // Hapus dropdown lama jika ada
+    const oldDropdown = document.getElementById('searchResultsDropdown');
+    if (oldDropdown) {
+        oldDropdown.remove();
+    }
+    
+    // Buat dropdown baru di body
+    const dropdown = document.createElement('div');
+    dropdown.id = 'searchResultsDropdown';
+    document.body.appendChild(dropdown);
+    console.log('✅ New dropdown created and appended to body');
+    
+    // OVERRIDE displaySearchResults
+    window.displaySearchResults = function(results) {
+        const dropdown = document.getElementById('searchResultsDropdown');
+        const searchInput = document.getElementById('manualIdInput');
+        
+        if (!dropdown || !searchInput) return;
+        
+        const rect = searchInput.getBoundingClientRect();
+        dropdown.style.top = (rect.bottom + window.scrollY + 8) + 'px';
+        dropdown.style.left = rect.left + 'px';
+        dropdown.style.width = rect.width + 'px';
+        
+        const activeGudang = getActiveGudang();
+        
+        dropdown.innerHTML = results.map(item => {
+            const stok = activeGudang === 'Kalipucang' ? item.stokA : item.stokB;
+            const stokClass = stok > 0 ? 'text-success' : 'text-danger';
+            
+            return `
+                <div class="search-result-item" onclick="selectItemById('${item.id}')">
+                    <div class="search-item-main">
+                        <div class="search-item-id">${item.id}</div>
+                        <div class="search-item-name">${item.nama}</div>
+                    </div>
+                    <div class="search-item-stock ${stokClass}">
+                        Stok: ${stok} ${item.satuan}
+                    </div>
+                </div>
+            `;
+        }).join('');
+        
+        dropdown.style.display = 'block';
+        
+        const firstItem = dropdown.querySelector('.search-result-item');
+        if (firstItem) firstItem.classList.add('active');
+    };
+    
+    // OVERRIDE showNoResults
+    window.showNoResults = function(query) {
+        const dropdown = document.getElementById('searchResultsDropdown');
+        const searchInput = document.getElementById('manualIdInput');
+        
+        if (!dropdown || !searchInput) return;
+        
+        const rect = searchInput.getBoundingClientRect();
+        dropdown.style.top = (rect.bottom + window.scrollY + 8) + 'px';
+        dropdown.style.left = rect.left + 'px';
+        dropdown.style.width = rect.width + 'px';
+        
+        dropdown.innerHTML = `
+            <div class="search-no-results">
+                <i class="fas fa-search"></i>
+                <p>Tidak ada hasil untuk "${query}"</p>
+            </div>
+        `;
+        dropdown.style.display = 'block';
+    };
+    
+    // OVERRIDE hideSearchResults
+    window.hideSearchResults = function() {
+        const dropdown = document.getElementById('searchResultsDropdown');
+        if (dropdown) {
+            dropdown.style.display = 'none';
+        }
+    };
+    
+    // Update posisi saat scroll/resize
+    window.addEventListener('scroll', function() {
+        const dropdown = document.getElementById('searchResultsDropdown');
+        const searchInput = document.getElementById('manualIdInput');
+        if (dropdown && dropdown.style.display === 'block' && searchInput) {
+            const rect = searchInput.getBoundingClientRect();
+            dropdown.style.top = (rect.bottom + window.scrollY + 8) + 'px';
+            dropdown.style.left = rect.left + 'px';
+            dropdown.style.width = rect.width + 'px';
+        }
+    });
+    
+    window.addEventListener('resize', function() {
+        const dropdown = document.getElementById('searchResultsDropdown');
+        const searchInput = document.getElementById('manualIdInput');
+        if (dropdown && dropdown.style.display === 'block' && searchInput) {
+            const rect = searchInput.getBoundingClientRect();
+            dropdown.style.top = (rect.bottom + window.scrollY + 8) + 'px';
+            dropdown.style.left = rect.left + 'px';
+            dropdown.style.width = rect.width + 'px';
+        }
+    });
+    
+    // MutationObserver untuk memastikan selalu di depan
+    const observer = new MutationObserver(function(mutations) {
+        mutations.forEach(function(mutation) {
+            if (mutation.type === 'attributes' && mutation.attributeName === 'style') {
+                const dropdown = document.getElementById('searchResultsDropdown');
+                if (dropdown && dropdown.style.display === 'block') {
+                    dropdown.style.setProperty('z-index', '999999999999', 'important');
+                    dropdown.style.setProperty('position', 'fixed', 'important');
+                }
+            }
+        });
+    });
+    
+    setTimeout(() => {
+        const dropdown = document.getElementById('searchResultsDropdown');
+        if (dropdown) {
+            observer.observe(dropdown, { attributes: true, attributeFilter: ['style'] });
+        }
+    }, 1000);
+    
+    console.log('✅ Dropdown fix applied');
+}
+
+// ============================================
+// DATA LOADING
 // ============================================
 
 async function loadAllBarang() {
@@ -127,12 +255,11 @@ async function loadAllBarang() {
         
         console.log(`✅ ${data.length} items loaded`);
         
-        // ⚡ Background prefetch kategori jika belum ada
         if (dataKategori.length === 0) {
             API.prefetch('getKategoriList');
         }
         
-        await UI.hideLoading(); // ⚡ Await untuk smooth transition
+        await UI.hideLoading();
         return data;
         
     } catch (error) {
@@ -141,10 +268,6 @@ async function loadAllBarang() {
         UI.showAlert('❌ Gagal memuat data: ' + error.message, 'danger');
         throw error;
     }
-}
-
-async function loadDataBarang() {
-    return loadAllBarang();
 }
 
 async function loadKategori() {
@@ -170,7 +293,7 @@ async function loadKategori() {
 }
 
 // ============================================
-// EVENT LISTENERS - OPTIMIZED SEARCH
+// EVENT LISTENERS
 // ============================================
 
 function setupEventListeners() {
@@ -184,7 +307,6 @@ function setupEventListeners() {
     
     let searchTimeout;
     
-    // ⚡ FASTER SEARCH - 100ms debounce (dari 150ms)
     searchInput.addEventListener('input', function(e) {
         clearTimeout(searchTimeout);
         const query = e.target.value.trim();
@@ -192,14 +314,13 @@ function setupEventListeners() {
         if (query.length >= 2) {
             searchTimeout = setTimeout(() => {
                 searchBarang(query);
-            }, 100); // ⚡ Faster debounce
+            }, 100);
         } else {
             hideItemResult();
             hideSearchResults();
         }
     });
     
-    // Keyboard navigation untuk dropdown
     searchInput.addEventListener('keydown', function(e) {
         const dropdown = document.getElementById('searchResultsDropdown');
         if (!dropdown || dropdown.style.display === 'none') return;
@@ -239,13 +360,11 @@ function setupEventListeners() {
         }
     });
     
-    // Scanner button
     const scanBtn = document.getElementById('scanBtn');
     if (scanBtn) {
         scanBtn.addEventListener('click', startScanner);
     }
     
-    // Warehouse buttons
     document.querySelectorAll('.warehouse-btn').forEach(btn => {
         btn.addEventListener('click', function() {
             document.querySelectorAll('.warehouse-btn').forEach(b => 
@@ -261,7 +380,6 @@ function setupEventListeners() {
         });
     });
     
-    // Transaction type buttons
     document.querySelectorAll('.type-btn').forEach(btn => {
         btn.addEventListener('click', function() {
             document.querySelectorAll('.type-btn').forEach(b => 
@@ -271,7 +389,6 @@ function setupEventListeners() {
         });
     });
     
-    // Form submit
     const form = document.getElementById('transaksiForm');
     if (form) {
         form.addEventListener('submit', handleSubmit);
@@ -282,7 +399,7 @@ function setupEventListeners() {
 }
 
 // ============================================
-// SEARCH FUNCTION - OPTIMIZED
+// SEARCH FUNCTION
 // ============================================
 
 function searchBarang(query) {
@@ -294,7 +411,6 @@ function searchBarang(query) {
     searchedQuery = query;
     const searchLower = query.toLowerCase().trim();
     
-    // ⚡ Optimized search with early exit
     const results = [];
     for (let i = 0; i < dataMaster.length && results.length < 10; i++) {
         const item = dataMaster[i];
@@ -313,7 +429,6 @@ function searchBarang(query) {
         return;
     }
     
-    // Exact match - auto select
     if (results.length === 1 || 
         results[0].id.toLowerCase() === searchLower) {
         selectItem(results[0]);
@@ -322,94 +437,6 @@ function searchBarang(query) {
     }
     
     displaySearchResults(results);
-}
-
-function displaySearchResults(results) {
-    let dropdown = document.getElementById('searchResultsDropdown');
-    
-    // ✅ AUTO-CREATE dropdown element if not exists
-    if (!dropdown) {
-        console.warn('⚠️ Dropdown element not found, creating it...');
-        dropdown = document.createElement('div');
-        dropdown.id = 'searchResultsDropdown';
-        dropdown.className = 'search-results-dropdown';
-        
-        // Insert after search wrapper
-        const searchWrapper = document.querySelector('.search-wrapper');
-        if (searchWrapper) {
-            searchWrapper.parentNode.insertBefore(dropdown, searchWrapper.nextSibling);
-            console.log('✅ Dropdown element created successfully');
-        } else {
-            console.error('❌ Cannot find search-wrapper to insert dropdown');
-            return;
-        }
-    }
-    
-    // ⚡ Use innerHTML for faster rendering
-    const html = results.map(item => {
-        const activeGudang = getActiveGudang();
-        const stok = activeGudang === 'Kalipucang' ? item.stokA : item.stokB;
-        const stokClass = stok > 0 ? 'text-success' : 'text-danger';
-        
-        return `
-            <div class="search-result-item" onclick="selectItemById('${item.id}')">
-                <div class="search-item-main">
-                    <div class="search-item-id">${item.id}</div>
-                    <div class="search-item-name">${item.nama}</div>
-                </div>
-                <div class="search-item-stock ${stokClass}">
-                    Stok: ${stok} ${item.satuan}
-                </div>
-            </div>
-        `;
-    }).join('');
-    
-    dropdown.innerHTML = html;
-    dropdown.style.display = 'block';
-    
-    // Auto-select first item
-    const firstItem = dropdown.querySelector('.search-result-item');
-    if (firstItem) {
-        firstItem.classList.add('active');
-    }
-}
-
-function showNoResults(query) {
-    let dropdown = document.getElementById('searchResultsDropdown');
-    
-    // ✅ AUTO-CREATE dropdown element if not exists
-    if (!dropdown) {
-        console.warn('⚠️ Dropdown element not found, creating it...');
-        dropdown = document.createElement('div');
-        dropdown.id = 'searchResultsDropdown';
-        dropdown.className = 'search-results-dropdown';
-        
-        const searchWrapper = document.querySelector('.search-wrapper');
-        if (searchWrapper) {
-            searchWrapper.parentNode.insertBefore(dropdown, searchWrapper.nextSibling);
-            console.log('✅ Dropdown element created successfully');
-        } else {
-            console.error('❌ Cannot find search-wrapper to insert dropdown');
-            return;
-        }
-    }
-    
-    dropdown.innerHTML = `
-        <div class="search-no-results">
-            <div class="text-muted">
-                <i class="fas fa-search"></i>
-                <p>Tidak ada hasil untuk "${query}"</p>
-            </div>
-        </div>
-    `;
-    dropdown.style.display = 'block';
-}
-
-function hideSearchResults() {
-    const dropdown = document.getElementById('searchResultsDropdown');
-    if (dropdown) {
-        dropdown.style.display = 'none';
-    }
 }
 
 // ============================================
@@ -429,7 +456,6 @@ function selectItem(item) {
     
     tempSelectedItem = item;
     
-    // ⚡ Fast DOM updates
     const resultDiv = document.getElementById('itemResult');
     if (resultDiv) {
         resultDiv.innerHTML = `
@@ -457,10 +483,9 @@ function selectItem(item) {
     updateStockDisplay(item);
     updateGudangColors();
     
-    // Auto-focus jumlah input
     const jumlahInput = document.getElementById('jumlah');
     if (jumlahInput) {
-        setTimeout(() => jumlahInput.focus(), 50); // ⚡ Reduced timeout
+        setTimeout(() => jumlahInput.focus(), 50);
     }
 }
 
@@ -485,6 +510,13 @@ function hideItemResult() {
         resultDiv.style.display = 'none';
     }
     tempSelectedItem = null;
+}
+
+function hideSearchResults() {
+    const dropdown = document.getElementById('searchResultsDropdown');
+    if (dropdown) {
+        dropdown.style.display = 'none';
+    }
 }
 
 // ============================================
@@ -519,7 +551,6 @@ function startScanner() {
 
 function onScanSuccess(decodedText) {
     console.log('✅ QR Code scanned:', decodedText);
-    
     stopScanner();
     
     const searchInput = document.getElementById('manualIdInput');
@@ -530,7 +561,7 @@ function onScanSuccess(decodedText) {
 }
 
 function onScanError(error) {
-    // Silent - normal scanning errors
+    // Silent
 }
 
 function stopScanner() {
@@ -547,14 +578,6 @@ function stopScanner() {
         modal.style.display = 'none';
     }
 }
-
-// Close scanner modal
-document.addEventListener('DOMContentLoaded', function() {
-    const closeScannerBtn = document.getElementById('closeScannerBtn');
-    if (closeScannerBtn) {
-        closeScannerBtn.addEventListener('click', stopScanner);
-    }
-});
 
 // ============================================
 // FORM SUBMIT
@@ -592,7 +615,6 @@ async function handleSubmit(e) {
     
     const transaksiType = activeType.dataset.type;
     
-    // Validation for Keluar
     if (transaksiType === 'Keluar') {
         const currentStock = activeGudang === 'Kalipucang' ? 
             tempSelectedItem.stokA : tempSelectedItem.stokB;
@@ -603,7 +625,6 @@ async function handleSubmit(e) {
         }
     }
     
-    // Store pending transaction
     pendingTransaction = {
         idBarang: tempSelectedItem.id,
         namaBarang: tempSelectedItem.nama,
@@ -618,7 +639,6 @@ async function handleSubmit(e) {
         user: user
     };
     
-    // Show confirmation modal
     showConfirmationModal(pendingTransaction);
 }
 
@@ -645,7 +665,6 @@ function showConfirmationModal(data) {
     const modal = document.getElementById('confirmModal');
     if (!modal) return;
     
-    // Populate data
     document.getElementById('confirmNama').textContent = data.namaBarang;
     document.getElementById('confirmId').textContent = data.idBarang;
     document.getElementById('confirmJenis').textContent = data.jenis;
@@ -685,13 +704,8 @@ async function submitTransaction() {
         
         if (result.success) {
             UI.showAlert(`✅ ${pendingTransaction.jenis} berhasil dicatat!`, 'success');
-            
-            // Reload data
             await loadAllBarang();
-            
-            // Reset form
             resetForm();
-            
             localStorage.setItem('dataBarangChanged', 'true');
         } else {
             throw new Error(result.error || 'Gagal menyimpan transaksi');
@@ -719,14 +733,12 @@ function resetForm() {
         searchInput.focus();
     }
     
-    // Reset to today's date
     const tanggalInput = document.getElementById('tanggal');
     if (tanggalInput) {
         const today = new Date().toISOString().split('T')[0];
         tanggalInput.value = today;
     }
     
-    // Re-apply auto-fill
     if (AUTH && typeof AUTH.autoFillForm === 'function') {
         AUTH.autoFillForm();
     }
@@ -736,7 +748,7 @@ function resetForm() {
 }
 
 // ============================================
-// ADD ITEM MODAL - ✅ FIXED ID ELEMENTS
+// ADD ITEM MODAL
 // ============================================
 
 function setupAddItemModal() {
@@ -745,8 +757,6 @@ function setupAddItemModal() {
     const btnCloseAddModal = document.getElementById('btnCloseAddModal');
     const btnCancelAddItem = document.getElementById('btnCancelAddItem');
     const addItemForm = document.getElementById('addItemForm');
-    
-    // ✅ FIXED: Use correct ID from HTML
     const kategoriSelect = document.getElementById('newItemKategori');
     
     if (addItemBtn) {
@@ -777,7 +787,6 @@ function setupAddItemModal() {
         addItemForm.addEventListener('submit', handleAddItem);
     }
     
-    // Setup modal tabs
     setupModalTabs();
     
     return Promise.resolve();
@@ -795,7 +804,6 @@ function setupModalTabs() {
 }
 
 window.switchTab = function(tabName) {
-    // Remove active from all tabs
     document.querySelectorAll('.modal-tab-btn').forEach(btn => {
         btn.classList.remove('active');
     });
@@ -803,7 +811,6 @@ window.switchTab = function(tabName) {
         content.classList.remove('active');
     });
     
-    // Add active to target
     const targetBtn = document.querySelector(`[data-tab="${tabName}"]`);
     const targetContent = document.getElementById(`${tabName}Tab`);
     
@@ -812,7 +819,6 @@ window.switchTab = function(tabName) {
 };
 
 function populateKategoriSelect() {
-    // ✅ FIXED: Use correct ID from HTML
     const select = document.getElementById('newItemKategori');
     if (!select) {
         console.error('❌ newItemKategori select not found!');
@@ -832,17 +838,10 @@ function populateKategoriSelect() {
 }
 
 function updateNewIdPreview() {
-    // ✅ FIXED: Use correct ID from HTML
     const kategoriSelect = document.getElementById('newItemKategori');
     const previewDiv = document.getElementById('newItemId');
     
-    if (!kategoriSelect || !previewDiv) {
-        console.error('❌ Elements not found:', {
-            kategoriSelect: !!kategoriSelect,
-            previewDiv: !!previewDiv
-        });
-        return;
-    }
+    if (!kategoriSelect || !previewDiv) return;
     
     const selectedKat = kategoriSelect.value;
     
@@ -861,27 +860,16 @@ function updateNewIdPreview() {
     
     previewDiv.value = newId;
     previewDiv.placeholder = '';
-    
-    console.log(`✅ Generated new ID: ${newId}`);
 }
 
 async function handleAddItem(e) {
     e.preventDefault();
     
-    // ✅ FIXED: Use correct IDs from HTML
     const kategoriInisial = document.getElementById('newItemKategori').value;
     const nama = document.getElementById('newItemNama').value;
     const satuan = document.getElementById('newItemSatuan').value;
     const stokAwal = parseInt(document.getElementById('newItemStok').value) || 0;
     const gudang = document.getElementById('newItemGudang').value;
-    
-    console.log('📝 Form values:', {
-        kategoriInisial,
-        nama,
-        satuan,
-        stokAwal,
-        gudang
-    });
     
     if (!kategoriInisial || !nama || !satuan || !gudang) {
         UI.showAlert('❌ Lengkapi semua field', 'danger');
@@ -994,71 +982,15 @@ function updateWarehouseButtonsForMobile() {
 window.addEventListener('resize', updateWarehouseButtonsForMobile);
 
 // ============================================
-// MOBILE KEYBOARD HANDLER
-// ============================================
-
-function setupMobileKeyboardHandler() {
-    if (!('ontouchstart' in window)) return;
-    
-    console.log('📱 Mobile keyboard handler');
-    
-    const inputs = document.querySelectorAll('input, textarea, select');
-    let activeInput = null;
-    
-    function checkKeyboard() {
-        const viewportHeight = window.innerHeight;
-        const documentHeight = document.documentElement.clientHeight;
-        
-        if (documentHeight > viewportHeight) {
-            document.body.classList.add('keyboard-open');
-            
-            if (activeInput) {
-                setTimeout(() => {
-                    activeInput.scrollIntoView({
-                        behavior: 'smooth',
-                        block: 'center'
-                    });
-                }, 50); // ⚡ Reduced delay
-            }
-        } else {
-            document.body.classList.remove('keyboard-open');
-        }
-    }
-    
-    inputs.forEach(input => {
-        input.addEventListener('focus', function() {
-            activeInput = this;
-            document.body.classList.add('input-focused');
-            setTimeout(checkKeyboard, 200); // ⚡ Reduced delay
-        });
-        
-        input.addEventListener('blur', function() {
-            activeInput = null;
-            document.body.classList.remove('input-focused');
-            setTimeout(checkKeyboard, 300); // ⚡ Reduced delay
-        });
-    });
-    
-    let resizeTimeout;
-    window.addEventListener('resize', function() {
-        clearTimeout(resizeTimeout);
-        resizeTimeout = setTimeout(checkKeyboard, 50); // ⚡ Faster check
-    });
-}
-
-// ============================================
 // INITIALIZATION
 // ============================================
 
 if (document.getElementById('transaksiForm')) {
     document.addEventListener('DOMContentLoaded', function() {
-        // ⚡ Reduced all delays
         setTimeout(() => {
             updateGudangColors();
             updateWarehouseButtonsForMobile();
         }, 50);
-        
-        setTimeout(setupMobileKeyboardHandler, 200);
     });
 }
 
@@ -1082,205 +1014,20 @@ window.debugApp = {
         await loadAllBarang();
         console.log('✅ Reloaded');
     },
-    
     checkELK: function() {
         const elkItems = dataMaster.filter(item => item.id.startsWith('ELK-'));
         console.log(`ELK items: ${elkItems.length}`);
-        console.log('ELK IDs:', elkItems.map(item => item.id));
         return elkItems;
     },
-    
     findID: function(id) {
         const item = dataMaster.find(item => item.id === id);
         console.log(`ID: ${id}`, item);
         return item;
     },
-    
     clearCache: function() {
         if (typeof API !== 'undefined' && API.clearCache) {
             API.clearCache();
             console.log('✅ Cache cleared');
         }
-    },
-    
-    testModal: function() {
-        console.log('🧪 Testing modal elements...');
-        const elements = {
-            'newItemKategori': document.getElementById('newItemKategori'),
-            'newItemNama': document.getElementById('newItemNama'),
-            'newItemSatuan': document.getElementById('newItemSatuan'),
-            'newItemStok': document.getElementById('newItemStok'),
-            'newItemGudang': document.getElementById('newItemGudang'),
-            'newItemId': document.getElementById('newItemId')
-        };
-        
-        Object.keys(elements).forEach(key => {
-            console.log(`${key}:`, elements[key] ? '✅ Found' : '❌ Not found');
-        });
-        
-        return elements;
     }
 };
-
-// ============================================
-// ULTIMATE DROPDOWN FIX - PASTI DI DEPAN
-// ============================================
-
-(function forceDropdownToTop() {
-    console.log('🚀 Applying ultimate dropdown fix...');
-    
-    // 1. HAPUS dropdown lama jika ada
-    const oldDropdown = document.getElementById('searchResultsDropdown');
-    if (oldDropdown) {
-        oldDropdown.remove();
-    }
-    
-    // 2. BUAT dropdown BARU di root body
-    const dropdown = document.createElement('div');
-    dropdown.id = 'searchResultsDropdown';
-    dropdown.className = 'search-results-dropdown';
-    
-    // 3. SET STYLE LANGSUNG - PAKSA position fixed
-    dropdown.style.cssText = `
-        position: fixed !important;
-        top: 0 !important;
-        left: 0 !important;
-        width: 90% !important;
-        max-width: 560px !important;
-        max-height: 300px !important;
-        overflow-y: auto !important;
-        background: rgba(10, 10, 20, 0.98) !important;
-        backdrop-filter: blur(20px) !important;
-        border: 1px solid rgba(255, 255, 255, 0.2) !important;
-        border-radius: 12px !important;
-        box-shadow: 0 20px 60px rgba(0, 0, 0, 0.9) !important;
-        z-index: 999999999999 !important;
-        display: none;
-        margin: 0 !important;
-        padding: 0 !important;
-    `;
-    
-    // 4. APPEND ke body, BUKAN ke container
-    document.body.appendChild(dropdown);
-    console.log('✅ New dropdown created and appended to body');
-    
-    // 5. OVERRIDE fungsi displaySearchResults
-    const originalDisplaySearchResults = window.displaySearchResults || function() {};
-    
-    window.displaySearchResults = function(results) {
-        const dropdown = document.getElementById('searchResultsDropdown');
-        if (!dropdown) return;
-        
-        // Hitung posisi berdasarkan search input
-        const searchInput = document.getElementById('manualIdInput');
-        if (searchInput) {
-            const rect = searchInput.getBoundingClientRect();
-            dropdown.style.top = (rect.bottom + window.scrollY + 8) + 'px';
-            dropdown.style.left = rect.left + 'px';
-            dropdown.style.width = rect.width + 'px';
-            dropdown.style.maxWidth = rect.width + 'px';
-        }
-        
-        // Render HTML
-        const html = results.map(item => {
-            const activeGudang = getActiveGudang();
-            const stok = activeGudang === 'Kalipucang' ? item.stokA : item.stokB;
-            const stokClass = stok > 0 ? 'text-success' : 'text-danger';
-            
-            return `
-                <div class="search-result-item" onclick="selectItemById('${item.id}')">
-                    <div class="search-item-main">
-                        <div class="search-item-id">${item.id}</div>
-                        <div class="search-item-name">${item.nama}</div>
-                    </div>
-                    <div class="search-item-stock ${stokClass}">
-                        Stok: ${stok} ${item.satuan}
-                    </div>
-                </div>
-            `;
-        }).join('');
-        
-        dropdown.innerHTML = html;
-        dropdown.style.display = 'block';
-        
-        // Auto-select first item
-        const firstItem = dropdown.querySelector('.search-result-item');
-        if (firstItem) firstItem.classList.add('active');
-    };
-    
-    // 6. OVERRIDE fungsi showNoResults
-    window.showNoResults = function(query) {
-        const dropdown = document.getElementById('searchResultsDropdown');
-        if (!dropdown) return;
-        
-        const searchInput = document.getElementById('manualIdInput');
-        if (searchInput) {
-            const rect = searchInput.getBoundingClientRect();
-            dropdown.style.top = (rect.bottom + window.scrollY + 8) + 'px';
-            dropdown.style.left = rect.left + 'px';
-            dropdown.style.width = rect.width + 'px';
-        }
-        
-        dropdown.innerHTML = `
-            <div class="search-no-results">
-                <i class="fas fa-search"></i>
-                <p>Tidak ada hasil untuk "${query}"</p>
-            </div>
-        `;
-        dropdown.style.display = 'block';
-    };
-    
-    // 7. OVERRIDE fungsi hideSearchResults
-    window.hideSearchResults = function() {
-        const dropdown = document.getElementById('searchResultsDropdown');
-        if (dropdown) {
-            dropdown.style.display = 'none';
-        }
-    };
-    
-    // 8. Update posisi saat scroll/resize
-    window.addEventListener('scroll', function() {
-        const dropdown = document.getElementById('searchResultsDropdown');
-        const searchInput = document.getElementById('manualIdInput');
-        
-        if (dropdown && dropdown.style.display === 'block' && searchInput) {
-            const rect = searchInput.getBoundingClientRect();
-            dropdown.style.top = (rect.bottom + window.scrollY + 8) + 'px';
-            dropdown.style.left = rect.left + 'px';
-        }
-    });
-    
-    window.addEventListener('resize', function() {
-        const dropdown = document.getElementById('searchResultsDropdown');
-        const searchInput = document.getElementById('manualIdInput');
-        
-        if (dropdown && dropdown.style.display === 'block' && searchInput) {
-            const rect = searchInput.getBoundingClientRect();
-            dropdown.style.top = (rect.bottom + window.scrollY + 8) + 'px';
-            dropdown.style.left = rect.left + 'px';
-            dropdown.style.width = rect.width + 'px';
-        }
-    });
-    
-    // 9. Observer untuk memastikan selalu di depan
-    const observer = new MutationObserver(function(mutations) {
-        mutations.forEach(function(mutation) {
-            if (mutation.type === 'attributes' && mutation.attributeName === 'style') {
-                const dropdown = document.getElementById('searchResultsDropdown');
-                if (dropdown && dropdown.style.display === 'block') {
-                    dropdown.style.setProperty('z-index', '999999999999', 'important');
-                    dropdown.style.setProperty('position', 'fixed', 'important');
-                }
-            }
-        });
-    });
-    
-    // Observe dropdown
-    setTimeout(() => {
-        const dropdown = document.getElementById('searchResultsDropdown');
-        if (dropdown) {
-            observer.observe(dropdown, { attributes: true, attributeFilter: ['style'] });
-        }
-    }, 1000);
-    
-})();

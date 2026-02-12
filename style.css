@@ -170,7 +170,6 @@ body::before {
     font-size: 1.25rem;
 }
 
-/* Gudang Kalipucang - BLUE */
 .warehouse-btn[data-warehouse="Kalipucang"]:hover {
     border-color: rgba(59, 130, 246, 0.3);
     background: rgba(59, 130, 246, 0.08);
@@ -184,7 +183,6 @@ body::before {
     box-shadow: 0 0 15px rgba(59, 130, 246, 0.3);
 }
 
-/* Gudang Troso - ORANGE */
 .warehouse-btn[data-warehouse="Troso"]:hover {
     border-color: rgba(243, 156, 18, 0.3);
     background: rgba(243, 156, 18, 0.08);
@@ -299,78 +297,6 @@ body::before {
     justify-content: center;
     transition: all 0.3s ease;
     font-size: 1rem;
-}
-
-/* ============================================
-   SEARCH RESULTS DROPDOWN - FIXED
-   ============================================ */
-
-.search-results-dropdown {
-    position: fixed !important;
-    background: rgba(20, 20, 30, 0.98) !important;
-    border: 1px solid rgba(255, 255, 255, 0.15) !important;
-    border-radius: 8px !important;
-    max-height: 300px !important;
-    overflow-y: auto !important;
-    z-index: 999999 !important;
-    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.9) !important;
-    backdrop-filter: blur(20px) !important;
-    display: none;
-    width: 90%;
-    left: 5%;
-}
-
-.search-result-item {
-    padding: 0.75rem 1rem;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
-    cursor: pointer;
-    transition: all 0.2s ease;
-    display: flex;
-    flex-direction: column;
-    gap: 0.25rem;
-}
-
-.search-result-item:hover,
-.search-result-item.active {
-    background: rgba(79, 172, 254, 0.1);
-    border-left: 3px solid var(--primary);
-}
-
-.search-item-main {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    width: 100%;
-}
-
-.search-item-id {
-    font-family: 'JetBrains Mono', monospace;
-    font-size: 0.8rem;
-    color: rgba(255, 255, 255, 0.7);
-}
-
-.search-item-name {
-    font-weight: 600;
-    color: white;
-    font-size: 0.9rem;
-}
-
-.search-item-stock {
-    font-size: 0.75rem;
-}
-
-.text-success {
-    color: var(--success) !important;
-}
-
-.text-danger {
-    color: var(--danger) !important;
-}
-
-.search-no-results {
-    padding: 1rem;
-    text-align: center;
-    color: var(--text-secondary);
 }
 
 /* ============================================
@@ -729,7 +655,7 @@ textarea.input-field {
 }
 
 /* ============================================
-   LOG PAGE STYLES - FIXED
+   LOG PAGE STYLES
    ============================================ */
 
 .log-page .log-container {
@@ -768,7 +694,7 @@ textarea.input-field {
     background: rgba(255, 255, 255, 0.1);
     border: 1px solid rgba(255, 255, 255, 0.2);
     border-radius: 8px;
-    color: var(--text-primary);
+    color: var(--light);
     text-decoration: none;
     display: flex;
     align-items: center;
@@ -802,50 +728,6 @@ textarea.input-field {
     align-items: end;
 }
 
-/* ============================================
-   EXPORT SO BUTTON - FIXED & WORKING
-   ============================================ */
-
-.export-section {
-    display: flex;
-    justify-content: flex-end;
-    margin-top: 1.5rem;
-    padding-top: 1rem;
-    border-top: 1px solid rgba(255, 255, 255, 0.1);
-}
-
-.btn-export-so {
-    background: linear-gradient(135deg, #4facfe, #00f2fe);
-    border: none;
-    border-radius: 14px;
-    padding: 0.9rem 2rem;
-    color: white;
-    font-weight: 700;
-    font-size: 1rem;
-    cursor: pointer;
-    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-    display: flex;
-    align-items: center;
-    gap: 0.75rem;
-    box-shadow: 0 6px 16px rgba(79, 172, 254, 0.4);
-    border: 1px solid rgba(255, 255, 255, 0.2);
-    letter-spacing: 0.3px;
-}
-
-.btn-export-so:hover {
-    transform: translateY(-4px);
-    box-shadow: 0 12px 28px rgba(79, 172, 254, 0.6);
-    background: linear-gradient(135deg, #3d9ef0, #00d8fe);
-}
-
-.btn-export-so i {
-    font-size: 1.2rem;
-}
-
-/* ============================================
-   WAREHOUSE TABS - LOG PAGE
-   ============================================ */
-
 .log-page .warehouse-tabs {
     display: flex;
     gap: 1rem;
@@ -876,10 +758,6 @@ textarea.input-field {
     color: white;
     box-shadow: 0 8px 20px rgba(102, 126, 234, 0.3);
 }
-
-/* ============================================
-   LOG TABLE
-   ============================================ */
 
 .log-page .log-table-container {
     background: rgba(255, 255, 255, 0.03);
@@ -916,15 +794,42 @@ textarea.input-field {
     color: #a78bfa;
 }
 
-.log-page .log-table tbody tr {
-    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
-    transition: all 0.3s ease;
-}
-
 .log-page .log-table td {
     padding: 1rem;
     color: var(--light);
     font-size: 0.875rem;
+}
+
+.btn-export-so {
+    background: linear-gradient(135deg, #4facfe, #00f2fe);
+    border: none;
+    border-radius: 14px;
+    padding: 0.9rem 2rem;
+    color: white;
+    font-weight: 700;
+    font-size: 1rem;
+    cursor: pointer;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    box-shadow: 0 6px 16px rgba(79, 172, 254, 0.4);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    letter-spacing: 0.3px;
+}
+
+.btn-delete-transaction {
+    padding: 0.5rem 0.75rem;
+    background: rgba(244, 92, 67, 0.1);
+    border: 1px solid rgba(244, 92, 67, 0.3);
+    border-radius: 8px;
+    color: #f45c43;
+    font-size: 0.875rem;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
 }
 
 .badge {
@@ -952,31 +857,92 @@ textarea.input-field {
 }
 
 /* ============================================
-   DELETE BUTTON
+   DROPDOWN SEARCH - SINGLE SOURCE OF TRUTH
    ============================================ */
 
-.btn-delete-transaction {
-    padding: 0.5rem 0.75rem;
-    background: rgba(244, 92, 67, 0.1);
-    border: 1px solid rgba(244, 92, 67, 0.3);
-    border-radius: 8px;
-    color: #f45c43;
-    font-size: 0.875rem;
-    cursor: pointer;
-    transition: all 0.3s ease;
-    display: inline-flex;
-    align-items: center;
-    gap: 0.5rem;
+#searchResultsDropdown {
+    position: fixed !important;
+    background: rgba(10, 10, 20, 0.98) !important;
+    backdrop-filter: blur(20px) !important;
+    border: 1px solid rgba(255, 255, 255, 0.15) !important;
+    border-radius: 12px !important;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.8) !important;
+    z-index: 999999999999 !important;
+    max-height: 350px !important;
+    overflow-y: auto !important;
+    display: none;
+    padding: 0 !important;
+    margin: 0 !important;
+    width: auto !important;
+    left: auto !important;
+    right: auto !important;
+    top: auto !important;
 }
 
-.btn-delete-transaction:hover {
-    background: rgba(244, 92, 67, 0.2);
-    border-color: #f45c43;
-    transform: scale(1.05);
+.search-result-item {
+    padding: 14px 18px !important;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.08) !important;
+    cursor: pointer !important;
+    transition: all 0.2s ease !important;
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 6px !important;
+}
+
+.search-result-item:hover,
+.search-result-item.active {
+    background: rgba(79, 172, 254, 0.2) !important;
+    border-left: 4px solid #FF6B35 !important;
+    padding-left: 14px !important;
+}
+
+.search-item-main {
+    display: flex !important;
+    justify-content: space-between !important;
+    align-items: center !important;
+    width: 100% !important;
+}
+
+.search-item-id {
+    font-family: 'JetBrains Mono', monospace !important;
+    font-size: 0.8rem !important;
+    color: rgba(255, 255, 255, 0.7) !important;
+}
+
+.search-item-name {
+    font-weight: 700 !important;
+    color: white !important;
+    font-size: 0.95rem !important;
+}
+
+.search-item-stock {
+    font-size: 0.8rem !important;
+    font-weight: 600 !important;
+    text-align: right !important;
+}
+
+.text-success {
+    color: #38ef7d !important;
+}
+
+.text-danger {
+    color: #f45c43 !important;
+}
+
+.search-no-results {
+    padding: 30px !important;
+    text-align: center !important;
+    color: rgba(255, 255, 255, 0.6) !important;
+}
+
+.search-no-results i {
+    font-size: 2.5rem !important;
+    margin-bottom: 15px !important;
+    opacity: 0.5 !important;
 }
 
 /* ============================================
-   MOBILE RESPONSIVE - FIXED
+   MOBILE RESPONSIVE
    ============================================ */
 
 @media (max-width: 1024px) {
@@ -1013,7 +979,6 @@ textarea.input-field {
         font-size: 0.7rem;
     }
     
-    /* Log page mobile */
     .log-page .page-title {
         font-size: 1.3rem;
     }
@@ -1047,7 +1012,6 @@ textarea.input-field {
         padding: 0.8rem 1rem;
     }
     
-    /* Table to card on mobile */
     .log-page .log-table thead {
         display: none;
     }
@@ -1103,14 +1067,6 @@ textarea.input-field {
         font-size: 0.85rem;
     }
     
-    .btn-export-so span {
-        font-size: 0.85rem;
-    }
-    
-    .btn-export-so i {
-        font-size: 1rem;
-    }
-    
     .fab {
         width: 50px;
         height: 50px;
@@ -1135,17 +1091,9 @@ textarea.input-field {
     color: var(--danger) !important;
 }
 
-.text-warning {
-    color: var(--accent) !important;
-}
-
 .text-muted {
     color: rgba(255, 255, 255, 0.5) !important;
 }
-
-/* ============================================
-   SCROLLBAR STYLING
-   ============================================ */
 
 ::-webkit-scrollbar {
     width: 6px;
@@ -1163,223 +1111,4 @@ textarea.input-field {
 
 ::-webkit-scrollbar-thumb:hover {
     background: rgba(255, 255, 255, 0.3);
-}
-
-/* ============================================
-   SEARCH RESULTS DROPDOWN - FIXED POSITIONING
-   ============================================ */
-
-.search-results-dropdown {
-    position: absolute !important;
-    background: rgba(20, 20, 30, 0.98) !important;
-    border: 1px solid rgba(255, 255, 255, 0.15) !important;
-    border-radius: 8px !important;
-    max-height: 300px !important;
-    overflow-y: auto !important;
-    z-index: 999999 !important;
-    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.9) !important;
-    backdrop-filter: blur(20px) !important;
-    width: 100%;
-    margin-top: 5px;
-    display: none;
-}
-
-/* Untuk container search */
-.search-wrapper {
-    position: relative;
-}
-
-/* Item styling */
-.search-result-item {
-    padding: 12px 16px;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
-    cursor: pointer;
-    transition: all 0.2s ease;
-    display: flex;
-    flex-direction: column;
-    gap: 4px;
-}
-
-.search-result-item:hover,
-.search-result-item.active {
-    background: rgba(79, 172, 254, 0.15);
-    border-left: 4px solid var(--primary);
-}
-
-.search-item-main {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    width: 100%;
-}
-
-.search-item-id {
-    font-family: 'JetBrains Mono', monospace;
-    font-size: 0.8rem;
-    color: rgba(255, 255, 255, 0.7);
-}
-
-.search-item-name {
-    font-weight: 600;
-    color: white;
-    font-size: 0.9rem;
-}
-
-.search-item-stock {
-    font-size: 0.8rem;
-    font-weight: 600;
-}
-
-.text-success {
-    color: #38ef7d !important;
-}
-
-.text-danger {
-    color: #f45c43 !important;
-}
-
-.search-no-results {
-    padding: 20px;
-    text-align: center;
-    color: rgba(255, 255, 255, 0.6);
-}
-
-.search-no-results i {
-    font-size: 2rem;
-    margin-bottom: 10px;
-    opacity: 0.5;
-}
-
-/* ============================================
-   SEARCH RESULTS DROPDOWN - FORCE FRONT
-   ============================================ */
-
-.search-results-dropdown {
-    position: fixed !important;  /* GUNAKAN FIXED, BUKAN ABSOLUTE */
-    top: auto !important;
-    left: 5% !important;
-    right: 5% !important;
-    width: 90% !important;
-    max-width: 560px !important;  /* Sesuai container */
-    background: rgba(10, 10, 20, 0.98) !important;
-    backdrop-filter: blur(20px) !important;
-    border: 1px solid rgba(255, 255, 255, 0.2) !important;
-    border-radius: 16px !important;
-    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.8), 0 0 0 1px rgba(255, 255, 255, 0.05) !important;
-    z-index: 2147483647 !important;  /* MAX POSSIBLE */
-    max-height: 400px !important;
-    overflow-y: auto !important;
-    display: none;
-}
-
-/* Posisikan di bawah search input */
-.search-wrapper {
-    position: relative !important;
-    z-index: 2147483646 !important;
-}
-
-.search-results-dropdown {
-    margin-top: 10px !important;
-}
-
-/* Pastikan tidak ada yang bisa menutupi */
-.modal-overlay,
-#confirmModal,
-#addItemModal,
-#scannerModal,
-.alert-container,
-.fab,
-.app-header {
-    z-index: auto;  /* Reset */
-}
-
-/* Force dropdown di atas modal manapun */
-.modal-overlay {
-    z-index: 10000 !important;  /* Turunkan dari sebelumnya */
-}
-
-.search-results-dropdown {
-    z-index: 10001 !important;  /* Lebih tinggi dari modal */
-}
-
-/* Pastikan dropdown tampil di atas loading overlay */
-#loader {
-    z-index: 9999 !important;
-}
-
-/* ============================================
-   ULTIMATE DROPDOWN FIX - PASTI DI DEPAN
-   ============================================ */
-
-/* Dropdown langsung di body - PASTI paling depan */
-body > #searchResultsDropdown {
-    position: fixed !important;
-    z-index: 2147483647 !important; /* MAX 32-bit integer */
-    background: rgba(10, 10, 20, 0.98) !important;
-    backdrop-filter: blur(20px) !important;
-    border: 1px solid rgba(255, 255, 255, 0.2) !important;
-    border-radius: 12px !important;
-    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.9) !important;
-    color: white !important;
-}
-
-/* Force semua modal turun */
-.modal-overlay,
-#confirmModal,
-#addItemModal,
-#scannerModal {
-    z-index: 10000 !important; /* Lebih rendah dari dropdown */
-}
-
-/* Loading overlay juga turun */
-#loader {
-    z-index: 9999 !important;
-}
-
-/* Pastikan dropdown tidak terpotong */
-.search-results-dropdown {
-    overflow-y: auto !important;
-    max-height: 400px !important;
-}
-
-/* Item styling */
-.search-result-item {
-    padding: 12px 16px !important;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.08) !important;
-    cursor: pointer !important;
-    transition: all 0.2s ease !important;
-}
-
-.search-result-item:hover {
-    background: rgba(79, 172, 254, 0.2) !important;
-    border-left: 4px solid #FF6B35 !important;
-}
-
-.search-item-id {
-    font-family: 'JetBrains Mono', monospace !important;
-    font-size: 0.8rem !important;
-    color: rgba(255, 255, 255, 0.7) !important;
-}
-
-.search-item-name {
-    font-weight: 600 !important;
-    color: white !important;
-}
-
-.search-item-stock {
-    font-size: 0.8rem !important;
-    font-weight: 600 !important;
-}
-
-/* No results styling */
-.search-no-results {
-    padding: 30px !important;
-    text-align: center !important;
-    color: rgba(255, 255, 255, 0.6) !important;
-}
-
-.search-no-results i {
-    font-size: 2.5rem !important;
-    margin-bottom: 10px !important;
-    opacity: 0.5 !important;
 }
