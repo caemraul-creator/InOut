@@ -250,6 +250,48 @@
             transform: translateY(0);
         }
 
+        /* Tombol Export SO Bulanan */
+        .btn-export-so {
+            padding: 0.875rem 1.75rem;
+            background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
+            border: none;
+            border-radius: 12px;
+            color: white;
+            font-weight: 700;
+            font-size: 0.9rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            box-shadow: 0 4px 15px rgba(17, 153, 142, 0.3);
+        }
+
+        .btn-export-so:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 25px rgba(17, 153, 142, 0.5);
+        }
+
+        .btn-export-so:active {
+            transform: translateY(0);
+        }
+
+        .btn-export-so i {
+            font-size: 1.1rem;
+        }
+
+        /* Responsive untuk tombol export */
+        @media (max-width: 768px) {
+            .btn-export-so span {
+                display: none;
+            }
+            .btn-export-so {
+                padding: 0.875rem 1rem;
+            }
+        }
+
         /* Warehouse Tabs */
         .warehouse-tabs {
             display: flex;
@@ -661,6 +703,14 @@
                 </div>
                 <button class="btn-filter" onclick="applyFilters()">
                     <i class="fas fa-filter"></i> Filter
+                </button>
+            </div>
+            
+            <!-- Tombol Aksi - Export SO Bulanan -->
+            <div style="margin-top: 1rem; display: flex; gap: 0.75rem; justify-content: flex-end;">
+                <button class="btn-export-so" onclick="exportMonthlySO()" title="Export Laporan Stock Opname Bulanan">
+                    <i class="fas fa-file-excel"></i>
+                    <span>Export SO Bulanan</span>
                 </button>
             </div>
         </div>
