@@ -1,10 +1,12 @@
 // ============================================
-// APP.JS - ULTRA-FAST VERSION
+// APP.JS - ULTRA-FAST VERSION (FIXED)
 // ⚡ Optimizations:
 // - Parallel data loading
 // - Faster search debounce
 // - Reduced timeouts
 // - Lazy initialization
+// ✅ FIXED: ID element mismatch
+// ✅ ADDED: Search functionality in Add Item modal
 // ============================================
 
 let dataMaster = [];
@@ -499,22 +501,30 @@ function onScanError(error) {
 }
 
 function stopScanner() {
-    const modal = document.getElementById('scannerModal');
-    if (modal) {
-        modal.style.display = 'none';
-    }
-    
     if (html5QrCode && html5QrCode.isScanning) {
         html5QrCode.stop().then(() => {
-            console.log('✅ Scanner stopped');
+            console.log('Scanner stopped');
         }).catch(err => {
             console.error('Error stopping scanner:', err);
         });
     }
+    
+    const modal = document.getElementById('scannerModal');
+    if (modal) {
+        modal.style.display = 'none';
+    }
 }
 
+// Close scanner modal
+document.addEventListener('DOMContentLoaded', function() {
+    const closeScannerBtn = document.getElementById('closeScannerBtn');
+    if (closeScannerBtn) {
+        closeScannerBtn.addEventListener('click', stopScanner);
+    }
+});
+
 // ============================================
-// FORM SUBMIT - OPTIMIZED
+// FORM SUBMIT
 // ============================================
 
 async function handleSubmit(e) {
@@ -527,48 +537,56 @@ async function handleSubmit(e) {
     
     const activeGudang = getActiveGudang();
     const activeType = document.querySelector('.type-btn.active');
-    const jenis = activeType ? activeType.dataset.type : 'Masuk';
+    const jumlah = parseInt(document.getElementById('jumlah').value);
+    const keterangan = document.getElementById('keterangan').value.trim();
+    const tanggal = document.getElementById('tanggal').value;
+    const user = document.getElementById('user').value.trim();
     
-    const formData = {
-        lokasiGudang: getGudangDisplayNameFromValue(activeGudang),
-        jenis: jenis,
-        tanggal: document.getElementById('tanggal').value,
-        idBarang: tempSelectedItem.id,
-        namaBarang: tempSelectedItem.nama,
-        jumlah: parseInt(document.getElementById('jumlah').value),
-        satuan: tempSelectedItem.satuan,
-        pic: document.getElementById('pic').value,
-        user: document.getElementById('user').value,
-        keterangan: document.getElementById('keterangan').value
-    };
-    
-    // Validation
-    if (!formData.tanggal || !formData.jumlah || !formData.pic || !formData.user) {
-        UI.showAlert('❌ Lengkapi semua field yang wajib diisi', 'danger');
+    if (!activeType) {
+        UI.showAlert('❌ Pilih jenis transaksi', 'danger');
         return;
     }
     
-    if (formData.jumlah <= 0) {
-        UI.showAlert('❌ Jumlah harus lebih dari 0', 'danger');
+    if (!jumlah || jumlah <= 0) {
+        UI.showAlert('❌ Masukkan jumlah yang valid', 'danger');
         return;
     }
     
-    // Stock validation untuk barang keluar
-    if (jenis === 'Keluar') {
+    if (!user) {
+        UI.showAlert('❌ Nama petugas harus diisi', 'danger');
+        return;
+    }
+    
+    const transaksiType = activeType.dataset.type;
+    
+    // Validation for Keluar
+    if (transaksiType === 'Keluar') {
         const currentStock = activeGudang === 'Kalipucang' ? 
             tempSelectedItem.stokA : tempSelectedItem.stokB;
         
-        if (formData.jumlah > currentStock) {
-            UI.showAlert(
-                `❌ Stok tidak cukup! Tersedia: ${currentStock} ${tempSelectedItem.satuan}`,
-                'danger'
-            );
+        if (jumlah > currentStock) {
+            UI.showAlert(`❌ Stok tidak cukup! Tersedia: ${currentStock} ${tempSelectedItem.satuan}`, 'danger');
             return;
         }
     }
     
-    pendingTransaction = formData;
-    showConfirmationModal(formData);
+    // Store pending transaction
+    pendingTransaction = {
+        idBarang: tempSelectedItem.id,
+        namaBarang: tempSelectedItem.nama,
+        kategori: tempSelectedItem.kategori,
+        satuan: tempSelectedItem.satuan,
+        jenis: transaksiType,
+        jumlah: jumlah,
+        gudang: getGudangApiCode(activeGudang),
+        gudangDisplay: getGudangDisplayNameFromValue(activeGudang),
+        keterangan: keterangan,
+        tanggal: tanggal,
+        user: user
+    };
+    
+    // Show confirmation modal
+    showConfirmationModal(pendingTransaction);
 }
 
 // ============================================
@@ -576,122 +594,79 @@ async function handleSubmit(e) {
 // ============================================
 
 function setupConfirmationModal() {
-    const confirmBtn = document.getElementById('confirmSubmitBtn');
-    const cancelBtn = document.getElementById('cancelSubmitBtn');
+    const btnCancel = document.getElementById('btnCancelConfirm');
+    const btnOk = document.getElementById('btnOkConfirm');
     
-    if (confirmBtn) {
-        confirmBtn.onclick = processTransaction;
+    if (btnCancel) {
+        btnCancel.onclick = hideConfirmationModal;
     }
     
-    if (cancelBtn) {
-        cancelBtn.onclick = hideConfirmationModal;
+    if (btnOk) {
+        btnOk.onclick = submitTransaction;
     }
     
     return Promise.resolve();
 }
 
 function showConfirmationModal(data) {
-    const modal = document.getElementById('confirmationModal');
-    const content = document.getElementById('confirmationContent');
+    const modal = document.getElementById('confirmModal');
+    if (!modal) return;
     
-    if (!modal || !content) return;
+    // Populate data
+    document.getElementById('confirmNama').textContent = data.namaBarang;
+    document.getElementById('confirmId').textContent = data.idBarang;
+    document.getElementById('confirmJenis').textContent = data.jenis;
+    document.getElementById('confirmGudang').textContent = data.gudangDisplay;
+    document.getElementById('confirmJumlah').textContent = `${data.jumlah} ${data.satuan}`;
+    document.getElementById('confirmPetugas').textContent = data.user;
     
-    const activeGudang = getActiveGudang();
-    const currentStock = activeGudang === 'Kalipucang' ? 
-        tempSelectedItem.stokA : tempSelectedItem.stokB;
-    
-    let newStock;
-    if (data.jenis === 'Masuk') {
-        newStock = currentStock + data.jumlah;
+    const ketRow = document.getElementById('confirmKetRow');
+    const ketValue = document.getElementById('confirmKeterangan');
+    if (data.keterangan) {
+        ketValue.textContent = data.keterangan;
+        ketRow.style.display = 'flex';
     } else {
-        newStock = currentStock - data.jumlah;
+        ketRow.style.display = 'none';
     }
-    
-    const jenisClass = data.jenis === 'Masuk' ? 'text-success' : 'text-danger';
-    const jenisIcon = data.jenis === 'Masuk' ? 'fa-arrow-down' : 'fa-arrow-up';
-    
-    content.innerHTML = `
-        <div class="confirmation-item">
-            <strong>Gudang:</strong>
-            <span>${data.lokasiGudang}</span>
-        </div>
-        <div class="confirmation-item">
-            <strong>Jenis:</strong>
-            <span class="${jenisClass}">
-                <i class="fas ${jenisIcon}"></i> ${data.jenis}
-            </span>
-        </div>
-        <div class="confirmation-item">
-            <strong>Barang:</strong>
-            <span>${data.namaBarang} (${data.idBarang})</span>
-        </div>
-        <div class="confirmation-item">
-            <strong>Jumlah:</strong>
-            <span>${data.jumlah} ${data.satuan}</span>
-        </div>
-        <div class="confirmation-item">
-            <strong>Stok Saat Ini:</strong>
-            <span>${currentStock} ${data.satuan}</span>
-        </div>
-        <div class="confirmation-item">
-            <strong>Stok Setelah Transaksi:</strong>
-            <span class="${newStock >= 0 ? 'text-success' : 'text-danger'}">
-                ${newStock} ${data.satuan}
-            </span>
-        </div>
-        <div class="confirmation-item">
-            <strong>PIC:</strong>
-            <span>${data.pic}</span>
-        </div>
-        <div class="confirmation-item">
-            <strong>Tanggal:</strong>
-            <span>${data.tanggal}</span>
-        </div>
-    `;
     
     modal.style.display = 'flex';
 }
 
 function hideConfirmationModal() {
-    const modal = document.getElementById('confirmationModal');
+    const modal = document.getElementById('confirmModal');
     if (modal) {
         modal.style.display = 'none';
     }
-    pendingTransaction = null;
 }
 
-async function processTransaction() {
+async function submitTransaction() {
     if (!pendingTransaction) return;
     
     try {
         UI.showLoading();
+        hideConfirmationModal();
         
-        const activeGudang = getActiveGudang();
-        const gudangCode = getGudangApiCode(activeGudang);
-        
-        const result = await API.post('submitTransaksi', {
-            ...pendingTransaction,
-            gudang: gudangCode
-        });
+        const result = await API.post('addTransaksi', pendingTransaction);
         
         await UI.hideLoading();
         
-        if (result.success || result.message) {
-            UI.showAlert('✅ Transaksi berhasil!', 'success', 2000);
-            hideConfirmationModal();
+        if (result.success) {
+            UI.showAlert(`✅ ${pendingTransaction.jenis} berhasil dicatat!`, 'success');
+            
+            // Reload data
+            await loadAllBarang();
+            
+            // Reset form
             resetForm();
             
-            // ⚡ Fast reload
-            setTimeout(() => {
-                loadAllBarang();
-            }, 100); // ⚡ Reduced timeout
+            localStorage.setItem('dataBarangChanged', 'true');
         } else {
-            throw new Error(result.error || 'Transaksi gagal');
+            throw new Error(result.error || 'Gagal menyimpan transaksi');
         }
         
     } catch (error) {
         await UI.hideLoading();
-        console.error('Transaction error:', error);
+        console.error('Submit error:', error);
         UI.showAlert('❌ Gagal: ' + error.message, 'danger');
     }
 }
@@ -728,15 +703,18 @@ function resetForm() {
 }
 
 // ============================================
-// ADD ITEM MODAL
+// ADD ITEM MODAL - ✅ FIXED ID ELEMENTS
 // ============================================
 
 function setupAddItemModal() {
     const addItemBtn = document.getElementById('addItemBtn');
     const addItemModal = document.getElementById('addItemModal');
-    const closeAddItem = document.getElementById('closeAddItem');
+    const btnCloseAddModal = document.getElementById('btnCloseAddModal');
+    const btnCancelAddItem = document.getElementById('btnCancelAddItem');
     const addItemForm = document.getElementById('addItemForm');
-    const kategoriSelect = document.getElementById('newKategori');
+    
+    // ✅ FIXED: Use correct ID from HTML
+    const kategoriSelect = document.getElementById('newItemKategori');
     
     if (addItemBtn) {
         addItemBtn.onclick = function() {
@@ -746,8 +724,14 @@ function setupAddItemModal() {
         };
     }
     
-    if (closeAddItem) {
-        closeAddItem.onclick = function() {
+    if (btnCloseAddModal) {
+        btnCloseAddModal.onclick = function() {
+            if (addItemModal) addItemModal.style.display = 'none';
+        };
+    }
+    
+    if (btnCancelAddItem) {
+        btnCancelAddItem.onclick = function() {
             if (addItemModal) addItemModal.style.display = 'none';
         };
     }
@@ -760,12 +744,47 @@ function setupAddItemModal() {
         addItemForm.addEventListener('submit', handleAddItem);
     }
     
+    // Setup modal tabs
+    setupModalTabs();
+    
     return Promise.resolve();
 }
 
+function setupModalTabs() {
+    const tabBtns = document.querySelectorAll('.modal-tab-btn');
+    
+    tabBtns.forEach(btn => {
+        btn.addEventListener('click', function() {
+            const targetTab = this.dataset.tab;
+            switchTab(targetTab);
+        });
+    });
+}
+
+window.switchTab = function(tabName) {
+    // Remove active from all tabs
+    document.querySelectorAll('.modal-tab-btn').forEach(btn => {
+        btn.classList.remove('active');
+    });
+    document.querySelectorAll('.modal-tab-content').forEach(content => {
+        content.classList.remove('active');
+    });
+    
+    // Add active to target
+    const targetBtn = document.querySelector(`[data-tab="${tabName}"]`);
+    const targetContent = document.getElementById(`${tabName}Tab`);
+    
+    if (targetBtn) targetBtn.classList.add('active');
+    if (targetContent) targetContent.classList.add('active');
+};
+
 function populateKategoriSelect() {
-    const select = document.getElementById('newKategori');
-    if (!select) return;
+    // ✅ FIXED: Use correct ID from HTML
+    const select = document.getElementById('newItemKategori');
+    if (!select) {
+        console.error('❌ newItemKategori select not found!');
+        return;
+    }
     
     select.innerHTML = '<option value="">-- Pilih Kategori --</option>';
     
@@ -775,18 +794,28 @@ function populateKategoriSelect() {
         option.textContent = `${kat.nama} (${kat.inisial})`;
         select.appendChild(option);
     });
+    
+    console.log(`✅ Populated ${dataKategori.length} categories`);
 }
 
 function updateNewIdPreview() {
-    const kategoriSelect = document.getElementById('newKategori');
-    const previewDiv = document.getElementById('newIdPreview');
+    // ✅ FIXED: Use correct ID from HTML
+    const kategoriSelect = document.getElementById('newItemKategori');
+    const previewDiv = document.getElementById('newItemId');
     
-    if (!kategoriSelect || !previewDiv) return;
+    if (!kategoriSelect || !previewDiv) {
+        console.error('❌ Elements not found:', {
+            kategoriSelect: !!kategoriSelect,
+            previewDiv: !!previewDiv
+        });
+        return;
+    }
     
     const selectedKat = kategoriSelect.value;
     
     if (!selectedKat) {
-        previewDiv.innerHTML = '<em class="text-muted">Pilih kategori terlebih dahulu</em>';
+        previewDiv.value = '';
+        previewDiv.placeholder = 'Pilih kategori terlebih dahulu';
         return;
     }
     
@@ -797,22 +826,29 @@ function updateNewIdPreview() {
     const nextNumber = itemsInKat.length + 1;
     const newId = `${selectedKat}-${String(nextNumber).padStart(3, '0')}`;
     
-    previewDiv.innerHTML = `
-        <div class="id-preview-box">
-            <strong>ID Baru:</strong>
-            <code>${newId}</code>
-        </div>
-    `;
+    previewDiv.value = newId;
+    previewDiv.placeholder = '';
+    
+    console.log(`✅ Generated new ID: ${newId}`);
 }
 
 async function handleAddItem(e) {
     e.preventDefault();
     
-    const kategoriInisial = document.getElementById('newKategori').value;
-    const nama = document.getElementById('newNama').value;
-    const satuan = document.getElementById('newSatuan').value;
-    const stokAwal = parseInt(document.getElementById('newStokAwal').value) || 0;
-    const gudang = document.getElementById('newGudang').value;
+    // ✅ FIXED: Use correct IDs from HTML
+    const kategoriInisial = document.getElementById('newItemKategori').value;
+    const nama = document.getElementById('newItemNama').value;
+    const satuan = document.getElementById('newItemSatuan').value;
+    const stokAwal = parseInt(document.getElementById('newItemStok').value) || 0;
+    const gudang = document.getElementById('newItemGudang').value;
+    
+    console.log('📝 Form values:', {
+        kategoriInisial,
+        nama,
+        satuan,
+        stokAwal,
+        gudang
+    });
     
     if (!kategoriInisial || !nama || !satuan || !gudang) {
         UI.showAlert('❌ Lengkapi semua field', 'danger');
@@ -1032,5 +1068,23 @@ window.debugApp = {
             API.clearCache();
             console.log('✅ Cache cleared');
         }
+    },
+    
+    testModal: function() {
+        console.log('🧪 Testing modal elements...');
+        const elements = {
+            'newItemKategori': document.getElementById('newItemKategori'),
+            'newItemNama': document.getElementById('newItemNama'),
+            'newItemSatuan': document.getElementById('newItemSatuan'),
+            'newItemStok': document.getElementById('newItemStok'),
+            'newItemGudang': document.getElementById('newItemGudang'),
+            'newItemId': document.getElementById('newItemId')
+        };
+        
+        Object.keys(elements).forEach(key => {
+            console.log(`${key}:`, elements[key] ? '✅ Found' : '❌ Not found');
+        });
+        
+        return elements;
     }
 };
