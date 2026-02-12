@@ -1,5 +1,5 @@
 // ============================================
-// APP.JS - ULTRA-FAST VERSION (FIXED DROPDOWN)
+// APP.JS - FINAL FIXED VERSION
 // ============================================
 
 let dataMaster = [];
@@ -72,7 +72,7 @@ function setupAutoReloadListener() {
 }
 
 // ============================================
-// INDEX PAGE - PARALLEL LOADING
+// INDEX PAGE INIT
 // ============================================
 
 async function initIndexPage() {
@@ -98,7 +98,6 @@ async function initIndexPage() {
             console.log('✅ All event listeners ready');
         });
         
-        // ✅ DROPDOWN FIX - PASTI BERHASIL
         initDropdownFix();
         
         console.log('✅ Index page initialized');
@@ -110,7 +109,7 @@ async function initIndexPage() {
 }
 
 // ============================================
-// DROPDOWN FIX - POSITION FIXED HANDLING
+// DROPDOWN FIX - POSITION & CLICK HANDLING
 // ============================================
 
 function initDropdownFix() {
@@ -138,7 +137,6 @@ function initDropdownFix() {
         const rect = searchInput.getBoundingClientRect();
         
         // PENTING: position: fixed TIDAK memakai window.scrollY
-        // Gunakan setProperty('top', ..., 'important') agar mengalahkan CSS
         dropdown.style.setProperty('top', `${rect.bottom + 8}px`, 'important');
         dropdown.style.setProperty('left', `${rect.left}px`, 'important');
         dropdown.style.setProperty('width', `${rect.width}px`, 'important');
@@ -149,26 +147,40 @@ function initDropdownFix() {
         const dropdown = document.getElementById('searchResultsDropdown');
         if (!dropdown) return;
         
-        updateDropdownPosition(); // Update posisi sebelum tampil
+        updateDropdownPosition();
         
         const activeGudang = getActiveGudang();
+        dropdown.innerHTML = ''; // Kosongkan dulu
         
-        dropdown.innerHTML = results.map(item => {
+        results.forEach(item => {
             const stok = activeGudang === 'Kalipucang' ? item.stokA : item.stokB;
             const stokClass = stok > 0 ? 'text-success' : 'text-danger';
             
-            return `
-                <div class="search-result-item" onclick="selectItemById('${item.id}')">
-                    <div class="search-item-main">
-                        <div class="search-item-id">${item.id}</div>
-                        <div class="search-item-name">${item.nama}</div>
-                    </div>
-                    <div class="search-item-stock ${stokClass}">
-                        Stok: ${stok} ${item.satuan}
-                    </div>
+            const div = document.createElement('div');
+            div.className = 'search-result-item';
+            div.innerHTML = `
+                <div class="search-item-main">
+                    <div class="search-item-id">${item.id}</div>
+                    <div class="search-item-name">${item.nama}</div>
+                </div>
+                <div class="search-item-stock ${stokClass}">
+                    Stok: ${stok} ${item.satuan}
                 </div>
             `;
-        }).join('');
+            
+            // ✅ PERBAIKAN: Gunakan addEventListener langsung ke object
+            div.addEventListener('click', function() {
+                selectItem(item); // Langsung kirim object item
+                hideSearchResults();
+            });
+            
+            // Mencegah blur pada input saat klik dropdown
+            div.addEventListener('mousedown', function(e) {
+                e.preventDefault();
+            });
+            
+            dropdown.appendChild(div);
+        });
         
         dropdown.style.setProperty('display', 'block', 'important');
         
@@ -417,7 +429,7 @@ function searchBarang(query) {
 }
 
 // ============================================
-// ITEM SELECTION
+// ITEM SELECTION - FIXED
 // ============================================
 
 window.selectItemById = function(id) {
@@ -454,7 +466,9 @@ function selectItem(item) {
                 </div>
             </div>
         `;
-        resultDiv.style.display = 'block';
+        
+        // ✅ PERBAIKAN UTAMA: Hapus class 'hidden' secara eksplisit
+        resultDiv.classList.remove('hidden');
     }
     
     updateStockDisplay(item);
@@ -484,7 +498,7 @@ function updateStockDisplay(item) {
 function hideItemResult() {
     const resultDiv = document.getElementById('itemResult');
     if (resultDiv) {
-        resultDiv.style.display = 'none';
+        resultDiv.classList.add('hidden');
     }
     tempSelectedItem = null;
 }
