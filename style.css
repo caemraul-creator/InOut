@@ -857,7 +857,7 @@ textarea.input-field {
 }
 
 /* ============================================
-   DROPDOWN SEARCH - SINGLE SOURCE OF TRUTH
+   DROPDOWN SEARCH - FIXED POSITION
    ============================================ */
 
 #searchResultsDropdown {
@@ -873,10 +873,10 @@ textarea.input-field {
     display: none;
     padding: 0 !important;
     margin: 0 !important;
-    width: auto !important;
-    left: auto !important;
-    right: auto !important;
-    top: auto !important;
+    /* Posisi diatur JS, jangan pakai !important di sini */
+    top: 0; 
+    left: 0;
+    width: 300px; 
 }
 
 .search-result-item {

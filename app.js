@@ -1,6 +1,5 @@
 // ============================================
-// APP.JS - ULTRA-FAST VERSION (FIXED)
-// ✅ DROPDOWN PASTI MUNCUL & DI DEPAN
+// APP.JS - ULTRA-FAST VERSION (FIXED DROPDOWN)
 // ============================================
 
 let dataMaster = [];
@@ -80,12 +79,12 @@ async function initIndexPage() {
     console.log('📄 Initializing index page...');
     
     try {
-        const [dataBarang, dataKategori] = await Promise.all([
+        const [dataBarang, dataKategoriResult] = await Promise.all([
             loadAllBarang(),
             loadKategori()
         ]);
         
-        console.log(`✅ Loaded ${dataBarang.length} items + ${dataKategori.length} categories in parallel`);
+        console.log(`✅ Loaded ${dataBarang.length} items + ${dataKategoriResult.length} categories in parallel`);
         
         if (AUTH && typeof AUTH.autoFillForm === 'function') {
             AUTH.autoFillForm();
@@ -111,7 +110,7 @@ async function initIndexPage() {
 }
 
 // ============================================
-// DROPDOWN FIX - PASTI MUNCUL & DI DEPAN
+// DROPDOWN FIX - POSITION FIXED HANDLING
 // ============================================
 
 function initDropdownFix() {
@@ -129,17 +128,28 @@ function initDropdownFix() {
     document.body.appendChild(dropdown);
     console.log('✅ New dropdown created and appended to body');
     
-    // OVERRIDE displaySearchResults
-    window.displaySearchResults = function(results) {
+    // Helper function untuk update posisi
+    const updateDropdownPosition = () => {
         const dropdown = document.getElementById('searchResultsDropdown');
         const searchInput = document.getElementById('manualIdInput');
         
         if (!dropdown || !searchInput) return;
         
         const rect = searchInput.getBoundingClientRect();
-        dropdown.style.top = (rect.bottom + window.scrollY + 8) + 'px';
-        dropdown.style.left = rect.left + 'px';
-        dropdown.style.width = rect.width + 'px';
+        
+        // PENTING: position: fixed TIDAK memakai window.scrollY
+        // Gunakan setProperty('top', ..., 'important') agar mengalahkan CSS
+        dropdown.style.setProperty('top', `${rect.bottom + 8}px`, 'important');
+        dropdown.style.setProperty('left', `${rect.left}px`, 'important');
+        dropdown.style.setProperty('width', `${rect.width}px`, 'important');
+    };
+
+    // OVERRIDE displaySearchResults
+    window.displaySearchResults = function(results) {
+        const dropdown = document.getElementById('searchResultsDropdown');
+        if (!dropdown) return;
+        
+        updateDropdownPosition(); // Update posisi sebelum tampil
         
         const activeGudang = getActiveGudang();
         
@@ -160,7 +170,7 @@ function initDropdownFix() {
             `;
         }).join('');
         
-        dropdown.style.display = 'block';
+        dropdown.style.setProperty('display', 'block', 'important');
         
         const firstItem = dropdown.querySelector('.search-result-item');
         if (firstItem) firstItem.classList.add('active');
@@ -169,14 +179,9 @@ function initDropdownFix() {
     // OVERRIDE showNoResults
     window.showNoResults = function(query) {
         const dropdown = document.getElementById('searchResultsDropdown');
-        const searchInput = document.getElementById('manualIdInput');
+        if (!dropdown) return;
         
-        if (!dropdown || !searchInput) return;
-        
-        const rect = searchInput.getBoundingClientRect();
-        dropdown.style.top = (rect.bottom + window.scrollY + 8) + 'px';
-        dropdown.style.left = rect.left + 'px';
-        dropdown.style.width = rect.width + 'px';
+        updateDropdownPosition();
         
         dropdown.innerHTML = `
             <div class="search-no-results">
@@ -184,59 +189,31 @@ function initDropdownFix() {
                 <p>Tidak ada hasil untuk "${query}"</p>
             </div>
         `;
-        dropdown.style.display = 'block';
+        dropdown.style.setProperty('display', 'block', 'important');
     };
     
     // OVERRIDE hideSearchResults
     window.hideSearchResults = function() {
         const dropdown = document.getElementById('searchResultsDropdown');
         if (dropdown) {
-            dropdown.style.display = 'none';
+            dropdown.style.setProperty('display', 'none', 'important');
         }
     };
     
     // Update posisi saat scroll/resize
     window.addEventListener('scroll', function() {
         const dropdown = document.getElementById('searchResultsDropdown');
-        const searchInput = document.getElementById('manualIdInput');
-        if (dropdown && dropdown.style.display === 'block' && searchInput) {
-            const rect = searchInput.getBoundingClientRect();
-            dropdown.style.top = (rect.bottom + window.scrollY + 8) + 'px';
-            dropdown.style.left = rect.left + 'px';
-            dropdown.style.width = rect.width + 'px';
+        if (dropdown && dropdown.style.display !== 'none') {
+            updateDropdownPosition();
         }
-    });
+    }, { passive: true });
     
     window.addEventListener('resize', function() {
         const dropdown = document.getElementById('searchResultsDropdown');
-        const searchInput = document.getElementById('manualIdInput');
-        if (dropdown && dropdown.style.display === 'block' && searchInput) {
-            const rect = searchInput.getBoundingClientRect();
-            dropdown.style.top = (rect.bottom + window.scrollY + 8) + 'px';
-            dropdown.style.left = rect.left + 'px';
-            dropdown.style.width = rect.width + 'px';
+        if (dropdown && dropdown.style.display !== 'none') {
+            updateDropdownPosition();
         }
     });
-    
-    // MutationObserver untuk memastikan selalu di depan
-    const observer = new MutationObserver(function(mutations) {
-        mutations.forEach(function(mutation) {
-            if (mutation.type === 'attributes' && mutation.attributeName === 'style') {
-                const dropdown = document.getElementById('searchResultsDropdown');
-                if (dropdown && dropdown.style.display === 'block') {
-                    dropdown.style.setProperty('z-index', '999999999999', 'important');
-                    dropdown.style.setProperty('position', 'fixed', 'important');
-                }
-            }
-        });
-    });
-    
-    setTimeout(() => {
-        const dropdown = document.getElementById('searchResultsDropdown');
-        if (dropdown) {
-            observer.observe(dropdown, { attributes: true, attributeFilter: ['style'] });
-        }
-    }, 1000);
     
     console.log('✅ Dropdown fix applied');
 }
