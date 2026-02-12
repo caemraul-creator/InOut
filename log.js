@@ -1,5 +1,6 @@
 // ============================================
 // LOG.JS - Transaction Log Functions + EXPORT SO BULANAN
+// CUT OFF: 26 bulan sebelumnya - 25 bulan ini
 // ============================================
 
 let currentWarehouse = 'A';
@@ -455,7 +456,8 @@ async function deleteTransaction(rowIndex, idBarang, jenis, jumlah, namaBarang) 
 }
 
 // ============================================
-// EXPORT MONTHLY SO REPORT (STOCK OPNAME) - LENGKAP
+// EXPORT MONTHLY SO REPORT (STOCK OPNAME)
+// CUT OFF: 26 BULAN LALU - 25 BULAN INI
 // ============================================
 
 async function exportMonthlySO() {
@@ -469,23 +471,63 @@ async function exportMonthlySO() {
         return;
     }
     
-    // Parse tahun dan bulan
+    // Parse tahun dan bulan yang dipilih
     const [year, month] = filterMonth.split('-');
+    const currentYear = parseInt(year);
+    const currentMonth = parseInt(month) - 1; // 0-indexed untuk JS Date
+    
+    // Nama bulan
     const monthNames = ['Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni', 
                         'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'];
-    const monthName = monthNames[parseInt(month) - 1];
+    const monthName = monthNames[currentMonth];
     
-    // Konfirmasi dengan opsi tanggal cutoff
+    // ============================================
+    // HITUNG PERIODE CUT OFF
+    // ============================================
+    
+    // START DATE: 26 bulan sebelumnya
+    let startDate;
+    let prevMonthName;
+    
+    if (currentMonth === 0) { // Januari
+        // Bulan sebelumnya adalah Desember tahun lalu
+        startDate = new Date(currentYear - 1, 11, 26, 0, 0, 0); // 26 Desember tahun lalu
+        prevMonthName = 'Desember ' + (currentYear - 1);
+    } else {
+        // Bulan sebelumnya
+        startDate = new Date(currentYear, currentMonth - 1, 26, 0, 0, 0);
+        prevMonthName = monthNames[currentMonth - 1] + ' ' + currentYear;
+    }
+    
+    // END DATE: 25 bulan ini
+    const endDate = new Date(currentYear, currentMonth, 25, 23, 59, 59);
+    
+    // Format untuk display
+    const formatDate = (date) => {
+        const day = String(date.getDate()).padStart(2, '0');
+        const month = monthNames[date.getMonth()];
+        const year = date.getFullYear();
+        return `${day} ${month} ${year}`;
+    };
+    
+    const startDateStr = formatDate(startDate);
+    const endDateStr = formatDate(endDate);
+    
+    // ============================================
+    // KONFIRMASI
+    // ============================================
+    
     const gudangDisplay = GudangMapping[currentWarehouse].display;
     const confirmMsg = `📊 DOWNLOAD LAPORAN STOCK OPNAME (SO) BULANAN\n\n` +
                       `🏭 Gudang: ${gudangDisplay}\n` +
-                      `📅 Periode: ${monthName} ${year}\n` +
-                      `📅 Cut-off: Sampai tanggal 25 ${monthName} ${year}\n\n` +
+                      `📅 PERIODE CUT OFF:\n` +
+                      `   Dari: ${startDateStr}\n` +
+                      `   Sampai: ${endDateStr}\n\n` +
                       `Laporan akan berisi:\n` +
-                      `• Saldo awal bulan\n` +
-                      `• Total barang masuk (1-25)\n` +
-                      `• Total barang keluar (1-25)\n` +
-                      `• Saldo akhir per tanggal 25\n` +
+                      `• Saldo awal per ${startDateStr}\n` +
+                      `• Total barang masuk (${startDateStr} - ${endDateStr})\n` +
+                      `• Total barang keluar (${startDateStr} - ${endDateStr})\n` +
+                      `• Saldo akhir per ${endDateStr}\n` +
                       `• Nilai persediaan\n\n` +
                       `Lanjutkan download?`;
     
@@ -496,41 +538,25 @@ async function exportMonthlySO() {
     try {
         UI.showLoading();
         
-        console.log(`📊 Generating SO Report for ${gudangDisplay} - ${monthName} ${year}`);
-        console.log(`📊 All transactions count:`, allTransactions.length);
+        console.log(`📊 Generating SO Report for ${gudangDisplay}`);
+        console.log(`📅 Period: ${startDateStr} to ${endDateStr}`);
+        console.log(`📦 All transactions count:`, allTransactions.length);
         
         // ============================================
-        // STEP 1: Dapatkan semua transaksi SAMPAI TANGGAL 25
+        // STEP 1: FILTER TRANSAKSI SESUAI PERIODE CUT OFF
         // ============================================
         
-        // Tanggal cutoff: 25 bulan ini
-        const cutoffDate = new Date(parseInt(year), parseInt(month) - 1, 25, 23, 59, 59);
-        console.log(`📅 Cutoff date: ${cutoffDate.toLocaleDateString('id-ID')}`);
-        
-        const monthTransactions = allTransactions.filter(transaction => {
+        const periodTransactions = allTransactions.filter(transaction => {
             const transDate = parseIndonesianDate(transaction.tanggal);
             if (!transDate || transDate.getTime() === 0) {
                 return false;
             }
             
-            // Filter: bulan harus sama DAN tanggal <= 25
-            const transMonth = transDate.toISOString().slice(0, 7);
-            const isSameMonth = transMonth === filterMonth;
-            const isBeforeCutoff = transDate <= cutoffDate;
-            
-            if (isSameMonth && isBeforeCutoff) {
-                console.log(`✅ Include: ${transaction.idBarang} - ${transDate.toLocaleDateString('id-ID')}`);
-            }
-            
-            return isSameMonth && isBeforeCutoff;
+            // Transaksi harus antara startDate dan endDate
+            return transDate >= startDate && transDate <= endDate;
         });
         
-        console.log(`📦 Transaksi sampai tgl 25 ${monthName}: ${monthTransactions.length} records`);
-        
-        // JIKA TIDAK ADA TRANSAKSI, TETAP BUAT LAPORAN DENGAN DATA MASTER
-        if (monthTransactions.length === 0) {
-            console.log(`⚠️ Tidak ada transaksi, tapi tetap generate laporan dari data master`);
-        }
+        console.log(`📦 Transaksi dalam periode cut off: ${periodTransactions.length} records`);
         
         // ============================================
         // STEP 2: Dapatkan data stok dari master barang
@@ -556,10 +582,10 @@ async function exportMonthlySO() {
         }
         
         // ============================================
-        // STEP 3: Hitung saldo awal & pergerakan
+        // STEP 3: HITUNG SALDO AWAL & PERGERAKAN
         // ============================================
         
-        const sortedTransactions = [...monthTransactions].sort((a, b) => {
+        const sortedTransactions = [...periodTransactions].sort((a, b) => {
             const dateA = parseIndonesianDate(a.tanggal);
             const dateB = parseIndonesianDate(b.tanggal);
             return dateA.getTime() - dateB.getTime();
@@ -586,7 +612,7 @@ async function exportMonthlySO() {
             });
         });
         
-        // Hitung total masuk/keluar
+        // Hitung total masuk/keluar dalam periode
         sortedTransactions.forEach(transaction => {
             const id = transaction.idBarang;
             if (!id || !soMap.has(id)) return;
@@ -602,14 +628,14 @@ async function exportMonthlySO() {
             }
         });
         
-        // Hitung saldo awal
+        // Hitung saldo AWAL (stok akhir + total keluar - total masuk)
         soMap.forEach(item => {
             item.saldoAwal = item.stokAkhir + item.totalKeluar - item.totalMasuk;
             item.totalNilai = item.stokAkhir * (item.hargaSatuan || 0);
         });
         
         // ============================================
-        // STEP 4: Filter hanya barang yang aktif
+        // STEP 4: FILTER HANYA BARANG YANG AKTIF
         // ============================================
         
         const activeItems = Array.from(soMap.values()).filter(item => {
@@ -622,7 +648,7 @@ async function exportMonthlySO() {
         activeItems.sort((a, b) => a.nama.localeCompare(b.nama));
         
         // ============================================
-        // STEP 5: Generate CSV
+        // STEP 5: GENERATE CSV
         // ============================================
         
         const gudangCode = currentWarehouse === 'A' ? 'Kalipucang' : 'Troso';
@@ -640,15 +666,16 @@ async function exportMonthlySO() {
         // HEADER LAPORAN
         csv += `"LAPORAN STOCK OPNAME (SO) BULANAN - WAREHOUSE PRO"\n`;
         csv += `"${gudangDisplay}"\n`;
-        csv += `"PERIODE: ${monthName} ${year} (s/d tanggal 25)"\n`;
-        csv += `"CUT-OFF: 25 ${monthName} ${year}"\n`;
+        csv += `"PERIODE CUT OFF"\n`;
+        csv += `"DARI: ${startDateStr}"\n`;
+        csv += `"SAMPAI: ${endDateStr}"\n`;
+        csv += `"\n"`;
         csv += `"TANGGAL GENERATE: ${dateGenerated}"\n`;
         csv += `"USER: ${AUTH.getUserName() || 'System'}"\n`;
-        csv += `"TRANSAKSI DIHITUNG: 1-25 ${monthName} ${year}"\n`;
-        csv += `\n`;
+        csv += `"\n"`;
         
         // HEADER TABEL
-        csv += `"NO","ID BARANG","NAMA BARANG","KATEGORI","SATUAN","SALDO AWAL","MASUK (1-25)","KELUAR (1-25)","SALDO AKHIR (25)","HARGA SATUAN","TOTAL NILAI"\n`;
+        csv += `"NO","ID BARANG","NAMA BARANG","KATEGORI","SATUAN","SALDO AWAL (${startDateStr})","MASUK","KELUAR","SALDO AKHIR (${endDateStr})","HARGA SATUAN","TOTAL NILAI"\n`;
         
         // DATA
         activeItems.forEach((item, index) => {
@@ -679,26 +706,34 @@ async function exportMonthlySO() {
         csv += `"═══════════════════════════════════════════════════════════════════════════════"\n`;
         csv += `"RINGKASAN LAPORAN"\n`;
         csv += `"═══════════════════════════════════════════════════════════════════════════════"\n`;
+        csv += `"Periode Cut Off","${startDateStr} - ${endDateStr}"\n`;
         csv += `"Total Item Aktif",${totalBarang}\n`;
         csv += `"Total Stok Awal (Unit)",${totalStokAwal}\n`;
-        csv += `"Total Barang Masuk (1-25)",${totalMasuk}\n`;
-        csv += `"Total Barang Keluar (1-25)",${totalKeluar}\n`;
-        csv += `"Total Stok Akhir Tgl 25 (Unit)",${totalStokAkhir}\n`;
+        csv += `"Total Barang Masuk",${totalMasuk}\n`;
+        csv += `"Total Barang Keluar",${totalKeluar}\n`;
+        csv += `"Total Stok Akhir (Unit)",${totalStokAkhir}\n`;
         csv += `"Total Nilai Persediaan (Rp)",${totalNilaiAkhir}\n`;
         csv += `\n`;
         csv += `"═══════════════════════════════════════════════════════════════════════════════"\n`;
         csv += `"Gudang",${gudangCode}\n`;
-        csv += `"Periode","${monthName} ${year} (s/d tgl 25)"\n`;
-        csv += `"Transaksi Dihitung","1-25 ${monthName} ${year}"\n`;
+        csv += `"Periode Laporan","${startDateStr} - ${endDateStr}"\n`;
         csv += `"Dibuat oleh",${AUTH.getUserName() || 'System'}\n`;
         csv += `"Tanggal Generate",${dateGenerated}\n`;
         csv += `"═══════════════════════════════════════════════════════════════════════════════"\n`;
         
         // ============================================
-        // STEP 6: Download file
+        // STEP 6: DOWNLOAD FILE
         // ============================================
         
-        const fileName = `SO_${gudangDisplay.replace(/ /g, '')}_${monthName}${year}_Tgl25.csv`;
+        // Format nama file: SO_GudangKalipucang_Januari2026_26Des2025-25Jan2026.csv
+        const startDay = String(startDate.getDate()).padStart(2, '0');
+        const startMonth = monthNames[startDate.getMonth()].substring(0, 3);
+        const startYear = startDate.getFullYear();
+        const endDay = String(endDate.getDate()).padStart(2, '0');
+        const endMonth = monthNames[endDate.getMonth()].substring(0, 3);
+        const endYear = endDate.getFullYear();
+        
+        const fileName = `SO_${gudangDisplay.replace(/ /g, '')}_${monthName}${year}_${startDay}${startMonth}${startYear}-${endDay}${endMonth}${endYear}.csv`;
         
         const blob = new Blob(["\ufeff" + csv], { type: 'text/csv;charset=utf-8;' });
         const link = document.createElement('a');
@@ -715,18 +750,18 @@ async function exportMonthlySO() {
         UI.hideLoading();
         
         // ============================================
-        // STEP 7: Tampilkan ringkasan
+        // STEP 7: TAMPILKAN RINGKASAN
         // ============================================
         
         UI.showAlert(
-            `✅ Laporan SO ${gudangDisplay} - ${monthName} ${year} (s/d tgl 25) berhasil di-download!\n` +
-            `📦 ${totalBarang} item aktif | 📊 Transaksi: 1-25 ${monthName} | 💰 Nilai: Rp ${totalNilaiAkhir.toLocaleString('id-ID')}`,
+            `✅ Laporan SO ${gudangDisplay} periode ${startDateStr} - ${endDateStr} berhasil di-download!\n` +
+            `📦 ${totalBarang} item aktif | 📊 Total transaksi: ${periodTransactions.length} | 💰 Nilai: Rp ${totalNilaiAkhir.toLocaleString('id-ID')}`,
             'success', 
-            7000
+            8000
         );
         
-        console.log(`✅ SO Report generated: ${fileName} (${totalBarang} items)`);
-        console.log(`📊 Period: 1-25 ${monthName} ${year}`);
+        console.log(`✅ SO Report generated: ${fileName}`);
+        console.log(`📊 Period: ${startDateStr} - ${endDateStr}`);
         console.log(`📊 Summary: Awal=${totalStokAwal}, Masuk=${totalMasuk}, Keluar=${totalKeluar}, Akhir=${totalStokAkhir}, Nilai=Rp ${totalNilaiAkhir}`);
         
     } catch (error) {
@@ -781,7 +816,8 @@ window.LogHelper = {
     applyFilters: applyFilters,
     exportToCSV: exportToCSV,
     deleteTransaction: deleteTransaction,
-    exportMonthlySO: exportMonthlySO // TAMBAHKAN INI
+    exportMonthlySO: exportMonthlySO,
+    loadTransactions: loadTransactions // Tambahkan ini
 };
 
 // Make functions globally accessible untuk onclick
@@ -789,4 +825,5 @@ window.switchWarehouse = switchWarehouse;
 window.applyFilters = applyFilters;
 window.exportToCSV = exportToCSV;
 window.deleteTransaction = deleteTransaction;
-window.exportMonthlySO = exportMonthlySO; // Make available globally
+window.exportMonthlySO = exportMonthlySO;
+window.loadTransactions = loadTransactions;
