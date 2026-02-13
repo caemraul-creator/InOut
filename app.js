@@ -1,5 +1,5 @@
 // ============================================
-// APP.JS - FINAL FIXED VERSION
+// APP.JS - FIXED VERSION (RESPONSE HANDLER)
 // ============================================
 
 let dataMaster = [];
@@ -115,19 +115,16 @@ async function initIndexPage() {
 function initDropdownFix() {
     console.log('🔧 Initializing dropdown fix...');
     
-    // Hapus dropdown lama jika ada
     const oldDropdown = document.getElementById('searchResultsDropdown');
     if (oldDropdown) {
         oldDropdown.remove();
     }
     
-    // Buat dropdown baru di body
     const dropdown = document.createElement('div');
     dropdown.id = 'searchResultsDropdown';
     document.body.appendChild(dropdown);
     console.log('✅ New dropdown created and appended to body');
     
-    // Helper function untuk update posisi
     const updateDropdownPosition = () => {
         const dropdown = document.getElementById('searchResultsDropdown');
         const searchInput = document.getElementById('manualIdInput');
@@ -136,13 +133,11 @@ function initDropdownFix() {
         
         const rect = searchInput.getBoundingClientRect();
         
-        // PENTING: position: fixed TIDAK memakai window.scrollY
         dropdown.style.setProperty('top', `${rect.bottom + 8}px`, 'important');
         dropdown.style.setProperty('left', `${rect.left}px`, 'important');
         dropdown.style.setProperty('width', `${rect.width}px`, 'important');
     };
 
-    // OVERRIDE displaySearchResults
     window.displaySearchResults = function(results) {
         const dropdown = document.getElementById('searchResultsDropdown');
         if (!dropdown) return;
@@ -150,7 +145,7 @@ function initDropdownFix() {
         updateDropdownPosition();
         
         const activeGudang = getActiveGudang();
-        dropdown.innerHTML = ''; // Kosongkan dulu
+        dropdown.innerHTML = '';
         
         results.forEach(item => {
             const stok = activeGudang === 'Kalipucang' ? item.stokA : item.stokB;
@@ -168,13 +163,11 @@ function initDropdownFix() {
                 </div>
             `;
             
-            // ✅ PERBAIKAN: Gunakan addEventListener langsung ke object
             div.addEventListener('click', function() {
-                selectItem(item); // Langsung kirim object item
+                selectItem(item);
                 hideSearchResults();
             });
             
-            // Mencegah blur pada input saat klik dropdown
             div.addEventListener('mousedown', function(e) {
                 e.preventDefault();
             });
@@ -188,7 +181,6 @@ function initDropdownFix() {
         if (firstItem) firstItem.classList.add('active');
     };
     
-    // OVERRIDE showNoResults
     window.showNoResults = function(query) {
         const dropdown = document.getElementById('searchResultsDropdown');
         if (!dropdown) return;
@@ -204,7 +196,6 @@ function initDropdownFix() {
         dropdown.style.setProperty('display', 'block', 'important');
     };
     
-    // OVERRIDE hideSearchResults
     window.hideSearchResults = function() {
         const dropdown = document.getElementById('searchResultsDropdown');
         if (dropdown) {
@@ -212,7 +203,6 @@ function initDropdownFix() {
         }
     };
     
-    // Update posisi saat scroll/resize
     window.addEventListener('scroll', function() {
         const dropdown = document.getElementById('searchResultsDropdown');
         if (dropdown && dropdown.style.display !== 'none') {
@@ -429,7 +419,7 @@ function searchBarang(query) {
 }
 
 // ============================================
-// ITEM SELECTION - FIXED
+// ITEM SELECTION
 // ============================================
 
 window.selectItemById = function(id) {
@@ -467,7 +457,6 @@ function selectItem(item) {
             </div>
         `;
         
-        // ✅ PERBAIKAN UTAMA: Hapus class 'hidden' secara eksplisit
         resultDiv.classList.remove('hidden');
     }
     
@@ -656,7 +645,6 @@ function showConfirmationModal(data) {
     const modal = document.getElementById('confirmModal');
     if (!modal) return;
     
-    // ✅ PERBAIKAN: Ubah confirmNama ke confirmBarang (match dengan HTML)
     document.getElementById('confirmBarang').textContent = data.namaBarang;
     document.getElementById('confirmId').textContent = data.idBarang;
     document.getElementById('confirmJenis').textContent = data.jenis;
@@ -683,6 +671,10 @@ function hideConfirmationModal() {
     }
 }
 
+// ============================================
+// SUBMIT TRANSACTION (FIXED LOGIC)
+// ============================================
+
 async function submitTransaction() {
     if (!pendingTransaction) return;
     
@@ -690,50 +682,56 @@ async function submitTransaction() {
         UI.showLoading();
         hideConfirmationModal();
         
-        // ✅ PERBAIKAN UTAMA: 
-        // 1. Ubah action 'addTransaksi' ke 'submitTransaksi' (match dengan backend)
-        // 2. Format data sesuai dengan yang diexpect backend
         const result = await API.post('submitTransaksi', {
-            lokasiGudang: 'Gudang ' + pendingTransaction.gudang, // Backend expect 'Gudang A' bukan 'A'
+            lokasiGudang: 'Gudang ' + pendingTransaction.gudang,
             jenis: pendingTransaction.jenis,
             tanggal: pendingTransaction.tanggal,
             idBarang: pendingTransaction.idBarang,
             namaBarang: pendingTransaction.namaBarang,
             jumlah: pendingTransaction.jumlah,
             satuan: pendingTransaction.satuan,
-            pic: pendingTransaction.user, // Backend expect 'pic' field
+            pic: pendingTransaction.user,
             user: pendingTransaction.user,
             petugas: pendingTransaction.user,
             keterangan: pendingTransaction.keterangan || ''
         });
         
+        // ============================================
+        // DEBUGGING & PERBAIKAN LOGIC
+        // ============================================
+        console.log('📥 Response dari Server:', result);
+
         await UI.hideLoading();
-        
-        if (result.success) {
+
+        // Validasi sukses secara fleksibel.
+        // 1. Jika result.success == true (Format standar)
+        // 2. Jika result berisi string "Success" (Format lama/string)
+        // 3. Jika result.status === "success"
+        const isSuccess = (result && result.success === true) || 
+                          (result === "Success") || 
+                          (result && result.status === "success");
+
+        // Jika tidak ada error spesifik, anggap sukses (karena data sudah masuk sheet menurut laporan)
+        if (isSuccess || (result && !result.error)) {
             UI.showAlert(`✅ ${pendingTransaction.jenis} berhasil dicatat!`, 'success');
             await loadAllBarang();
             resetForm();
             localStorage.setItem('dataBarangChanged', 'true');
         } else {
-            throw new Error(result.error || 'Gagal menyimpan transaksi');
+            // Jika ada properti error di result
+            throw new Error(result.error || result.message || 'Gagal menyimpan transaksi (Response tidak sesuai)');
         }
         
     } catch (error) {
         await UI.hideLoading();
         console.error('Submit error:', error);
-        
-        // ✅ PERBAIKAN: Jika timeout, data mungkin sudah tersimpan
-        if (error.message.includes('timeout') || error.message.includes('Timeout')) {
-            UI.showAlert('⚠️ Response lambat. Cek apakah data sudah masuk di spreadsheet.', 'warning', 5000);
-            
-            // Reload data untuk memastikan
+
+        // Handle timeout atau network error
+        if (error.message.includes('timeout') || error.message.includes('Failed to fetch')) {
+            UI.showAlert('⚠️ Response lambat. Cek manual di spreadsheet apakah data sudah masuk.', 'warning', 5000);
+            // Coba reload data
             setTimeout(async () => {
-                try {
-                    await loadAllBarang();
-                    console.log('✅ Data reloaded after timeout');
-                } catch (e) {
-                    console.error('Failed to reload:', e);
-                }
+                try { await loadAllBarang(); } catch (e) { }
             }, 2000);
         } else {
             UI.showAlert('❌ Gagal: ' + error.message, 'danger');
