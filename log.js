@@ -1,5 +1,5 @@
 // ============================================
-// LOG.JS - FIXED & IMPROVED
+// LOG.JS - FINAL FIXED
 // ============================================
 
 let currentWarehouse = 'A';
@@ -19,14 +19,14 @@ document.addEventListener('DOMContentLoaded', function() {
         return;
     }
     
-    document.getElementById('filterMonth').value = '';
     loadTransactions();
     
+    // Auto filter saat mengetik di search bar
     const searchInput = document.getElementById('searchBarang');
     let searchTimeout;
     searchInput.addEventListener('input', function() {
         clearTimeout(searchTimeout);
-        searchTimeout = setTimeout(() => { applyFilters(); }, 200);
+        searchTimeout = setTimeout(() => { applyFilters(); }, 300);
     });
 });
 
@@ -62,7 +62,7 @@ async function loadTransactions() {
 function applyFilters() {
     const searchTerm = document.getElementById('searchBarang').value.toLowerCase().trim();
     const filterMonth = document.getElementById('filterMonth').value;
-    const filterJenis = document.getElementById('filterJenis').value; // Value: "In" atau "Out"
+    const filterJenis = document.getElementById('filterJenis').value;
     
     filteredTransactions = allTransactions.filter(transaction => {
         // Filter Search
@@ -80,14 +80,11 @@ function applyFilters() {
             if (transMonth !== filterMonth) return false;
         }
         
-        // Filter Jenis (FIXED)
+        // Filter Jenis
         if (filterJenis) {
             const tJenis = (transaction.jenis || '').toLowerCase();
-            // Normalisasi: 'masuk' = 'in', 'keluar' = 'out'
             const normalizedTJenis = (tJenis === 'masuk') ? 'in' : (tJenis === 'keluar') ? 'out' : tJenis;
-            const normalizedFJenis = filterJenis.toLowerCase();
-            
-            if (normalizedTJenis !== normalizedFJenis) return false;
+            if (normalizedTJenis !== filterJenis.toLowerCase()) return false;
         }
         
         return true;
@@ -99,13 +96,10 @@ function applyFilters() {
 function parseIndonesianDate(dateStr) {
     if (!dateStr || dateStr === '-' || dateStr.trim() === '') return new Date(0);
     try {
-        // Handle ISO/String format
         if (typeof dateStr === 'object' || dateStr.includes('GMT') || dateStr.includes('T')) {
             const d = new Date(dateStr);
             if (!isNaN(d.getTime())) return d;
         }
-        
-        // Handle dd/mm/yyyy HH:mm:ss
         if (dateStr.includes('/')) {
             const parts = String(dateStr).trim().split(' ');
             const dateParts = parts[0].split('/');
@@ -113,16 +107,16 @@ function parseIndonesianDate(dateStr) {
                 const day = parseInt(dateParts[0], 10);
                 const month = parseInt(dateParts[1], 10) - 1;
                 const year = parseInt(dateParts[2], 10);
-                let hours = 0, minutes = 0, seconds = 0;
+                let hours = 0, minutes = 0;
                 if (parts.length > 1 && parts[1].includes(':')) {
                     const timeParts = parts[1].split(':');
                     hours = parseInt(timeParts[0], 10) || 0;
                     minutes = parseInt(timeParts[1], 10) || 0;
                 }
-                return new Date(year, month, day, hours, minutes, seconds);
+                return new Date(year, month, day, hours, minutes);
             }
         }
-        return new Date(dateStr); // Fallback
+        return new Date(dateStr);
     } catch (e) {
         return new Date(0);
     }
@@ -142,7 +136,6 @@ function renderTable(transactions) {
         return;
     }
     
-    // Sort Descending
     transactions.sort((a, b) => parseIndonesianDate(b.tanggal).getTime() - parseIndonesianDate(a.tanggal).getTime());
     
     let html = '';
@@ -180,8 +173,6 @@ async function deleteTransaction(rowIndex, idBarang, jenis, jumlah, namaBarang) 
 
     try {
         UI.showLoading();
-        // Menggunakan API.post agar konsisten dengan app.js, atau fetch manual jika perlu
-        // Asumsi API.post menghandle JSON
         const result = await API.post('deleteTransaction', {
             gudang: currentWarehouse,
             rowIndex: rowIndex,
@@ -192,11 +183,10 @@ async function deleteTransaction(rowIndex, idBarang, jenis, jumlah, namaBarang) 
         
         UI.hideLoading();
         
-        // Cek sukses secara longgar
         if (result && (result.success || result.status === 'success')) {
             UI.showAlert('✅ Transaksi dihapus. Stok dikembalikan.', 'success');
-            localStorage.setItem('dataBarangChanged', 'true'); // Trigger reload di index
-            await loadTransactions(); // Reload log
+            localStorage.setItem('dataBarangChanged', 'true');
+            await loadTransactions();
         } else {
             throw new Error(result.error || 'Gagal menghapus');
         }
@@ -207,10 +197,7 @@ async function deleteTransaction(rowIndex, idBarang, jenis, jumlah, namaBarang) 
     }
 }
 
-// ============================================
-// EXPORT SO BULANAN (CUTOFF 26-25)
-// ============================================
-
+// EXPORT SO BULANAN
 async function exportMonthlySO() {
     const filterMonth = document.getElementById('filterMonth').value;
     if (!filterMonth) {
@@ -221,16 +208,15 @@ async function exportMonthlySO() {
     const [year, month] = filterMonth.split('-').map(Number);
     const monthNames = ['Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni', 'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'];
     
-    // Hitung periode cut-off (26 bln lalu - 25 bln ini)
     let startDate, prevMonthName;
-    if (month === 1) { // Januari
-        startDate = new Date(year - 1, 11, 26); // 26 Des thn lalu
+    if (month === 1) {
+        startDate = new Date(year - 1, 11, 26);
         prevMonthName = 'Desember ' + (year - 1);
     } else {
-        startDate = new Date(year, month - 2, 26); // 26 bln sebelumnya
+        startDate = new Date(year, month - 2, 26);
         prevMonthName = monthNames[month - 2] + ' ' + year;
     }
-    const endDate = new Date(year, month - 1, 25, 23, 59, 59); // 25 bln ini
+    const endDate = new Date(year, month - 1, 25, 23, 59, 59);
     
     const formatDate = (d) => `${String(d.getDate()).padStart(2, '0')} ${monthNames[d.getMonth()]} ${d.getFullYear()}`;
     const startDateStr = formatDate(startDate);
@@ -241,39 +227,27 @@ async function exportMonthlySO() {
 
     try {
         UI.showLoading();
-        
-        // 1. Load Master Barang
         const masterBarang = await API.get('getAllBarang');
         if (!masterBarang || masterBarang.length === 0) throw new Error('Master barang kosong');
         
-        // 2. Hitung Stok Akhir per Cut-off
-        // Logika: Stok Akhir (Cut-off) = Stok Saat Ini + (Trans Keluar SETELAH Cut-off) - (Trans Masuk SETELAH Cut-off)
-        
-        // Kelompokkan transaksi SETELAH cut-off
         const transAfterCutOff = allTransactions.filter(t => parseIndonesianDate(t.tanggal) > endDate);
         const transInPeriod = allTransactions.filter(t => {
             const d = parseIndonesianDate(t.tanggal);
             return d >= startDate && d <= endDate;
         });
 
-        // Map untuk menyimpan data SO
         const soMap = new Map();
         
         masterBarang.forEach(item => {
             const currentStok = Number(currentWarehouse === 'A' ? item.stokA : item.stokB) || 0;
-            
-            // Hitung penyesuaian stok (transaksi setelah cut-off)
             let adjustment = 0;
             transAfterCutOff.forEach(t => {
                 if (t.idBarang === item.id) {
                     const jml = Number(t.jumlah) || 0;
                     const isOut = ['out', 'keluar'].includes((t.jenis || '').toLowerCase());
-                    // Jika Keluar setelah cut-off, berarti stok sekarang berkurang. Maka stok di cut-off lebih besar.
                     adjustment += isOut ? jml : -jml; 
                 }
             });
-            
-            // Stok Akhir Periode = Stok Sekarang + Penyesuaian
             const stokAkhirPeriode = currentStok + adjustment;
             
             soMap.set(item.id, {
@@ -283,27 +257,21 @@ async function exportMonthlySO() {
             });
         });
         
-        // Hitung Masuk/Keluar di dalam periode
         transInPeriod.forEach(t => {
             if (!soMap.has(t.idBarang)) return;
             const item = soMap.get(t.idBarang);
             const jml = Number(t.jumlah) || 0;
             const isOut = ['out', 'keluar'].includes((t.jenis || '').toLowerCase());
-            
             if (isOut) item.keluar += jml;
             else item.masuk += jml;
         });
         
-        // Hitung Saldo Awal
         soMap.forEach(item => {
-            // Saldo Awal = Stok Akhir - Masuk + Keluar
             item.saldoAwal = item.stokAkhir - item.masuk + item.keluar;
         });
         
-        // Filter item aktif
         const activeItems = Array.from(soMap.values()).filter(i => i.saldoAwal > 0 || i.masuk > 0 || i.keluar > 0 || i.stokAkhir > 0);
         
-        // Generate CSV
         let csv = `"LAPORAN STOCK OPNAME - ${gudangDisplay}"\n`;
         csv += `"Periode: ${startDateStr} - ${endDateStr}"\n\n`;
         csv += `"No","ID","Nama Barang","Kategori","Satuan","Saldo Awal","Masuk","Keluar","Stok Akhir","Nilai"\n`;
@@ -328,7 +296,6 @@ async function exportMonthlySO() {
     }
 }
 
-// Global Access
 window.switchWarehouse = switchWarehouse;
 window.applyFilters = applyFilters;
 window.deleteTransaction = deleteTransaction;

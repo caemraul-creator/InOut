@@ -20,7 +20,6 @@
             --accent-purple: #a78bfa;
             --accent-cyan: #22d3ee;
             --gradient-2: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
-            --gradient-3: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
         }
 
         * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -131,9 +130,10 @@
 
         @keyframes fadeInUp { from { opacity: 0; transform: translateY(30px); } to { opacity: 1; transform: translateY(0); } }
 
+        /* DIUBAH: Grid menjadi 3 kolom (hapus tombol filter) */
         .search-row {
             display: grid;
-            grid-template-columns: 2fr 1fr 1fr auto;
+            grid-template-columns: 2fr 1fr 1fr;
             gap: 1rem;
             align-items: end;
         }
@@ -172,24 +172,6 @@
 
         .search-icon { position: absolute; right: 1rem; top: 2.5rem; color: var(--text-secondary); pointer-events: none; }
 
-        .btn-filter {
-            padding: 0.875rem 2rem;
-            background: var(--primary-gradient);
-            border: none;
-            border-radius: 12px;
-            color: white;
-            font-weight: 700;
-            font-size: 0.9rem;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            text-transform: uppercase;
-            letter-spacing: 0.05em;
-            margin-top: 1.7rem;
-        }
-
-        .btn-filter:hover { transform: translateY(-2px); box-shadow: 0 10px 30px rgba(102, 126, 234, 0.4); }
-        .btn-filter:active { transform: translateY(0); }
-
         .btn-export-so {
             padding: 0.875rem 1.75rem;
             background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
@@ -208,12 +190,13 @@
             box-shadow: 0 4px 15px rgba(17, 153, 142, 0.3);
         }
         .btn-export-so:hover { transform: translateY(-3px); box-shadow: 0 8px 25px rgba(17, 153, 142, 0.5); }
-        .btn-export-so:active { transform: translateY(0); }
         .btn-export-so i { font-size: 1.1rem; }
 
         @media (max-width: 768px) {
             .btn-export-so span { display: none; }
             .btn-export-so { padding: 0.875rem 1rem; }
+            /* Mobile layout */
+            .search-row { grid-template-columns: 1fr; }
         }
 
         .warehouse-tabs { display: flex; gap: 1rem; margin-bottom: 2rem; animation: fadeInUp 0.6s ease 0.2s both; }
@@ -293,11 +276,9 @@
             gap: 0.5rem;
         }
         .btn-delete-transaction:hover { background: rgba(244, 92, 67, 0.2); border-color: #f45c43; transform: scale(1.05); }
-        .btn-delete-transaction:active { transform: scale(0.95); }
         .btn-delete-transaction i { font-size: 0.875rem; }
 
         @media (max-width: 1024px) {
-            .search-row { grid-template-columns: 1fr; }
             .warehouse-tabs { flex-direction: column; }
         }
 
@@ -305,7 +286,6 @@
             .log-container { padding: 0.75rem; }
             .page-title { font-size: 1.5rem; }
             .search-filter-section { padding: 1rem; }
-            .search-row { grid-template-columns: 1fr; }
             .input-transaction-btn .btn-text { display: none; }
             .input-transaction-btn { width: 40px; height: 40px; justify-content: center; padding: 0; }
             .back-home-btn { padding: 0.4rem 0.5rem; }
@@ -321,8 +301,6 @@
                 content: attr(data-label); font-weight: 700; color: var(--text-secondary);
                 display: block; margin-bottom: 0.25rem; font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.05em;
             }
-            .no-data { display: flex !important; flex-direction: column; align-items: center; padding: 2rem 1rem !important; }
-            .no-data:before { display: none; }
         }
 
         @media (max-width: 480px) {
@@ -379,6 +357,7 @@
 
     <div class="log-container">
         <div class="search-filter-section">
+            <!-- DIUBAH: Hapus tombol, tambahkan onchange event -->
             <div class="search-row">
                 <div class="input-group">
                     <label>Cari Barang</label>
@@ -387,18 +366,18 @@
                 </div>
                 <div class="input-group">
                     <label>Filter Bulan</label>
-                    <input type="month" id="filterMonth">
+                    <!-- Auto filter saat bulan berubah -->
+                    <input type="month" id="filterMonth" onchange="applyFilters()">
                 </div>
                 <div class="input-group">
                     <label>Jenis Transaksi</label>
-                    <select id="filterJenis">
+                    <!-- Auto filter saat jenis berubah -->
+                    <select id="filterJenis" onchange="applyFilters()">
                         <option value="">Semua</option>
                         <option value="In">Masuk</option>
                         <option value="Out">Keluar</option>
                     </select>
                 </div>
-                <!-- ICON FILTER SUDAH DIHAPUS DI SINI -->
-                <button class="btn-filter" onclick="applyFilters()"> Filter</button>
             </div>
             
             <div style="margin-top: 1rem; display: flex; gap: 0.75rem; justify-content: flex-end;">
