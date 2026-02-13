@@ -270,8 +270,10 @@ async function deleteTransaction(rowIndex, idBarang, jenis, jumlah, namaBarang) 
     }
 }
 
+// ... (kode sebelumnya tetap sama sampai fungsi deleteTransaction) ...
+
 // ============================================
-// EXPORT SO BULANAN (CUTOFF 26-25)
+// EXPORT SO BULANAN - EXCEL DENGAN BORDER
 // ============================================
 
 async function exportMonthlySO() {
@@ -281,9 +283,16 @@ async function exportMonthlySO() {
         return;
     }
     
+    // Cek apakah library XLSX tersedia
+    if (typeof XLSX === 'undefined') {
+        UI.showAlert('❌ Library Export belum termuat. Coba refresh halaman.', 'danger');
+        return;
+    }
+
     const [year, month] = filterMonth.split('-').map(Number);
     const monthNames = ['Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni', 'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'];
     
+    // Hitung periode cut-off
     let startDate;
     if (month === 1) {
         startDate = new Date(year - 1, 11, 26);
@@ -305,7 +314,7 @@ async function exportMonthlySO() {
         const masterBarang = await API.get('getAllBarang');
         if (!masterBarang || masterBarang.length === 0) throw new Error('Master barang kosong');
         
-        // Hitung penyesuaian stok
+        // Proses data (sama seperti sebelumnya)
         const transAfterCutOff = allTransactions.filter(t => parseIndonesianDate(t.tanggal) > endDate);
         const transInPeriod = allTransactions.filter(t => {
             const d = parseIndonesianDate(t.tanggal);
@@ -316,7 +325,6 @@ async function exportMonthlySO() {
         
         masterBarang.forEach(item => {
             const currentStok = Number(currentWarehouse === 'A' ? item.stokA : item.stokB) || 0;
-            
             let adjustment = 0;
             transAfterCutOff.forEach(t => {
                 if (t.idBarang === item.id) {
@@ -325,7 +333,6 @@ async function exportMonthlySO() {
                     adjustment += isOut ? jml : -jml; 
                 }
             });
-            
             const stokAkhirPeriode = currentStok + adjustment;
             
             soMap.set(item.id, {
@@ -350,29 +357,150 @@ async function exportMonthlySO() {
         
         const activeItems = Array.from(soMap.values()).filter(i => i.saldoAwal > 0 || i.masuk > 0 || i.keluar > 0 || i.stokAkhir > 0);
         
-        let csv = `"LAPORAN STOCK OPNAME - ${gudangDisplay}"\n`;
-        csv += `"Periode: ${startDateStr} - ${endDateStr}"\n\n`;
-        csv += `"No","ID","Nama Barang","Kategori","Satuan","Saldo Awal","Masuk","Keluar","Stok Akhir","Nilai"\n`;
+        // ============================================
+        // MEMBUAT FILE EXCEL DENGAN STYLE
+        // ============================================
         
+        // 1. Siapkan Data Array
+        const rows = [];
+        
+        // Header Laporan
+        rows.push([{ v: "LAPORAN STOCK OPNAME (SO) BULANAN", s: { font: { bold: true, sz: 16 } } }]);
+        rows.push([{ v: gudangDisplay.toUpperCase(), s: { font: { bold: true, sz: 12 } } }]);
+        rows.push([{ v: "PERIODE CUT OFF", s: { font: { bold: true } } }]);
+        rows.push([`DARI: ${startDateStr}`]);
+        rows.push([`SAMPAI: ${endDateStr}`]);
+        rows.push([]); // Spacer
+        rows.push([`TANGGAL CETAK: ${new Date().toLocaleString('id-ID')}`]);
+        rows.push([]); // Spacer
+        
+        // Header Tabel
+        const tableHeader = ["NO", "ID BARANG", "NAMA BARANG", "KATEGORI", "SATUAN", "SALDO AWAL", "MASUK", "KELUAR", "SALDO AKHIR", "HARGA SATUAN", "TOTAL NILAI"];
+        rows.push(tableHeader);
+        
+        // Data Tabel
+        let totalNilaiAkhir = 0;
         activeItems.forEach((item, i) => {
             const nilai = item.stokAkhir * item.harga;
-            csv += `${i+1},"${item.id}","${item.nama}","${item.kategori}","${item.satuan}",${item.saldoAwal},${item.masuk},${item.keluar},${item.stokAkhir},${nilai}\n`;
+            totalNilaiAkhir += nilai;
+            
+            rows.push([
+                i + 1,
+                item.id,
+                item.nama,
+                item.kategori,
+                item.satuan,
+                item.saldoAwal,
+                item.masuk,
+                item.keluar,
+                item.stokAkhir,
+                item.harga,
+                nilai
+            ]);
         });
         
-        const blob = new Blob(["\ufeff" + csv], { type: 'text/csv;charset=utf-8;' });
-        const link = document.createElement('a');
-        link.href = URL.createObjectURL(blob);
-        link.download = `SO_${gudangDisplay.replace(/ /g,'')}_${monthNames[month-1]}${year}.csv`;
-        link.click();
+        // Footer Ringkasan
+        rows.push([]); // Spacer
+        rows.push(["RINGKASAN"]);
+        rows.push(["Total Item Aktif", activeItems.length]);
+        rows.push(["Total Saldo Awal", activeItems.reduce((s, i) => s + i.saldoAwal, 0)]);
+        rows.push(["Total Masuk", activeItems.reduce((s, i) => s + i.masuk, 0)]);
+        rows.push(["Total Keluar", activeItems.reduce((s, i) => s + i.keluar, 0)]);
+        rows.push(["Total Saldo Akhir", activeItems.reduce((s, i) => s + i.stokAkhir, 0)]);
+        rows.push(["Total Nilai Persediaan", totalNilaiAkhir]);
+        
+        // 2. Buat Worksheet
+        const ws = XLSX.utils.aoa_to_sheet(rows);
+        
+        // 3. Definisikan Style
+        const borderStyle = {
+            top: { style: "thin" },
+            bottom: { style: "thin" },
+            left: { style: "thin" },
+            right: { style: "thin" }
+        };
+        
+        const headerCellStyle = {
+            font: { bold: true, color: { rgb: "FFFFFF" } },
+            fill: { fgColor: { rgb: "4F81BD" } },
+            alignment: { horizontal: "center", vertical: "center" },
+            border: borderStyle
+        };
+        
+        const dataCellStyle = {
+            border: borderStyle,
+            alignment: { vertical: "center" }
+        };
+        
+        const numberCellStyle = {
+            border: borderStyle,
+            alignment: { horizontal: "right", vertical: "center" }
+        };
+        
+        // 4. Terapkan Style ke Range Tabel
+        const range = XLSX.utils.decode_range(ws['!ref']);
+        const startRow = 8; // Baris ke-9 (index 8) adalah header tabel
+        const endRow = startRow + activeItems.length;
+        
+        for (let R = range.s.r; R <= range.e.r; ++R) {
+            for (let C = range.s.c; C <= range.e.c; ++C) {
+                const cellAddress = XLSX.utils.encode_cell({ r: R, c: C });
+                
+                if (!ws[cellAddress]) continue;
+                
+                // Style Header Tabel (Baris ke-9)
+                if (R === startRow) {
+                    ws[cellAddress].s = headerCellStyle;
+                }
+                // Style Data Tabel
+                else if (R > startRow && R <= endRow) {
+                    // Kolom Number (Saldo, Masuk, Keluar, Harga, Nilai) -> Index 5,6,7,8,9,10
+                    if (C >= 5) {
+                        ws[cellAddress].s = numberCellStyle;
+                        // Format Angka
+                        if (typeof ws[cellAddress].v === 'number') {
+                            ws[cellAddress].z = '#,##0';
+                        }
+                    } else {
+                        ws[cellAddress].s = dataCellStyle;
+                    }
+                }
+            }
+        }
+        
+        // Set Column Widths
+        ws['!cols'] = [
+            { wch: 5 },  // NO
+            { wch: 12 }, // ID
+            { wch: 35 }, // NAMA
+            { wch: 15 }, // KATEGORI
+            { wch: 8 },  // SATUAN
+            { wch: 12 }, // SALDO AWAL
+            { wch: 10 }, // MASUK
+            { wch: 10 }, // KELUAR
+            { wch: 12 }, // SALDO AKHIR
+            { wch: 15 }, // HARGA
+            { wch: 18 }  // NILAI
+        ];
+        
+        // 5. Buat Workbook dan Download
+        const wb = XLSX.utils.book_new();
+        XLSX.utils.book_append_sheet(wb, ws, "Stock Opname");
+        
+        const fileName = `SO_${gudangDisplay.replace(/ /g, '')}_${monthNames[month - 1]}${year}.xlsx`;
+        XLSX.writeFile(wb, fileName);
         
         UI.hideLoading();
-        UI.showAlert(`✅ Export berhasil! ${activeItems.length} item.`, 'success');
+        UI.showAlert(`✅ Export Excel berhasil!`, 'success');
         
     } catch (error) {
         UI.hideLoading();
         UI.showAlert('❌ Gagal export: ' + error.message, 'danger');
+        console.error(error);
     }
 }
+
+// ... (kode selanjutnya tetap sama)
 
 // Global Access
 window.switchWarehouse = switchWarehouse;
