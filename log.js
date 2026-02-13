@@ -272,8 +272,10 @@ async function deleteTransaction(rowIndex, idBarang, jenis, jumlah, namaBarang) 
 
 // ... kode sebelumnya ...
 
+// ... kode sebelumnya ...
+
 // ============================================
-// EXPORT SO BULANAN - FORMAT EXCEL CUSTOM
+// EXPORT SO BULANAN - FORMAT SIMPLIFIED
 // ============================================
 
 async function exportMonthlySO() {
@@ -283,7 +285,6 @@ async function exportMonthlySO() {
         return;
     }
     
-    // Cek library
     if (typeof XLSX === 'undefined') {
         UI.showAlert('❌ Library Export belum termuat. Coba refresh halaman.', 'danger');
         return;
@@ -294,13 +295,10 @@ async function exportMonthlySO() {
     
     // Hitung periode cut-off
     let startDate;
-    let prevMonthName;
     if (month === 1) {
         startDate = new Date(year - 1, 11, 26);
-        prevMonthName = 'Desember ' + (year - 1);
     } else {
         startDate = new Date(year, month - 2, 26);
-        prevMonthName = monthNames[month - 2] + ' ' + year;
     }
     const endDate = new Date(year, month - 1, 25, 23, 59, 59);
     
@@ -317,7 +315,7 @@ async function exportMonthlySO() {
         const masterBarang = await API.get('getAllBarang');
         if (!masterBarang || masterBarang.length === 0) throw new Error('Master barang kosong');
         
-        // Proses Data
+        // Proses Data (Tetap hitung Masuk/Keluar untuk mendapatkan Stok Akhir yang benar)
         const transAfterCutOff = allTransactions.filter(t => parseIndonesianDate(t.tanggal) > endDate);
         const transInPeriod = allTransactions.filter(t => {
             const d = parseIndonesianDate(t.tanggal);
@@ -340,8 +338,7 @@ async function exportMonthlySO() {
             
             soMap.set(item.id, {
                 id: item.id, nama: item.nama, kategori: item.kategori, satuan: item.satuan,
-                saldoAwal: 0, masuk: 0, keluar: 0, stokAkhir: stokAkhirPeriode,
-                harga: item.harga || 0
+                saldoAwal: 0, masuk: 0, keluar: 0, stokAkhir: stokAkhirPeriode
             });
         });
         
@@ -361,38 +358,25 @@ async function exportMonthlySO() {
         const activeItems = Array.from(soMap.values()).filter(i => i.saldoAwal > 0 || i.masuk > 0 || i.keluar > 0 || i.stokAkhir > 0);
         
         // ============================================
-        // MEMBUAT EXCEL DENGAN FORMAT CUSTOM
+        // MEMBUAT EXCEL
         // ============================================
         
         const rows = [];
         
-        // 1. HEADER ATAS (Baris 0-6)
-        // Baris 0: Judul Utama
-        rows.push(["LAPORAN STOCK OPNAME (SO) BULANAN", null, null, null, null, "RINGKASAN"]);
+        // 1. HEADER ATAS (Sesuaikan kolom agar muat 7 kolom)
+        // Kolom: A(No), B(ID), C(Nama), D(Satuan), E(Awal), F(Akhir), G(Note), H(Ringkasan)
+        rows.push(["LAPORAN STOCK OPNAME (SO) BULANAN", null, null, null, null, null, null, "RINGKASAN"]);
+        rows.push([gudangDisplay.toUpperCase(), null, null, null, null, null, null, "Total Item Aktif", activeItems.length]);
+        rows.push(["PERIODE CUT OFF", null, null, null, null, null, null, "Total Stok Awal", activeItems.reduce((s, i) => s + i.saldoAwal, 0)]);
+        rows.push([`DARI: ${startDateStr}`, null, null, null, null, null, null, "Total Stok Akhir", activeItems.reduce((s, i) => s + i.stokAkhir, 0)]);
+        rows.push([`SAMPAI: ${endDateStr}`, null, null, null, null, null, null, "", ""]);
+        rows.push([`TANGGAL CETAK: ${new Date().toLocaleString('id-ID')}`, null, null, null, null, null, null]);
+        rows.push([]); // Spacer
         
-        // Baris 1: Gudang
-        rows.push([gudangDisplay.toUpperCase(), null, null, null, null, "Total Item Aktif", activeItems.length]);
+        // 2. HEADER TABEL (7 Kolom)
+        rows.push(["NO", "ID BARANG", "NAMA BARANG", "SATUAN", "STOK AWAL", "STOK AKHIR", "NOTE"]);
         
-        // Baris 2: Periode Cut Off
-        rows.push(["PERIODE CUT OFF", null, null, null, null, "Total Stok Awal", activeItems.reduce((s, i) => s + i.saldoAwal, 0)]);
-        
-        // Baris 3: Dari
-        rows.push([`DARI: ${startDateStr}`, null, null, null, null, "Total Masuk", activeItems.reduce((s, i) => s + i.masuk, 0)]);
-        
-        // Baris 4: Sampai
-        rows.push([`SAMPAI: ${endDateStr}`, null, null, null, null, "Total Keluar", activeItems.reduce((s, i) => s + i.keluar, 0)]);
-        
-        // Baris 5: Tanggal Cetak
-        rows.push([`TANGGAL CETAK: ${new Date().toLocaleString('id-ID')}`, null, null, null, null, "Total Stok Akhir", activeItems.reduce((s, i) => s + i.stokAkhir, 0)]);
-        
-        // Baris 6: Kosong
-        rows.push([]);
-        
-        // 2. HEADER TABEL (Baris 7)
-        const tableHeader = ["NO", "ID BARANG", "NAMA BARANG", "SATUAN", "SALDO AWAL", "MASUK", "KELUAR", "SALDO AKHIR"];
-        rows.push(tableHeader);
-        
-        // 3. DATA TABEL (Baris 8 dst)
+        // 3. DATA (7 Kolom)
         activeItems.forEach((item, i) => {
             rows.push([
                 i + 1,
@@ -400,29 +384,60 @@ async function exportMonthlySO() {
                 item.nama,
                 item.satuan,
                 item.saldoAwal,
-                item.masuk,
-                item.keluar,
-                item.stokAkhir
+                item.stokAkhir,
+                "" // Note kosong
             ]);
         });
+        
+        // 4. FOOTER PENANGGUNG JAWAB
+        rows.push([]); // Spacer
+        rows.push([]); // Spacer
+        
+        // Tanggal di kanan
+        const datePlace = `........................, ${formatDate(new Date())}`;
+        rows.push([null, null, null, null, null, null, datePlace]);
+        
+        rows.push([]); // Spacer
+        
+        // Jabatan (Kiri: Kepala, Kanan: Petugas)
+        rows.push(["Mengetahui,", null, null, null, null, null, "Dibuat oleh,"]);
+        
+        rows.push([]); // Spacer untuk tanda tangan
+        rows.push([]);
+        rows.push([]);
+        
+        // Nama (Kiri: Kosong, Kanan: User Login)
+        const currentUser = AUTH.getUserName() || "........................";
+        rows.push(["........................", null, null, null, null, null, currentUser]);
+        
+        // Jabatan Bawah
+        rows.push(["Kepala Gudang", null, null, null, null, null, "Petugas Gudang"]);
         
         // Buat Worksheet
         const ws = XLSX.utils.aoa_to_sheet(rows);
         
         // ============================================
-        // MERGE CELLS (GABUNG KOLOM)
+        // MERGE CELLS
         // ============================================
         ws['!merges'] = [
-            { s: { r: 0, c: 0 }, e: { r: 0, c: 3 } }, // Judul Utama
-            { s: { r: 1, c: 0 }, e: { r: 1, c: 3 } }, // Nama Gudang
-            { s: { r: 2, c: 0 }, e: { r: 2, c: 3 } }, // Periode Cut Off
-            { s: { r: 3, c: 0 }, e: { r: 3, c: 3 } }, // Dari
-            { s: { r: 4, c: 0 }, e: { r: 4, c: 3 } }, // Sampai
-            { s: { r: 5, c: 0 }, e: { r: 5, c: 3 } }  // Tanggal Cetak
+            // Header Kiri (A-G)
+            { s: { r: 0, c: 0 }, e: { r: 0, c: 6 } }, // Judul
+            { s: { r: 1, c: 0 }, e: { r: 1, c: 6 } }, // Gudang
+            { s: { r: 2, c: 0 }, e: { r: 2, c: 6 } }, // Periode
+            { s: { r: 3, c: 0 }, e: { r: 3, c: 6 } }, // Dari
+            { s: { r: 4, c: 0 }, e: { r: 4, c: 6 } }, // Sampai
+            { s: { r: 5, c: 0 }, e: { r: 5, c: 6 } }, // Tanggal Cetak
+            
+            // Footer (A-C untuk Kiri, F-G untuk Kanan)
+            { s: { r: rows.length - 5, c: 5 }, e: { r: rows.length - 5, c: 6 } }, // Tanggal kanan
+            { s: { r: rows.length - 4, c: 0 }, e: { r: rows.length - 4, c: 2 } }, // Mengetahui
+            { s: { r: rows.length - 4, c: 5 }, e: { r: rows.length - 4, c: 6 } }, // Dibuat oleh
+            { s: { r: rows.length - 1, c: 0 }, e: { r: rows.length - 1, c: 2 } }, // Kepala Gudang
+            { s: { r: rows.length - 1, c: 5 }, e: { r: rows.length - 1, c: 6 } }  // Petugas Gudang
         ];
         
         // ============================================
-        // STYLING (BORDER, FONT, ALIGNMENT)
+        // STYLING
         // ============================================
         
         const borderStyle = {
@@ -433,21 +448,19 @@ async function exportMonthlySO() {
         };
         
         const range = XLSX.utils.decode_range(ws['!ref']);
-        const tableStartRow = 7; // Baris ke-8 (index 7) adalah header tabel
+        const tableStartRow = 7; // Baris ke-8 (index 7)
+        const tableEndRow = 7 + activeItems.length;
         
         for (let R = range.s.r; R <= range.e.r; ++R) {
             for (let C = range.s.c; C <= range.e.c; ++C) {
                 const cellAddress = XLSX.utils.encode_cell({ r: R, c: C });
                 if (!ws[cellAddress]) continue;
                 
-                // Default style
-                ws[cellAddress].s = {
-                    font: { name: "Arial", sz: 10 },
-                    alignment: { vertical: "center" }
-                };
+                // Default Style
+                ws[cellAddress].s = { font: { name: "Arial", sz: 10 }, alignment: { vertical: "center" } };
                 
-                // Style untuk Header Tabel (Baris 7)
-                if (R === tableStartRow) {
+                // Header Tabel (Baris 7, Kolom 0-6)
+                if (R === tableStartRow && C <= 6) {
                     ws[cellAddress].s = {
                         font: { name: "Arial", sz: 10, bold: true, color: { rgb: "FFFFFF" } },
                         fill: { fgColor: { rgb: "4F81BD" } },
@@ -455,49 +468,49 @@ async function exportMonthlySO() {
                         border: borderStyle
                     };
                 }
-                // Style untuk Data Tabel (Baris 8 dst)
-                else if (R > tableStartRow) {
-                    // Jika kolom angka (Saldo, Masuk, Keluar, Akhir) -> Index 4, 5, 6, 7
-                    if (C >= 4) {
-                        ws[cellAddress].s.alignment = { horizontal: "right", vertical: "center" };
-                        ws[cellAddress].z = '#,##0'; // Format angka
-                    } else {
-                        ws[cellAddress].s.alignment = { vertical: "center" };
-                    }
+                // Data Tabel (Kolom 0-6)
+                else if (R > tableStartRow && R <= tableEndRow && C <= 6) {
                     ws[cellAddress].s.border = borderStyle;
+                    
+                    // Kolom Angka (E=4, F=5)
+                    if (C === 4 || C === 5) {
+                        ws[cellAddress].s.alignment = { horizontal: "right", vertical: "center" };
+                        ws[cellAddress].z = '#,##0';
+                    } 
+                    // Kolom NO (A=0)
+                    else if (C === 0) {
+                         ws[cellAddress].s.alignment = { horizontal: "center", vertical: "center" };
+                    }
                 }
-                // Style untuk Header Laporan (Baris 0-6)
-                else {
-                     // Judul Utama (Baris 0)
-                     if (R === 0) ws[cellAddress].s.font = { name: "Arial", sz: 14, bold: true };
-                     // Nama Gudang (Baris 1)
-                     if (R === 1) ws[cellAddress].s.font = { name: "Arial", sz: 12, bold: true };
-                     
-                     // Label Ringkasan (Kolom F)
-                     if (C === 5) ws[cellAddress].s.alignment = { horizontal: "right" };
-                     // Nilai Ringkasan (Kolom G)
-                     if (C === 6) {
-                         ws[cellAddress].s.alignment = { horizontal: "right" };
-                         ws[cellAddress].s.font = { name: "Arial", sz: 10, bold: true };
-                         ws[cellAddress].z = '#,##0';
-                     }
+                // Header Laporan (Kiri)
+                else if (R < tableStartRow) {
+                    if (R === 0) ws[cellAddress].s.font = { name: "Arial", sz: 14, bold: true };
+                    if (R === 1) ws[cellAddress].s.font = { name: "Arial", sz: 12, bold: true };
+                }
+                
+                // Ringkasan (Kanan - Kolom H)
+                if (R >= 1 && R <= 3 && C === 7) {
+                    ws[cellAddress].s.alignment = { horizontal: "right" };
+                    if (R > 1) {
+                        ws[cellAddress].s.font = { name: "Arial", sz: 10, bold: true };
+                        ws[cellAddress].z = '#,##0';
+                    }
                 }
             }
         }
         
         // Set Lebar Kolom
         ws['!cols'] = [
-            { wch: 5 },  // NO
-            { wch: 12 }, // ID
-            { wch: 40 }, // NAMA
-            { wch: 8 },  // SATUAN
-            { wch: 12 }, // SALDO AWAL
-            { wch: 10 }, // MASUK
-            { wch: 10 }, // KELUAR
-            { wch: 12 }  // SALDO AKHIR
+            { wch: 5 },  // A: NO
+            { wch: 13 }, // B: ID
+            { wch: 40 }, // C: NAMA
+            { wch: 8 },  // D: SATUAN
+            { wch: 12 }, // E: STOK AWAL
+            { wch: 12 }, // F: STOK AKHIR
+            { wch: 15 }, // G: NOTE
+            { wch: 15 }  // H: RINGKASAN (overflow)
         ];
         
-        // Buat Workbook dan Download
         const wb = XLSX.utils.book_new();
         XLSX.utils.book_append_sheet(wb, ws, "Stock Opname");
         
@@ -513,6 +526,8 @@ async function exportMonthlySO() {
         console.error(error);
     }
 }
+
+// ... kode selanjutnya ...
 
 // Global Access
 window.switchWarehouse = switchWarehouse;
