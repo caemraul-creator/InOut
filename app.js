@@ -1,5 +1,5 @@
 // ============================================
-// APP.JS - FINAL VERSION (FAST SUBMIT + ADD FROM SEARCH)
+// APP.JS - FINAL VERSION (AUTO OPEN MODAL)
 // ============================================
 
 let dataMaster = [];
@@ -108,7 +108,7 @@ async function initIndexPage() {
 }
 
 // ============================================
-// DROPDOWN FIX (WITH ADD ITEM BUTTON)
+// DROPDOWN FIX (AUTO OPEN MODAL IF NOT FOUND)
 // ============================================
 
 function initDropdownFix() {
@@ -179,56 +179,22 @@ function initDropdownFix() {
         if (firstItem) firstItem.classList.add('active');
     };
     
-    // ✅ PERBAIKAN: Tombol Tambah Barang jika tidak ketemu
+    // ✅ PERUBAHAN: Langsung buka modal tanpa tombol
     window.showNoResults = function(query) {
-        const dropdown = document.getElementById('searchResultsDropdown');
-        if (!dropdown) return;
+        // 1. Sembunyikan dropdown
+        hideSearchResults();
         
-        updateDropdownPosition();
+        // 2. Langsung buka modal tambah barang
+        openAddItemModal();
         
-        dropdown.innerHTML = `
-            <div class="search-no-results">
-                <p>Tidak ada hasil untuk "<b>${query}</b>"</p>
-                <div class="search-action-btn" id="addNewFromSearch" style="
-                    margin-top: 10px; 
-                    padding: 10px; 
-                    background: #28a745; 
-                    color: white; 
-                    text-align: center; 
-                    border-radius: 5px; 
-                    cursor: pointer;
-                    font-weight: bold;
-                ">
-                    <i class="fas fa-plus-circle"></i> Tambah Barang Baru
-                </div>
-            </div>
-        `;
-        dropdown.style.setProperty('display', 'block', 'important');
-
-        // Pasang event listener ke tombol baru tersebut
-        const addBtn = document.getElementById('addNewFromSearch');
-        if (addBtn) {
-            addBtn.addEventListener('click', function() {
-                hideSearchResults();
-                
-                // Buka modal tambah barang
-                openAddItemModal();
-                
-                // Isi otomatis nama barang dari pencarian
-                setTimeout(() => {
-                    const nameInput = document.getElementById('newItemNama');
-                    if (nameInput && query) {
-                         nameInput.value = query;
-                         nameInput.focus();
-                    }
-                }, 100);
-            });
-            
-            // Mencegah blur pada input saat klik tombol ini
-            addBtn.addEventListener('mousedown', function(e) {
-                e.preventDefault();
-            });
-        }
+        // 3. Isi otomatis nama barang dari pencarian
+        setTimeout(() => {
+            const nameInput = document.getElementById('newItemNama');
+            if (nameInput && query) {
+                 nameInput.value = query;
+                 nameInput.focus();
+            }
+        }, 100);
     };
     
     window.hideSearchResults = function() {
@@ -414,7 +380,7 @@ function setupEventListeners() {
 // SEARCH FUNCTION
 // ============================================
 
-function searchBarang(query) {
+function searchBarng(query) {
     if (!query || query.length < 2) {
         hideSearchResults();
         return;
@@ -744,20 +710,16 @@ function resetForm() {
 // ADD ITEM MODAL
 // ============================================
 
-// Fungsi untuk membuka modal tambah barang
 function openAddItemModal() {
     const modal = document.getElementById('addItemModal');
     if (modal) {
         modal.style.display = 'flex';
         modal.classList.add('show');
         
-        // Populate kategori dropdown
         populateKategoriSelect();
         
-        // Switch ke tab barang
         switchTab('barang');
         
-        // Reset form
         const form = document.getElementById('addItemForm');
         if (form) {
             form.reset();
@@ -766,11 +728,9 @@ function openAddItemModal() {
     }
 }
 
-// Expose function globally
 window.openAddItemModal = openAddItemModal;
 
 function setupAddItemModal() {
-    // Event listener untuk tombol Add New yang ada di area search (btnAddNew)
     const btnAddNew = document.getElementById('btnAddNew');
     const addItemModal = document.getElementById('addItemModal');
     const btnCloseAddModal = document.getElementById('btnCloseAddModal');
@@ -779,12 +739,10 @@ function setupAddItemModal() {
     const kategoriSelect = document.getElementById('newItemKategori');
     const addKategoriForm = document.getElementById('addKategoriForm');
     
-    // Tombol Add New di area search
     if (btnAddNew) {
         btnAddNew.onclick = openAddItemModal;
     }
     
-    // Tombol close modal (X)
     if (btnCloseAddModal) {
         btnCloseAddModal.onclick = function() {
             if (addItemModal) {
@@ -794,7 +752,6 @@ function setupAddItemModal() {
         };
     }
     
-    // Tombol cancel
     if (btnCancelAddItem) {
         btnCancelAddItem.onclick = function() {
             if (addItemModal) {
@@ -804,17 +761,14 @@ function setupAddItemModal() {
         };
     }
     
-    // Event listener untuk form kategori
     if (addKategoriForm) {
         addKategoriForm.addEventListener('submit', handleAddKategori);
     }
     
-    // Event listener untuk perubahan kategori
     if (kategoriSelect) {
         kategoriSelect.addEventListener('change', updateNewIdPreview);
     }
     
-    // Event listener untuk form tambah barang
     if (addItemForm) {
         addItemForm.addEventListener('submit', handleAddItem);
     }
@@ -957,7 +911,6 @@ async function handleAddKategori(e) {
         return;
     }
     
-    // Validasi inisial (max 4 karakter, huruf saja)
     if (inisial.length > 4) {
         UI.showAlert('❌ Inisial maksimal 4 karakter', 'danger');
         return;
@@ -968,7 +921,6 @@ async function handleAddKategori(e) {
         return;
     }
     
-    // Cek apakah inisial sudah ada
     const exists = dataKategori.some(k => k.inisial === inisial);
     if (exists) {
         UI.showAlert('❌ Inisial kategori sudah digunakan', 'danger');
@@ -988,19 +940,14 @@ async function handleAddKategori(e) {
         if (result.success) {
             UI.showAlert('✅ Kategori berhasil ditambahkan!', 'success');
             
-            // Reset form
             document.getElementById('addKategoriForm').reset();
             
-            // Reload kategori
             await loadKategori();
             
-            // Update dropdown
             populateKategoriSelect();
             
-            // Switch back to barang tab
             switchTab('barang');
             
-            // Select kategori yang baru ditambahkan
             const kategoriSelect = document.getElementById('newItemKategori');
             if (kategoriSelect) {
                 kategoriSelect.value = inisial;
