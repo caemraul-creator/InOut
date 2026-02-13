@@ -656,7 +656,8 @@ function showConfirmationModal(data) {
     const modal = document.getElementById('confirmModal');
     if (!modal) return;
     
-    document.getElementById('confirmNama').textContent = data.namaBarang;
+    // ✅ PERBAIKAN: Ubah confirmNama ke confirmBarang (match dengan HTML)
+    document.getElementById('confirmBarang').textContent = data.namaBarang;
     document.getElementById('confirmId').textContent = data.idBarang;
     document.getElementById('confirmJenis').textContent = data.jenis;
     document.getElementById('confirmGudang').textContent = data.gudangDisplay;
@@ -689,7 +690,22 @@ async function submitTransaction() {
         UI.showLoading();
         hideConfirmationModal();
         
-        const result = await API.post('addTransaksi', pendingTransaction);
+        // ✅ PERBAIKAN UTAMA: 
+        // 1. Ubah action 'addTransaksi' ke 'submitTransaksi' (match dengan backend)
+        // 2. Format data sesuai dengan yang diexpect backend
+        const result = await API.post('submitTransaksi', {
+            lokasiGudang: 'Gudang ' + pendingTransaction.gudang, // Backend expect 'Gudang A' bukan 'A'
+            jenis: pendingTransaction.jenis,
+            tanggal: pendingTransaction.tanggal,
+            idBarang: pendingTransaction.idBarang,
+            namaBarang: pendingTransaction.namaBarang,
+            jumlah: pendingTransaction.jumlah,
+            satuan: pendingTransaction.satuan,
+            pic: pendingTransaction.user, // Backend expect 'pic' field
+            user: pendingTransaction.user,
+            petugas: pendingTransaction.user,
+            keterangan: pendingTransaction.keterangan || ''
+        });
         
         await UI.hideLoading();
         
