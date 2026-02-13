@@ -1,5 +1,5 @@
 // ============================================
-// APP.JS - FINAL VERSION (NO CONFIRMATION)
+// APP.JS - FINAL VERSION (FAST SUBMIT + ADD FROM SEARCH)
 // ============================================
 
 let dataMaster = [];
@@ -108,7 +108,7 @@ async function initIndexPage() {
 }
 
 // ============================================
-// DROPDOWN FIX
+// DROPDOWN FIX (WITH ADD ITEM BUTTON)
 // ============================================
 
 function initDropdownFix() {
@@ -179,6 +179,7 @@ function initDropdownFix() {
         if (firstItem) firstItem.classList.add('active');
     };
     
+    // ✅ PERBAIKAN: Tombol Tambah Barang jika tidak ketemu
     window.showNoResults = function(query) {
         const dropdown = document.getElementById('searchResultsDropdown');
         if (!dropdown) return;
@@ -187,11 +188,50 @@ function initDropdownFix() {
         
         dropdown.innerHTML = `
             <div class="search-no-results">
-                <i class="fas fa-search"></i>
-                <p>Tidak ada hasil untuk "${query}"</p>
+                <p>Tidak ada hasil untuk "<b>${query}</b>"</p>
+                <div class="search-action-btn" id="addNewFromSearch" style="
+                    margin-top: 10px; 
+                    padding: 10px; 
+                    background: #28a745; 
+                    color: white; 
+                    text-align: center; 
+                    border-radius: 5px; 
+                    cursor: pointer;
+                    font-weight: bold;
+                ">
+                    <i class="fas fa-plus-circle"></i> Tambah Barang Baru
+                </div>
             </div>
         `;
         dropdown.style.setProperty('display', 'block', 'important');
+
+        // Pasang event listener ke tombol baru tersebut
+        const addBtn = document.getElementById('addNewFromSearch');
+        if (addBtn) {
+            addBtn.addEventListener('click', function() {
+                hideSearchResults();
+                
+                // Buka modal tambah barang
+                const addItemBtn = document.getElementById('addItemBtn');
+                if (addItemBtn) {
+                    addItemBtn.click();
+                    
+                    // Isi otomatis nama barang dari pencarian
+                    setTimeout(() => {
+                        const nameInput = document.getElementById('newItemNama');
+                        if (nameInput && query) {
+                             nameInput.value = query;
+                             nameInput.focus();
+                        }
+                    }, 100);
+                }
+            });
+            
+            // Mencegah blur pada input saat klik tombol ini
+            addBtn.addEventListener('mousedown', function(e) {
+                e.preventDefault();
+            });
+        }
     };
     
     window.hideSearchResults = function() {
@@ -601,7 +641,6 @@ async function handleSubmit(e) {
         }
     }
     
-    // Siapkan data transaksi
     pendingTransaction = {
         idBarang: tempSelectedItem.id,
         namaBarang: tempSelectedItem.nama,
@@ -616,12 +655,11 @@ async function handleSubmit(e) {
         user: user
     };
     
-    // LANGSUNG JALANKAN TRANSAKSI TANPA MODAL KONFIRMASI
     submitTransaction();
 }
 
 // ============================================
-// SUBMIT TRANSACTION (FIXED LOGIC)
+// SUBMIT TRANSACTION
 // ============================================
 
 async function submitTransaction() {
