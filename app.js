@@ -1,5 +1,5 @@
 // ============================================
-// APP.JS - FINAL VERSION (FIXED TYPO)
+// APP.JS - FINAL VERSION (PIC FIX & ROBUST HANDLER)
 // ============================================
 
 let dataMaster = [];
@@ -179,7 +179,6 @@ function initDropdownFix() {
         if (firstItem) firstItem.classList.add('active');
     };
     
-    // ✅ PERBAIKAN: Langsung buka modal jika tidak ketemu
     window.showNoResults = function(query) {
         hideSearchResults();
         openAddItemModal();
@@ -286,7 +285,7 @@ function setupEventListeners() {
         
         if (query.length >= 2) {
             searchTimeout = setTimeout(() => {
-                searchBarang(query); // Memanggil fungsi yang benar
+                searchBarang(query);
             }, 100);
         } else {
             hideItemResult();
@@ -372,10 +371,10 @@ function setupEventListeners() {
 }
 
 // ============================================
-// SEARCH FUNCTION (FIXED TYPO)
+// SEARCH FUNCTION
 // ============================================
 
-function searchBarang(query) { // Nama fungsi diperbaiki di sini
+function searchBarang(query) {
     if (!query || query.length < 2) {
         hideSearchResults();
         return;
@@ -530,7 +529,7 @@ function onScanSuccess(decodedText) {
     const searchInput = document.getElementById('manualIdInput');
     if (searchInput) {
         searchInput.value = decodedText;
-        searchBarang(decodedText); // Pemanggilan benar
+        searchBarang(decodedText);
     }
 }
 
@@ -554,7 +553,7 @@ function stopScanner() {
 }
 
 // ============================================
-// FORM SUBMIT (LANGSUNG TANPA KONFIRMASI)
+// FORM SUBMIT
 // ============================================
 
 async function handleSubmit(e) {
@@ -568,8 +567,14 @@ async function handleSubmit(e) {
     const activeGudang = getActiveGudang();
     const activeType = document.querySelector('.type-btn.active');
     const jumlah = parseInt(document.getElementById('jumlah').value);
+    
+    // ✅ PERUBAHAN: Ambil PIC dari input form, bukan dari user login
+    const pic = document.getElementById('pic').value.trim();
+    
     const keterangan = document.getElementById('keterangan').value.trim();
     const tanggal = document.getElementById('tanggal').value;
+    
+    // User login (tersembunyi)
     const user = document.getElementById('user').value.trim();
     
     if (!activeType) {
@@ -582,8 +587,9 @@ async function handleSubmit(e) {
         return;
     }
     
-    if (!user) {
-        UI.showAlert('❌ Nama petugas harus diisi', 'danger');
+    // ✅ VALIDASI: PIC wajib diisi manual
+    if (!pic) {
+        UI.showAlert('❌ Nama PIC harus diisi', 'danger');
         return;
     }
     
@@ -610,7 +616,8 @@ async function handleSubmit(e) {
         gudangDisplay: getGudangDisplayNameFromValue(activeGudang),
         keterangan: keterangan,
         tanggal: tanggal,
-        user: user
+        pic: pic, // Menggunakan value dari input form
+        user: user // User login dari field tersembunyi
     };
     
     submitTransaction();
@@ -634,7 +641,7 @@ async function submitTransaction() {
             namaBarang: pendingTransaction.namaBarang,
             jumlah: pendingTransaction.jumlah,
             satuan: pendingTransaction.satuan,
-            pic: pendingTransaction.user,
+            pic: pendingTransaction.pic, // Kirim PIC yang diinput manual
             user: pendingTransaction.user,
             petugas: pendingTransaction.user,
             keterangan: pendingTransaction.keterangan || ''
@@ -681,18 +688,27 @@ function resetForm() {
     hideItemResult();
     hideSearchResults();
     
+    // Bersihkan input pencarian
     const searchInput = document.getElementById('manualIdInput');
     if (searchInput) {
         searchInput.value = '';
         searchInput.focus();
     }
     
+    // Reset tanggal
     const tanggalInput = document.getElementById('tanggal');
     if (tanggalInput) {
         const today = new Date().toISOString().split('T')[0];
         tanggalInput.value = today;
     }
+
+    // ✅ Bersihkan field PIC manual
+    const picInput = document.getElementById('pic');
+    if (picInput) {
+        picInput.value = '';
+    }
     
+    // Auto-fill user login kembali (jika perlu)
     if (AUTH && typeof AUTH.autoFillForm === 'function') {
         AUTH.autoFillForm();
     }
@@ -873,7 +889,12 @@ async function handleAddItem(e) {
         
         await UI.hideLoading();
         
-        if (result.success) {
+        // ✅ PERBAIKAN: Validasi fleksibel seperti submitTransaction
+        const isSuccess = (result && result.success === true) || 
+                          (result === "Success") || 
+                          (result && result.status === "success");
+
+        if (isSuccess || (result && !result.error)) {
             UI.showAlert('✅ Barang berhasil ditambahkan!', 'success');
             
             const modal = document.getElementById('addItemModal');
