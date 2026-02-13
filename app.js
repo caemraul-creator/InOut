@@ -212,19 +212,16 @@ function initDropdownFix() {
                 hideSearchResults();
                 
                 // Buka modal tambah barang
-                const addItemBtn = document.getElementById('addItemBtn');
-                if (addItemBtn) {
-                    addItemBtn.click();
-                    
-                    // Isi otomatis nama barang dari pencarian
-                    setTimeout(() => {
-                        const nameInput = document.getElementById('newItemNama');
-                        if (nameInput && query) {
-                             nameInput.value = query;
-                             nameInput.focus();
-                        }
-                    }, 100);
-                }
+                openAddItemModal();
+                
+                // Isi otomatis nama barang dari pencarian
+                setTimeout(() => {
+                    const nameInput = document.getElementById('newItemNama');
+                    if (nameInput && query) {
+                         nameInput.value = query;
+                         nameInput.focus();
+                    }
+                }, 100);
             });
             
             // Mencegah blur pada input saat klik tombol ini
@@ -747,38 +744,77 @@ function resetForm() {
 // ADD ITEM MODAL
 // ============================================
 
+// Fungsi untuk membuka modal tambah barang
+function openAddItemModal() {
+    const modal = document.getElementById('addItemModal');
+    if (modal) {
+        modal.style.display = 'flex';
+        modal.classList.add('show');
+        
+        // Populate kategori dropdown
+        populateKategoriSelect();
+        
+        // Switch ke tab barang
+        switchTab('barang');
+        
+        // Reset form
+        const form = document.getElementById('addItemForm');
+        if (form) {
+            form.reset();
+            updateNewIdPreview();
+        }
+    }
+}
+
+// Expose function globally
+window.openAddItemModal = openAddItemModal;
+
 function setupAddItemModal() {
-    const addItemBtn = document.getElementById('addItemBtn');
+    // Event listener untuk tombol Add New yang ada di area search (btnAddNew)
+    const btnAddNew = document.getElementById('btnAddNew');
     const addItemModal = document.getElementById('addItemModal');
     const btnCloseAddModal = document.getElementById('btnCloseAddModal');
     const btnCancelAddItem = document.getElementById('btnCancelAddItem');
     const addItemForm = document.getElementById('addItemForm');
     const kategoriSelect = document.getElementById('newItemKategori');
+    const addKategoriForm = document.getElementById('addKategoriForm');
     
-    if (addItemBtn) {
-        addItemBtn.onclick = function() {
-            if (addItemModal) addItemModal.style.display = 'flex';
-            populateKategoriSelect();
-            updateNewIdPreview();
-        };
+    // Tombol Add New di area search
+    if (btnAddNew) {
+        btnAddNew.onclick = openAddItemModal;
     }
     
+    // Tombol close modal (X)
     if (btnCloseAddModal) {
         btnCloseAddModal.onclick = function() {
-            if (addItemModal) addItemModal.style.display = 'none';
+            if (addItemModal) {
+                addItemModal.style.display = 'none';
+                addItemModal.classList.remove('show');
+            }
         };
     }
     
+    // Tombol cancel
     if (btnCancelAddItem) {
         btnCancelAddItem.onclick = function() {
-            if (addItemModal) addItemModal.style.display = 'none';
+            if (addItemModal) {
+                addItemModal.style.display = 'none';
+                addItemModal.classList.remove('show');
+            }
         };
     }
     
+    // Event listener untuk form kategori
+    if (addKategoriForm) {
+        addKategoriForm.addEventListener('submit', handleAddKategori);
+    }
+    
+    // Event listener untuk perubahan kategori
     if (kategoriSelect) {
         kategoriSelect.addEventListener('change', updateNewIdPreview);
     }
     
+    // Event listener untuk form tambah barang
     if (addItemForm) {
         addItemForm.addEventListener('submit', handleAddItem);
     }
@@ -906,6 +942,77 @@ async function handleAddItem(e) {
     } catch (error) {
         await UI.hideLoading();
         console.error('Add item error:', error);
+        UI.showAlert('❌ Gagal: ' + error.message, 'danger');
+    }
+}
+
+async function handleAddKategori(e) {
+    e.preventDefault();
+    
+    const nama = document.getElementById('newKategoriNama').value.trim();
+    const inisial = document.getElementById('newKategoriInisial').value.trim().toUpperCase();
+    
+    if (!nama || !inisial) {
+        UI.showAlert('❌ Nama dan inisial harus diisi', 'danger');
+        return;
+    }
+    
+    // Validasi inisial (max 4 karakter, huruf saja)
+    if (inisial.length > 4) {
+        UI.showAlert('❌ Inisial maksimal 4 karakter', 'danger');
+        return;
+    }
+    
+    if (!/^[A-Z]+$/.test(inisial)) {
+        UI.showAlert('❌ Inisial hanya boleh huruf kapital', 'danger');
+        return;
+    }
+    
+    // Cek apakah inisial sudah ada
+    const exists = dataKategori.some(k => k.inisial === inisial);
+    if (exists) {
+        UI.showAlert('❌ Inisial kategori sudah digunakan', 'danger');
+        return;
+    }
+    
+    try {
+        UI.showLoading();
+        
+        const result = await API.post('addKategori', {
+            nama: nama,
+            inisial: inisial
+        });
+        
+        await UI.hideLoading();
+        
+        if (result.success) {
+            UI.showAlert('✅ Kategori berhasil ditambahkan!', 'success');
+            
+            // Reset form
+            document.getElementById('addKategoriForm').reset();
+            
+            // Reload kategori
+            await loadKategori();
+            
+            // Update dropdown
+            populateKategoriSelect();
+            
+            // Switch back to barang tab
+            switchTab('barang');
+            
+            // Select kategori yang baru ditambahkan
+            const kategoriSelect = document.getElementById('newItemKategori');
+            if (kategoriSelect) {
+                kategoriSelect.value = inisial;
+                updateNewIdPreview();
+            }
+        } else {
+            throw new Error(result.error || 'Gagal menambahkan kategori');
+        }
+        
+    } catch (error) {
+        await UI.hideLoading();
+        console.error('Add kategori error:', error);
         UI.showAlert('❌ Gagal: ' + error.message, 'danger');
     }
 }
