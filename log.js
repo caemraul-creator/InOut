@@ -1,5 +1,5 @@
 // ============================================
-// LOG.JS - FINAL FIXED
+// LOG.JS - ROBUST DATE PARSING
 // ============================================
 
 let currentWarehouse = 'A';
@@ -21,7 +21,6 @@ document.addEventListener('DOMContentLoaded', function() {
     
     loadTransactions();
     
-    // Auto filter saat mengetik di search bar
     const searchInput = document.getElementById('searchBarang');
     let searchTimeout;
     searchInput.addEventListener('input', function() {
@@ -76,8 +75,10 @@ function applyFilters() {
         if (filterMonth) {
             const transDate = parseIndonesianDate(transaction.tanggal);
             if (!transDate || transDate.getTime() === 0) return false;
-            const transMonth = transDate.toISOString().slice(0, 7);
-            if (transMonth !== filterMonth) return false;
+            try {
+                const transMonth = transDate.toISOString().slice(0, 7);
+                if (transMonth !== filterMonth) return false;
+            } catch (e) { return false; }
         }
         
         // Filter Jenis
@@ -93,70 +94,142 @@ function applyFilters() {
     renderTable(filteredTransactions);
 }
 
+// ============================================
+// ROBUST DATE PARSER
+// ============================================
 function parseIndonesianDate(dateStr) {
-    if (!dateStr || dateStr === '-' || dateStr.trim() === '') return new Date(0);
+    if (!dateStr && dateStr !== 0) return new Date(0); // Handle null/undefined, but allow 0
+    
+    // 1. Jika angka (Excel Serial Date)
+    if (typeof dateStr === 'number') {
+        // Excel serial date conversion (adjust for Excel leap year bug)
+        // Excel: 1 = Jan 1, 1900. JS: Jan 1, 1970.
+        // Correct formula: (Serial - 25569) * 86400 * 1000
+        const ms = (dateStr - 25569) * 86400 * 1000;
+        return new Date(ms);
+    }
+
+    if (typeof dateStr !== 'string') return new Date(0);
+    if (dateStr.trim() === '' || dateStr === '-') return new Date(0);
+
     try {
-        if (typeof dateStr === 'object' || dateStr.includes('GMT') || dateStr.includes('T')) {
+        // 2. Format ISO (YYYY-MM-DD atau YYYY-MM-DDTHH:mm:ss)
+        if (dateStr.includes('T') || (dateStr.length === 10 && dateStr.includes('-'))) {
             const d = new Date(dateStr);
             if (!isNaN(d.getTime())) return d;
         }
+
+        // 3. Format String DD/MM/YYYY HH:mm:ss
         if (dateStr.includes('/')) {
-            const parts = String(dateStr).trim().split(' ');
+            const parts = dateStr.trim().split(' ');
             const dateParts = parts[0].split('/');
+            
             if (dateParts.length >= 3) {
                 const day = parseInt(dateParts[0], 10);
-                const month = parseInt(dateParts[1], 10) - 1;
+                const month = parseInt(dateParts[1], 10) - 1; // Month is 0-indexed
                 const year = parseInt(dateParts[2], 10);
-                let hours = 0, minutes = 0;
+                
+                let hours = 0, minutes = 0, seconds = 0;
+                
                 if (parts.length > 1 && parts[1].includes(':')) {
                     const timeParts = parts[1].split(':');
                     hours = parseInt(timeParts[0], 10) || 0;
                     minutes = parseInt(timeParts[1], 10) || 0;
+                    seconds = parseInt(timeParts[2], 10) || 0;
                 }
-                return new Date(year, month, day, hours, minutes);
+                
+                const d = new Date(year, month, day, hours, minutes, seconds);
+                if (!isNaN(d.getTime())) return d;
             }
         }
-        return new Date(dateStr);
+        
+        // 4. Fallback General
+        const d = new Date(dateStr);
+        if (!isNaN(d.getTime())) return d;
+        
+        return new Date(0);
     } catch (e) {
+        console.error('Date parse error:', e);
         return new Date(0);
     }
 }
 
 function formatDateForDisplay(date) {
     if (!date || date.getTime() === 0) return '-';
-    const days = ['Min', 'Sen', 'Sel', 'Rab', 'Kam', 'Jum', 'Sab'];
-    const months = ['Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun', 'Jul', 'Agu', 'Sep', 'Okt', 'Nov', 'Des'];
-    return `${days[date.getDay()]}, ${String(date.getDate()).padStart(2, '0')} ${months[date.getMonth()]} ${date.getFullYear()} ${String(date.getHours()).padStart(2, '0')}:${String(date.getMinutes()).padStart(2, '0')}`;
+    
+    try {
+        const days = ['Min', 'Sen', 'Sel', 'Rab', 'Kam', 'Jum', 'Sab'];
+        const months = ['Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun', 'Jul', 'Agu', 'Sep', 'Okt', 'Nov', 'Des'];
+        
+        const dayName = days[date.getDay()];
+        const day = String(date.getDate()).padStart(2, '0');
+        const monthName = months[date.getMonth()];
+        const year = date.getFullYear();
+        const hours = String(date.getHours()).padStart(2, '0');
+        const minutes = String(date.getMinutes()).padStart(2, '0');
+        
+        return `${dayName}, ${day} ${monthName} ${year} ${hours}:${minutes}`;
+    } catch (e) {
+        return '-';
+    }
 }
 
 function renderTable(transactions) {
     const tbody = document.getElementById('logTableBody');
+    
     if (!transactions || transactions.length === 0) {
         tbody.innerHTML = `<tr><td colspan="6" class="no-data"><i class="fas fa-inbox" style="font-size:2rem; margin-bottom:0.5rem; opacity:0.5;"></i><p>Tidak ada data</p></td></tr>`;
         return;
     }
     
-    transactions.sort((a, b) => parseIndonesianDate(b.tanggal).getTime() - parseIndonesianDate(a.tanggal).getTime());
+    // Sort Descending
+    transactions.sort((a, b) => {
+        const dateA = parseIndonesianDate(a.tanggal);
+        const dateB = parseIndonesianDate(b.tanggal);
+        return dateB.getTime() - dateA.getTime();
+    });
     
     let html = '';
     transactions.forEach((t, index) => {
-        const tDate = parseIndonesianDate(t.tanggal);
+        // Ambil tanggal, cek berbagai kemungkinan key (fallback)
+        const rawDate = t.tanggal || t.Tanggal || t.timestamp || t.Timestamp;
+        const tDate = parseIndonesianDate(rawDate);
         const displayDate = formatDateForDisplay(tDate);
+        
         const isIn = ['in', 'masuk'].includes((t.jenis || '').toLowerCase());
         const badgeClass = isIn ? 'badge-in' : 'badge-out';
         const badgeText = isIn ? 'Masuk' : 'Keluar';
         const jumlahColor = isIn ? '#38ef7d' : '#f45c43';
         const jumlahSign = isIn ? '+' : '-';
         
+        const escapedNama = (t.namaBarang || '').replace(/'/g, "\\'");
+        
         html += `
             <tr style="animation: fadeInUp 0.3s ease ${index * 0.02}s both;">
-                <td data-label="Tanggal"><i class="far fa-clock" style="color:var(--text-secondary); margin-right:5px;"></i>${displayDate}</td>
-                <td data-label="Jenis"><span class="badge ${badgeClass}"><i class="fas fa-arrow-${isIn ? 'down' : 'up'}"></i> ${badgeText}</span></td>
-                <td data-label="Nama Barang"><strong>${t.namaBarang || '-'}</strong><div style="font-size:0.75rem; color:var(--text-secondary);">ID: ${t.idBarang || '-'}</div></td>
-                <td data-label="Jumlah"><span style="font-weight:700; color:${jumlahColor};">${jumlahSign}${t.jumlah || 0}</span></td>
-                <td data-label="Keterangan" style="color:var(--text-secondary);">${t.keterangan || '-'}</td>
+                <td data-label="Tanggal">
+                    <i class="far fa-clock" style="color:var(--text-secondary); margin-right:5px;"></i>
+                    ${displayDate}
+                </td>
+                <td data-label="Jenis">
+                    <span class="badge ${badgeClass}">
+                        <i class="fas fa-arrow-${isIn ? 'down' : 'up'}"></i> ${badgeText}
+                    </span>
+                </td>
+                <td data-label="Nama Barang">
+                    <strong>${t.namaBarang || '-'}</strong>
+                    <div style="font-size:0.75rem; color:var(--text-secondary);">ID: ${t.idBarang || '-'}</div>
+                </td>
+                <td data-label="Jumlah">
+                    <span style="font-weight:700; font-size:1.1rem; color:${jumlahColor};">
+                        ${jumlahSign}${t.jumlah || 0}
+                    </span>
+                </td>
+                <td data-label="Keterangan" style="color:var(--text-secondary);">
+                    ${t.keterangan || '-'}
+                </td>
                 <td data-label="Aksi" style="text-align:center;">
-                    <button class="btn-delete-transaction" onclick="deleteTransaction(${t.rowIndex}, '${t.idBarang}', '${isIn ? 'In' : 'Out'}', ${t.jumlah}, '${(t.namaBarang || '').replace(/'/g, "\\'")}')">
+                    <button class="btn-delete-transaction" 
+                            onclick="deleteTransaction(${t.rowIndex}, '${t.idBarang}', '${isIn ? 'In' : 'Out'}', ${t.jumlah}, '${escapedNama}')">
                         <i class="fas fa-trash"></i> Hapus
                     </button>
                 </td>
@@ -185,7 +258,7 @@ async function deleteTransaction(rowIndex, idBarang, jenis, jumlah, namaBarang) 
         
         if (result && (result.success || result.status === 'success')) {
             UI.showAlert('✅ Transaksi dihapus. Stok dikembalikan.', 'success');
-            localStorage.setItem('dataBarangChanged', 'true');
+            localStorage.setItem('dataBarangChanged', 'true'); // Trigger reload di index
             await loadTransactions();
         } else {
             throw new Error(result.error || 'Gagal menghapus');
@@ -197,7 +270,10 @@ async function deleteTransaction(rowIndex, idBarang, jenis, jumlah, namaBarang) 
     }
 }
 
-// EXPORT SO BULANAN
+// ============================================
+// EXPORT SO BULANAN (CUTOFF 26-25)
+// ============================================
+
 async function exportMonthlySO() {
     const filterMonth = document.getElementById('filterMonth').value;
     if (!filterMonth) {
@@ -208,13 +284,11 @@ async function exportMonthlySO() {
     const [year, month] = filterMonth.split('-').map(Number);
     const monthNames = ['Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni', 'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'];
     
-    let startDate, prevMonthName;
+    let startDate;
     if (month === 1) {
         startDate = new Date(year - 1, 11, 26);
-        prevMonthName = 'Desember ' + (year - 1);
     } else {
         startDate = new Date(year, month - 2, 26);
-        prevMonthName = monthNames[month - 2] + ' ' + year;
     }
     const endDate = new Date(year, month - 1, 25, 23, 59, 59);
     
@@ -227,9 +301,11 @@ async function exportMonthlySO() {
 
     try {
         UI.showLoading();
+        
         const masterBarang = await API.get('getAllBarang');
         if (!masterBarang || masterBarang.length === 0) throw new Error('Master barang kosong');
         
+        // Hitung penyesuaian stok
         const transAfterCutOff = allTransactions.filter(t => parseIndonesianDate(t.tanggal) > endDate);
         const transInPeriod = allTransactions.filter(t => {
             const d = parseIndonesianDate(t.tanggal);
@@ -240,6 +316,7 @@ async function exportMonthlySO() {
         
         masterBarang.forEach(item => {
             const currentStok = Number(currentWarehouse === 'A' ? item.stokA : item.stokB) || 0;
+            
             let adjustment = 0;
             transAfterCutOff.forEach(t => {
                 if (t.idBarang === item.id) {
@@ -248,6 +325,7 @@ async function exportMonthlySO() {
                     adjustment += isOut ? jml : -jml; 
                 }
             });
+            
             const stokAkhirPeriode = currentStok + adjustment;
             
             soMap.set(item.id, {
@@ -296,6 +374,7 @@ async function exportMonthlySO() {
     }
 }
 
+// Global Access
 window.switchWarehouse = switchWarehouse;
 window.applyFilters = applyFilters;
 window.deleteTransaction = deleteTransaction;
