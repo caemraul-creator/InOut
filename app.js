@@ -721,7 +721,23 @@ async function submitTransaction() {
     } catch (error) {
         await UI.hideLoading();
         console.error('Submit error:', error);
-        UI.showAlert('❌ Gagal: ' + error.message, 'danger');
+        
+        // ✅ PERBAIKAN: Jika timeout, data mungkin sudah tersimpan
+        if (error.message.includes('timeout') || error.message.includes('Timeout')) {
+            UI.showAlert('⚠️ Response lambat. Cek apakah data sudah masuk di spreadsheet.', 'warning', 5000);
+            
+            // Reload data untuk memastikan
+            setTimeout(async () => {
+                try {
+                    await loadAllBarang();
+                    console.log('✅ Data reloaded after timeout');
+                } catch (e) {
+                    console.error('Failed to reload:', e);
+                }
+            }, 2000);
+        } else {
+            UI.showAlert('❌ Gagal: ' + error.message, 'danger');
+        }
     }
 }
 

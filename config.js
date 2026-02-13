@@ -50,9 +50,9 @@ const API = {
             
             console.log('📤 API GET:', action);
             
-            // ⚡ Timeout dipercepat untuk operasi GET
+            // ⚡ Timeout untuk GET diperpanjang ke 15 detik (untuk data banyak)
             const controller = new AbortController();
-            const timeoutId = setTimeout(() => controller.abort(), 8000); // 8 detik (dari 10 detik)
+            const timeoutId = setTimeout(() => controller.abort(), 15000); // 15 detik
             
             const response = await fetch(url.toString(), {
                 method: 'GET',
@@ -103,9 +103,9 @@ const API = {
             
             console.log('📤 API POST:', action);
             
-            // ⚡ Timeout untuk POST tetap 15 detik (operasi write)
+            // ⚡ Timeout untuk POST diperpanjang ke 30 detik (untuk data banyak)
             const controller = new AbortController();
-            const timeoutId = setTimeout(() => controller.abort(), 15000);
+            const timeoutId = setTimeout(() => controller.abort(), 30000);
             
             const response = await fetch(url.toString(), {
                 method: 'GET',
