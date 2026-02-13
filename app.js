@@ -1,5 +1,5 @@
 // ============================================
-// APP.JS - FIXED VERSION (RESPONSE HANDLER)
+// APP.JS - FINAL VERSION (NO CONFIRMATION)
 // ============================================
 
 let dataMaster = [];
@@ -92,7 +92,6 @@ async function initIndexPage() {
         
         Promise.all([
             setupEventListeners(),
-            setupConfirmationModal(),
             setupAddItemModal()
         ]).then(() => {
             console.log('✅ All event listeners ready');
@@ -109,7 +108,7 @@ async function initIndexPage() {
 }
 
 // ============================================
-// DROPDOWN FIX - POSITION & CLICK HANDLING
+// DROPDOWN FIX
 // ============================================
 
 function initDropdownFix() {
@@ -123,7 +122,6 @@ function initDropdownFix() {
     const dropdown = document.createElement('div');
     dropdown.id = 'searchResultsDropdown';
     document.body.appendChild(dropdown);
-    console.log('✅ New dropdown created and appended to body');
     
     const updateDropdownPosition = () => {
         const dropdown = document.getElementById('searchResultsDropdown');
@@ -216,8 +214,6 @@ function initDropdownFix() {
             updateDropdownPosition();
         }
     });
-    
-    console.log('✅ Dropdown fix applied');
 }
 
 // ============================================
@@ -560,7 +556,7 @@ function stopScanner() {
 }
 
 // ============================================
-// FORM SUBMIT
+// FORM SUBMIT (LANGSUNG TANPA KONFIRMASI)
 // ============================================
 
 async function handleSubmit(e) {
@@ -605,6 +601,7 @@ async function handleSubmit(e) {
         }
     }
     
+    // Siapkan data transaksi
     pendingTransaction = {
         idBarang: tempSelectedItem.id,
         namaBarang: tempSelectedItem.nama,
@@ -619,56 +616,8 @@ async function handleSubmit(e) {
         user: user
     };
     
-    showConfirmationModal(pendingTransaction);
-}
-
-// ============================================
-// CONFIRMATION MODAL
-// ============================================
-
-function setupConfirmationModal() {
-    const btnCancel = document.getElementById('btnCancelConfirm');
-    const btnOk = document.getElementById('btnOkConfirm');
-    
-    if (btnCancel) {
-        btnCancel.onclick = hideConfirmationModal;
-    }
-    
-    if (btnOk) {
-        btnOk.onclick = submitTransaction;
-    }
-    
-    return Promise.resolve();
-}
-
-function showConfirmationModal(data) {
-    const modal = document.getElementById('confirmModal');
-    if (!modal) return;
-    
-    document.getElementById('confirmBarang').textContent = data.namaBarang;
-    document.getElementById('confirmId').textContent = data.idBarang;
-    document.getElementById('confirmJenis').textContent = data.jenis;
-    document.getElementById('confirmGudang').textContent = data.gudangDisplay;
-    document.getElementById('confirmJumlah').textContent = `${data.jumlah} ${data.satuan}`;
-    document.getElementById('confirmPetugas').textContent = data.user;
-    
-    const ketRow = document.getElementById('confirmKetRow');
-    const ketValue = document.getElementById('confirmKeterangan');
-    if (data.keterangan) {
-        ketValue.textContent = data.keterangan;
-        ketRow.style.display = 'flex';
-    } else {
-        ketRow.style.display = 'none';
-    }
-    
-    modal.style.display = 'flex';
-}
-
-function hideConfirmationModal() {
-    const modal = document.getElementById('confirmModal');
-    if (modal) {
-        modal.style.display = 'none';
-    }
+    // LANGSUNG JALANKAN TRANSAKSI TANPA MODAL KONFIRMASI
+    submitTransaction();
 }
 
 // ============================================
@@ -680,7 +629,6 @@ async function submitTransaction() {
     
     try {
         UI.showLoading();
-        hideConfirmationModal();
         
         const result = await API.post('submitTransaksi', {
             lokasiGudang: 'Gudang ' + pendingTransaction.gudang,
@@ -696,29 +644,20 @@ async function submitTransaction() {
             keterangan: pendingTransaction.keterangan || ''
         });
         
-        // ============================================
-        // DEBUGGING & PERBAIKAN LOGIC
-        // ============================================
         console.log('📥 Response dari Server:', result);
 
         await UI.hideLoading();
 
-        // Validasi sukses secara fleksibel.
-        // 1. Jika result.success == true (Format standar)
-        // 2. Jika result berisi string "Success" (Format lama/string)
-        // 3. Jika result.status === "success"
         const isSuccess = (result && result.success === true) || 
                           (result === "Success") || 
                           (result && result.status === "success");
 
-        // Jika tidak ada error spesifik, anggap sukses (karena data sudah masuk sheet menurut laporan)
         if (isSuccess || (result && !result.error)) {
             UI.showAlert(`✅ ${pendingTransaction.jenis} berhasil dicatat!`, 'success');
             await loadAllBarang();
             resetForm();
             localStorage.setItem('dataBarangChanged', 'true');
         } else {
-            // Jika ada properti error di result
             throw new Error(result.error || result.message || 'Gagal menyimpan transaksi (Response tidak sesuai)');
         }
         
@@ -726,10 +665,8 @@ async function submitTransaction() {
         await UI.hideLoading();
         console.error('Submit error:', error);
 
-        // Handle timeout atau network error
         if (error.message.includes('timeout') || error.message.includes('Failed to fetch')) {
             UI.showAlert('⚠️ Response lambat. Cek manual di spreadsheet apakah data sudah masuk.', 'warning', 5000);
-            // Coba reload data
             setTimeout(async () => {
                 try { await loadAllBarang(); } catch (e) { }
             }, 2000);
@@ -841,10 +778,7 @@ window.switchTab = function(tabName) {
 
 function populateKategoriSelect() {
     const select = document.getElementById('newItemKategori');
-    if (!select) {
-        console.error('❌ newItemKategori select not found!');
-        return;
-    }
+    if (!select) return;
     
     select.innerHTML = '<option value="">-- Pilih Kategori --</option>';
     
@@ -854,8 +788,6 @@ function populateKategoriSelect() {
         option.textContent = `${kat.nama} (${kat.inisial})`;
         select.appendChild(option);
     });
-    
-    console.log(`✅ Populated ${dataKategori.length} categories`);
 }
 
 function updateNewIdPreview() {
@@ -1034,16 +966,6 @@ window.debugApp = {
         console.log('🔄 Manual reload...');
         await loadAllBarang();
         console.log('✅ Reloaded');
-    },
-    checkELK: function() {
-        const elkItems = dataMaster.filter(item => item.id.startsWith('ELK-'));
-        console.log(`ELK items: ${elkItems.length}`);
-        return elkItems;
-    },
-    findID: function(id) {
-        const item = dataMaster.find(item => item.id === id);
-        console.log(`ID: ${id}`, item);
-        return item;
     },
     clearCache: function() {
         if (typeof API !== 'undefined' && API.clearCache) {
