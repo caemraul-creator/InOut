@@ -73,7 +73,7 @@ function applyFilters() {
         
         // Filter Month
         if (filterMonth) {
-            const transDate = parseIndonesianDate(transaction.tanggal);
+            const transDate = parseIndonesianDate(transaction.tanggalTransaksi || transaction.tanggal);
             if (!transDate || transDate.getTime() === 0) return false;
             try {
                 const transMonth = transDate.toISOString().slice(0, 7);
@@ -184,15 +184,15 @@ function renderTable(transactions) {
     
     // Sort Descending
     transactions.sort((a, b) => {
-        const dateA = parseIndonesianDate(a.tanggal);
-        const dateB = parseIndonesianDate(b.tanggal);
+        const dateA = parseIndonesianDate(a.tanggalTransaksi || a.tanggal);
+        const dateB = parseIndonesianDate(b.tanggalTransaksi || b.tanggal);
         return dateB.getTime() - dateA.getTime();
     });
     
     let html = '';
     transactions.forEach((t, index) => {
         // Ambil tanggal, cek berbagai kemungkinan key (fallback)
-        const rawDate = t.tanggal || t.Tanggal || t.timestamp || t.Timestamp;
+        const rawDate = t.tanggalTransaksi || t.tanggal || t.Tanggal || t.timestamp || t.Timestamp;
         const tDate = parseIndonesianDate(rawDate);
         const displayDate = formatDateForDisplay(tDate);
         
@@ -314,9 +314,9 @@ async function exportMonthlySO() {
         if (!masterBarang || masterBarang.length === 0) throw new Error('Master barang kosong');
         
         // Proses Data Stok
-        const transAfterCutOff = allTransactions.filter(t => parseIndonesianDate(t.tanggal) > endDate);
+        const transAfterCutOff = allTransactions.filter(t => parseIndonesianDate(t.tanggalTransaksi || t.tanggal) > endDate);
         const transInPeriod = allTransactions.filter(t => {
-            const d = parseIndonesianDate(t.tanggal);
+            const d = parseIndonesianDate(t.tanggalTransaksi || t.tanggal);
             return d >= startDate && d <= endDate;
         });
 
