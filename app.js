@@ -471,6 +471,15 @@ function updateStockDisplay(item) {
     const stokClass = stok > 0 ? 'text-success' : 'text-danger';
     const gudangDisplay = activeGudang === 'Kalipucang' ? 'Gudang Kalipucang' : 'Gudang Troso';
     
+    console.log('📊 updateStockDisplay:', {
+        item: item.nama,
+        activeGudang: activeGudang,
+        stokA: item.stokA,
+        stokB: item.stokB,
+        displayedStok: stok,
+        label: gudangDisplay
+    });
+    
     stockDiv.innerHTML = `
         <div class="stock-label">Stok ${gudangDisplay}:</div>
         <div class="stock-value ${stokClass}">${stok} ${item.satuan}</div>
@@ -989,6 +998,7 @@ function getActiveGudang() {
     
     // Jika ada button active, return data-warehouse nya
     if (activeBtn) {
+        console.log('✅ getActiveGudang: button active ->', activeBtn.dataset.warehouse);
         return activeBtn.dataset.warehouse;
     }
     
@@ -997,11 +1007,14 @@ function getActiveGudang() {
         const restriction = AUTH.getWarehouseRestriction();
         if (restriction !== null) {
             // Petugas restricted: return gudang sesuai restriction
-            return restriction === 'A' ? 'Kalipucang' : 'Troso';
+            const gudangName = restriction === 'A' ? 'Kalipucang' : 'Troso';
+            console.log('⚠️ getActiveGudang: fallback to user restriction ->', gudangName);
+            return gudangName;
         }
     }
     
     // Final fallback: Kalipucang (untuk admin/manager yang belum pilih gudang)
+    console.log('⚠️ getActiveGudang: final fallback -> Kalipucang');
     return 'Kalipucang';
 }
 

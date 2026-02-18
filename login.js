@@ -166,18 +166,29 @@ const AUTH = {
             const toggleContainer = document.querySelector('.warehouse-toggle');
             
             if (toggleContainer) {
-                // Hide the button that doesn't belong to this user
                 const allBtns = toggleContainer.querySelectorAll('.warehouse-btn');
+                let targetBtn = null;
+                
                 allBtns.forEach(btn => {
                     if (btn.dataset.warehouse !== warehouseName) {
+                        // Hide the button that doesn't belong to this user
                         btn.style.display = 'none';
                     } else {
-                        // Make the allowed one active
-                        btn.classList.add('active');
+                        // Found the target button
+                        targetBtn = btn;
                         // Expand to full width since only one button
                         btn.style.gridColumn = '1 / -1';
                     }
                 });
+                
+                // DIRECT FIX: Click the button after a short delay to ensure event handlers are attached
+                if (targetBtn) {
+                    setTimeout(() => {
+                        targetBtn.click();
+                        console.log('✅ Warehouse auto-clicked:', warehouseName);
+                    }, 100);
+                }
+                
                 console.log('✅ Warehouse restricted to:', warehouseName);
             }
         }
