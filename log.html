@@ -444,6 +444,20 @@
             if (userName) {
                 document.getElementById('userNameLog').textContent = userName;
             }
+            
+            // Apply warehouse restriction: hide tab not allowed for this user
+            const restriction = AUTH.getWarehouseRestriction();
+            if (restriction !== null) {
+                // Petugas A → only Kalipucang (tabA), hide Troso (tabB)
+                // Petugas B → only Troso (tabB), hide Kalipucang (tabA)
+                const hiddenTabId  = restriction === 'A' ? 'tabB' : 'tabA';
+                const activeTabId  = restriction === 'A' ? 'tabA' : 'tabB';
+                const hiddenTab = document.getElementById(hiddenTabId);
+                if (hiddenTab) hiddenTab.style.display = 'none';
+                
+                // Auto-switch to the allowed warehouse
+                switchWarehouse(restriction);
+            }
         });
     </script>
 </body>

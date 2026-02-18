@@ -108,6 +108,26 @@ const AUTH = {
         return localStorage.getItem('auth_gudang') || 'A';
     },
     
+    // Get warehouse restriction for this user
+    // Returns: 'A' | 'B' | null (null = no restriction, can access all)
+    getWarehouseRestriction() {
+        const role = localStorage.getItem('auth_role');
+        const gudang = localStorage.getItem('auth_gudang') || '';
+        
+        // Admin & Manager: no restriction
+        if (role === 'admin_gudang' || role === 'manager') {
+            return null;
+        }
+        
+        // Petugas: restrict to their assigned warehouse
+        if (gudang === 'A' || gudang === 'B') {
+            return gudang;
+        }
+        
+        // Default: no restriction
+        return null;
+    },
+    
     // Get user's role
     getUserRole() {
         return localStorage.getItem('auth_role');
@@ -137,6 +157,29 @@ const AUTH = {
             userField.value = user.name;
             userField.readOnly = true;
             console.log('✅ User field filled:', user.name);
+        }
+        
+        // Apply warehouse restriction on index page
+        const restriction = this.getWarehouseRestriction();
+        if (restriction !== null) {
+            const warehouseName = restriction === 'A' ? 'Kalipucang' : 'Troso';
+            const toggleContainer = document.querySelector('.warehouse-toggle');
+            
+            if (toggleContainer) {
+                // Hide the button that doesn't belong to this user
+                const allBtns = toggleContainer.querySelectorAll('.warehouse-btn');
+                allBtns.forEach(btn => {
+                    if (btn.dataset.warehouse !== warehouseName) {
+                        btn.style.display = 'none';
+                    } else {
+                        // Make the allowed one active
+                        btn.classList.add('active');
+                        // Expand to full width since only one button
+                        btn.style.gridColumn = '1 / -1';
+                    }
+                });
+                console.log('✅ Warehouse restricted to:', warehouseName);
+            }
         }
     },
     

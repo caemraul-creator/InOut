@@ -934,6 +934,15 @@
                     <i class="fas fa-user-circle"></i>
                     <span class="user-name" id="userName">User</span>
                 </div>
+                
+                <!-- Logout Button -->
+                <button onclick="AUTH.logout()" 
+                        title="Logout"
+                        style="width:36px;height:36px;background:rgba(239,71,111,0.15);border:1px solid rgba(239,71,111,0.4);border-radius:8px;color:#EF476F;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .3s ease;"
+                        onmouseover="this.style.background='rgba(239,71,111,0.3)'"
+                        onmouseout="this.style.background='rgba(239,71,111,0.15)'">
+                    <i class="fas fa-sign-out-alt"></i>
+                </button>
             </div>
         </div>
     </div>
@@ -1311,19 +1320,29 @@
             }
             
             // 3. Auto-fill form (Petugas & Gudang) via login.js
+            // Juga menerapkan restriction gudang (sembunyikan tombol yang tidak diizinkan)
             if (AUTH && typeof AUTH.autoFillForm === 'function') {
                 AUTH.autoFillForm();
             }
             
-            // 4. Set Default Tanggal Hari Ini
+            // 4. Jika ada restriction, klik tombol gudang yang sesuai agar state app.js sinkron
+            const restriction = AUTH.getWarehouseRestriction();
+            if (restriction !== null) {
+                const warehouseName = restriction === 'A' ? 'Kalipucang' : 'Troso';
+                const targetBtn = document.querySelector(`.warehouse-btn[data-warehouse="${warehouseName}"]`);
+                if (targetBtn && !targetBtn.classList.contains('active')) {
+                    targetBtn.click();
+                }
+            }
+            
+            // 5. Set Default Tanggal Hari Ini
             const tanggalInput = document.getElementById('tanggal');
             if (tanggalInput) {
                 const today = new Date().toISOString().split('T')[0];
                 tanggalInput.value = today;
             }
 
-            // 5. Inisialisasi Warna Gudang (Panggil fungsi dari app.js)
-            // Fungsi updateGudangColors sudah didefinisikan di app.js dan di-expose secara global
+            // 6. Inisialisasi Warna Gudang (Panggil fungsi dari app.js)
             if (typeof updateGudangColors === 'function') {
                 updateGudangColors();
             }
