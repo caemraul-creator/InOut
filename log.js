@@ -230,8 +230,6 @@ function renderTable(transactions) {
         const jumlahColor = isIn ? '#38ef7d' : '#f45c43';
         const jumlahSign = isIn ? '+' : '-';
         
-        const escapedNama = (t.namaBarang || '').replace(/'/g, "\\'");
-        
         html += `
             <tr style="animation: fadeInUp 0.3s ease ${index * 0.02}s both;">
                 <td data-label="Tanggal">
@@ -257,7 +255,11 @@ function renderTable(transactions) {
                 </td>
                 <td data-label="Aksi" style="text-align:center;">
                     <button class="btn-delete-transaction" 
-                            onclick="deleteTransaction(${t.rowIndex}, '${t.idBarang}', '${isIn ? 'In' : 'Out'}', ${t.jumlah}, '${escapedNama}')">
+                            data-row-index="${t.rowIndex}"
+                            data-id-barang="${t.idBarang}"
+                            data-jenis="${isIn ? 'In' : 'Out'}"
+                            data-jumlah="${t.jumlah}"
+                            data-nama-barang="${t.namaBarang || ''}">
                         <i class="fas fa-trash"></i> Hapus
                     </button>
                 </td>
@@ -265,6 +267,35 @@ function renderTable(transactions) {
         `;
     });
     tbody.innerHTML = html;
+    
+    // Setup event listeners untuk semua tombol delete
+    setupDeleteButtons();
+}
+
+// Setup event delegation untuk tombol delete
+function setupDeleteButtons() {
+    const tbody = document.getElementById('logTableBody');
+    
+    // Remove existing listener to prevent duplicates
+    tbody.removeEventListener('click', handleDeleteClick);
+    
+    // Add new listener
+    tbody.addEventListener('click', handleDeleteClick);
+}
+
+function handleDeleteClick(e) {
+    const deleteBtn = e.target.closest('.btn-delete-transaction');
+    if (!deleteBtn) return;
+    
+    // Get data from data attributes
+    const rowIndex = parseInt(deleteBtn.dataset.rowIndex);
+    const idBarang = deleteBtn.dataset.idBarang;
+    const jenis = deleteBtn.dataset.jenis;
+    const jumlah = parseInt(deleteBtn.dataset.jumlah);
+    const namaBarang = deleteBtn.dataset.namaBarang;
+    
+    // Call delete function
+    deleteTransaction(rowIndex, idBarang, jenis, jumlah, namaBarang);
 }
 
 async function deleteTransaction(rowIndex, idBarang, jenis, jumlah, namaBarang) {
