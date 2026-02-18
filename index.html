@@ -1325,13 +1325,16 @@
                 AUTH.autoFillForm();
             }
             
-            // 4. Jika ada restriction, klik tombol gudang yang sesuai agar state app.js sinkron
+            // 4. Jika ada restriction, PAKSA klik tombol gudang yang sesuai
+            // Ini memastikan event handler dijalankan dan state app.js sinkron
             const restriction = AUTH.getWarehouseRestriction();
             if (restriction !== null) {
                 const warehouseName = restriction === 'A' ? 'Kalipucang' : 'Troso';
                 const targetBtn = document.querySelector(`.warehouse-btn[data-warehouse="${warehouseName}"]`);
-                if (targetBtn && !targetBtn.classList.contains('active')) {
+                if (targetBtn) {
+                    // SELALU klik, meskipun sudah active (untuk trigger event handler)
                     targetBtn.click();
+                    console.log('✅ Forced click warehouse button:', warehouseName);
                 }
             }
             

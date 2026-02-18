@@ -986,7 +986,23 @@ async function handleAddKategori(e) {
 
 function getActiveGudang() {
     const activeBtn = document.querySelector('.warehouse-btn.active');
-    return activeBtn ? activeBtn.dataset.warehouse : 'Kalipucang';
+    
+    // Jika ada button active, return data-warehouse nya
+    if (activeBtn) {
+        return activeBtn.dataset.warehouse;
+    }
+    
+    // Fallback: cek restriction user
+    if (typeof AUTH !== 'undefined' && AUTH.getWarehouseRestriction) {
+        const restriction = AUTH.getWarehouseRestriction();
+        if (restriction !== null) {
+            // Petugas restricted: return gudang sesuai restriction
+            return restriction === 'A' ? 'Kalipucang' : 'Troso';
+        }
+    }
+    
+    // Final fallback: Kalipucang (untuk admin/manager yang belum pilih gudang)
+    return 'Kalipucang';
 }
 
 function getGudangDisplayNameFromValue(gudangValue) {
