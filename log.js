@@ -73,7 +73,8 @@ function applyFilters() {
         
         // Filter Month
         if (filterMonth) {
-            const transDate = parseIndonesianDate(transaction.tanggalTransaksi || transaction.tanggal);
+            // Parse dari timestamp (yang lengkap), fallback ke tanggalTransaksi
+            const transDate = parseIndonesianDate(transaction.timestamp || transaction.tanggalTransaksi || transaction.tanggal);
             if (!transDate || transDate.getTime() === 0) return false;
             try {
                 const transMonth = transDate.toISOString().slice(0, 7);
@@ -119,7 +120,7 @@ function parseIndonesianDate(dateStr) {
             if (!isNaN(d.getTime())) return d;
         }
 
-        // 3. Format String DD/MM/YYYY HH:mm:ss
+        // 3. Format String DD/MM/YYYY HH:mm:ss (UTAMA untuk timestamp)
         if (dateStr.includes('/')) {
             const parts = dateStr.trim().split(' ');
             const dateParts = parts[0].split('/');
@@ -131,6 +132,7 @@ function parseIndonesianDate(dateStr) {
                 
                 let hours = 0, minutes = 0, seconds = 0;
                 
+                // Parse waktu jika ada (HH:mm:ss)
                 if (parts.length > 1 && parts[1].includes(':')) {
                     const timeParts = parts[1].split(':');
                     hours = parseInt(timeParts[0], 10) || 0;
@@ -139,7 +141,14 @@ function parseIndonesianDate(dateStr) {
                 }
                 
                 const d = new Date(year, month, day, hours, minutes, seconds);
-                if (!isNaN(d.getTime())) return d;
+                
+                if (!isNaN(d.getTime())) {
+                    // Debug log untuk timestamp dengan waktu
+                    if (hours !== 0 || minutes !== 0 || seconds !== 0) {
+                        console.log('✅ Parsed with time:', dateStr, '→', d.toLocaleString('id-ID'));
+                    }
+                    return d;
+                }
             }
         }
         
@@ -147,9 +156,10 @@ function parseIndonesianDate(dateStr) {
         const d = new Date(dateStr);
         if (!isNaN(d.getTime())) return d;
         
+        console.warn('⚠️ Could not parse date:', dateStr);
         return new Date(0);
     } catch (e) {
-        console.error('Date parse error:', e);
+        console.error('Date parse error:', e, 'for input:', dateStr);
         return new Date(0);
     }
 }
@@ -168,8 +178,14 @@ function formatDateForDisplay(date) {
         const hours = String(date.getHours()).padStart(2, '0');
         const minutes = String(date.getMinutes()).padStart(2, '0');
         
+        // Debug log untuk cek apakah ada waktu
+        if (hours === '00' && minutes === '00') {
+            console.warn('⚠️ Time is 00:00 for date:', date.toISOString());
+        }
+        
         return `${dayName}, ${day} ${monthName} ${year} ${hours}:${minutes}`;
     } catch (e) {
+        console.error('formatDateForDisplay error:', e);
         return '-';
     }
 }
@@ -182,18 +198,30 @@ function renderTable(transactions) {
         return;
     }
     
-    // Sort Descending
+    // Sort Descending by TIMESTAMP (bukan tanggalTransaksi)
+    // Timestamp format: "dd/MM/yyyy HH:mm:ss"
     transactions.sort((a, b) => {
-        const dateA = parseIndonesianDate(a.tanggalTransaksi || a.tanggal);
-        const dateB = parseIndonesianDate(b.tanggalTransaksi || b.tanggal);
-        return dateB.getTime() - dateA.getTime();
+        // Prioritas 1: Parse dari timestamp (yang lengkap dengan jam:menit:detik)
+        const timestampA = parseIndonesianDate(a.timestamp || a.tanggalTransaksi || a.tanggal);
+        const timestampB = parseIndonesianDate(b.timestamp || b.tanggalTransaksi || b.tanggal);
+        return timestampB.getTime() - timestampA.getTime();
     });
     
     let html = '';
     transactions.forEach((t, index) => {
-        // Ambil tanggal, cek berbagai kemungkinan key (fallback)
-        const rawDate = t.tanggalTransaksi || t.tanggal || t.Tanggal || t.timestamp || t.Timestamp;
-        const tDate = parseIndonesianDate(rawDate);
+        // Ambil TIMESTAMP untuk display (yang ada jam:menit:detiknya)
+        const rawTimestamp = t.timestamp || t.Timestamp || t.tanggalTransaksi || t.tanggal;
+        
+        // Debug: Log first 3 transactions untuk cek format
+        if (index < 3) {
+            console.log(`Transaction ${index + 1}:`, {
+                raw: rawTimestamp,
+                tanggalTransaksi: t.tanggalTransaksi,
+                timestamp: t.timestamp
+            });
+        }
+        
+        const tDate = parseIndonesianDate(rawTimestamp);
         const displayDate = formatDateForDisplay(tDate);
         
         const isIn = ['in', 'masuk'].includes((t.jenis || '').toLowerCase());
@@ -314,9 +342,9 @@ async function exportMonthlySO() {
         if (!masterBarang || masterBarang.length === 0) throw new Error('Master barang kosong');
         
         // Proses Data Stok
-        const transAfterCutOff = allTransactions.filter(t => parseIndonesianDate(t.tanggalTransaksi || t.tanggal) > endDate);
+        const transAfterCutOff = allTransactions.filter(t => parseIndonesianDate(t.timestamp || t.tanggalTransaksi || t.tanggal) > endDate);
         const transInPeriod = allTransactions.filter(t => {
-            const d = parseIndonesianDate(t.tanggalTransaksi || t.tanggal);
+            const d = parseIndonesianDate(t.timestamp || t.tanggalTransaksi || t.tanggal);
             return d >= startDate && d <= endDate;
         });
 
